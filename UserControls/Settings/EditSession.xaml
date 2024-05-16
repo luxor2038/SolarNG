@@ -1,0 +1,332 @@
+﻿<UserControl x:Class="SolarNG.UserControls.Settings.EditSession" x:Name="MyControl" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:conv="clr-namespace:SolarNG.Converters" xmlns:utilities="clr-namespace:SolarNG.Utilities">
+  <FrameworkElement.Resources>
+    <ResourceDictionary>
+      <conv:BooleanToVisibilityConverter x:Key="visibilityConv" />
+      <conv:InverseBooleanToVisibilityConverter x:Key="inverseVisibilityConv" />
+      <conv:GuidToVisibilityConverter x:Key="guidToVisibilityConv" />
+      <conv:InverseGuidToVisibilityConverter x:Key="inverseGuidToVisibilityConv" />
+      <conv:EmptyStringToIntConverter x:Key="EmptyStringToIntConverter" EmptyStringValue="-1" />
+    </ResourceDictionary>
+  </FrameworkElement.Resources>
+  <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition />
+    </Grid.RowDefinitions>
+    <Border Grid.Row="0" Height="40" BorderThickness="0,0,0,0" BorderBrush="{StaticResource bb1}" Background="{Binding TitleBackground}">
+      <Label HorizontalAlignment="Left" VerticalContentAlignment="Center" Margin="15,0,0,0" Padding="0">
+        <FrameworkElement.Style>
+          <Style TargetType="{x:Type Label}">
+            <Setter Property="Foreground" Value="{StaticResource fg1}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Style.Triggers>
+              <DataTrigger Value="true" Binding="{Binding EditMode}">
+                <Setter Property="Content" Value="{StaticResource EditSession}" />
+              </DataTrigger>
+              <DataTrigger Value="true" Binding="{Binding BatchMode}">
+                <Setter Property="Content" Value="{StaticResource BatchEditSession}" />
+              </DataTrigger>
+              <DataTrigger Value="true" Binding="{Binding NewMode}">
+                <Setter Property="Content" Value="{StaticResource CreateSession}" />
+                <Setter Property="FocusManager.FocusedElement" Value="{Binding ElementName=TxbIP}" />
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </FrameworkElement.Style>
+      </Label>
+    </Border>
+    <StackPanel Grid.Row="1" Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="{Binding ControlVisible, Converter={StaticResource inverseVisibilityConv}}">
+      <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="13" Foreground="{StaticResource g0}" Text="{StaticResource SelectSession}" Margin="10,10,0,0" />
+    </StackPanel>
+    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" CanContentScroll="True" Style="{StaticResource CustomScrollViewerStyle}">
+      <DockPanel Background="{StaticResource bg1}" Visibility="{Binding ControlVisible, Converter={StaticResource visibilityConv}}">
+        <StackPanel DockPanel.Dock="Top" Margin="15,5,15,10">
+          <StackPanel Visibility="{Binding BatchMode, Converter={StaticResource inverseVisibilityConv}}">
+            <Label Content="{StaticResource SessionName}" Style="{StaticResource AboveControlLabel}" Margin="0,0,0,3" />
+            <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" />
+            <Label Content="{StaticResource SessionType}" Style="{StaticResource AboveControlLabel}" Margin="0,15,0,3" />
+            <ComboBox DisplayMemberPath="Display" SelectedValuePath="Key" Style="{StaticResource SimpleComboBox}" ItemsSource="{Binding SessionTypeList}" SelectedValue="{Binding _SessionType}"/>
+          </StackPanel>
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="3*" />
+              <ColumnDefinition Width="15" />
+              <ColumnDefinition Width="1*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+              <RowDefinition Height="1*" />
+              <RowDefinition Height="1*" />
+            </Grid.RowDefinitions>
+            <Label Grid.Row="0" Grid.Column="0" Content="{StaticResource Address}" Style="{StaticResource AboveControlLabel}" VerticalAlignment="Top" Margin="0,15,0,3" />
+            <Label Grid.Row="0" Grid.Column="2" Content="{StaticResource Port}" Style="{StaticResource AboveControlLabel}" VerticalAlignment="Top" Margin="0,15,0,3" />
+            <TextBox Name="TxbIP" Grid.Row="1" Grid.Column="0" VerticalAlignment="Top" Text="{Binding Ip, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBox Grid.Row="1" Grid.Column="2" VerticalAlignment="Top" Text="{Binding Port, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True, Converter={StaticResource EmptyStringToIntConverter}}" />
+          </Grid>
+          <StackPanel>
+            <Label Content="{StaticResource UseCredential}" Style="{StaticResource AboveControlLabel}" Margin="0,15,0,3" />
+            <ComboBox DisplayMemberPath="Display" SelectedValuePath="Key" Style="{StaticResource SimpleComboBox}" ItemsSource="{Binding CredentialList}" SelectedValue="{Binding CredentialId}" />
+          </StackPanel>
+          <StackPanel Visibility="{Binding CredentialId, Converter={StaticResource guidToVisibilityConv}}">
+            <StackPanel Visibility="{Binding PasswordOnlyCheck, Converter={StaticResource inverseVisibilityConv}}">
+              <Label Content="{StaticResource Username}" Style="{StaticResource AboveControlLabel}" Margin="0,15,0,3" />
+              <TextBox Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}" />
+            </StackPanel>
+            <StackPanel Visibility="{Binding PrivateKeyId, Converter={StaticResource guidToVisibilityConv}}">
+              <Label Content="{StaticResource Password}" Style="{StaticResource AboveControlLabel}" Margin="0,15,0,3" />
+              <PasswordBox utilities:PasswordBoxHelper.Attach="True" Style="{StaticResource SimpleBasswordBox}" utilities:PasswordBoxHelper.Password="{Binding Password, Mode=TwoWay}" />
+            </StackPanel>
+            <StackPanel Visibility="{Binding PrivateKeyId, Converter={StaticResource inverseGuidToVisibilityConv}}">
+              <Label Content="{StaticResource Passphrase}" Style="{StaticResource AboveControlLabel}" Margin="0,15,0,3" />
+              <PasswordBox utilities:PasswordBoxHelper.Attach="True" Style="{StaticResource SimpleBasswordBox}" utilities:PasswordBoxHelper.Password="{Binding Passphrase, Mode=TwoWay}" />
+            </StackPanel>
+            <StackPanel Visibility="{Binding PrivateKeyValid, Converter={StaticResource visibilityConv}}">
+              <Label Content="{StaticResource UsePrivateKey}" Style="{StaticResource AboveControlLabel}" Margin="0,15,0,3" />
+              <Grid>
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="3*" />
+                  <ColumnDefinition Width="15" />
+                  <ColumnDefinition Width="1*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                  <RowDefinition Height="1*" />
+                  <RowDefinition Height="1*" />
+                </Grid.RowDefinitions>
+                <ComboBox Grid.Row="0" Grid.Column="0" DisplayMemberPath="Display" SelectedValuePath="Key" Style="{StaticResource SimpleComboBox}" ItemsSource="{Binding PrivateKeys}" SelectedValue="{Binding PrivateKeyId}"/>
+                <Button Grid.Row="0" Grid.Column="2" Content="{StaticResource Import}" Style="{StaticResource CustomWhiteButtonStyle}" VerticalAlignment="Top" Command="{Binding ImportPrivateKeyCommand}" />
+              </Grid>
+            </StackPanel>
+            <StackPanel>
+              <Label Content="{StaticResource CredentialName}" Style="{StaticResource AboveControlLabel}" Margin="0,15,0,3" />
+              <TextBox Text="{Binding CredentialName, UpdateSourceTrigger=PropertyChanged}" />
+            </StackPanel>
+          </StackPanel>
+          <StackPanel Visibility="{Binding ProxyValid, Converter={StaticResource visibilityConv}}">
+            <Label Content="{StaticResource UseProxy}" Style="{StaticResource AboveControlLabel}" Margin="0,15,0,3" />
+            <ComboBox DisplayMemberPath="Display" SelectedValuePath="Key" Style="{StaticResource SimpleComboBox}" ItemsSource="{Binding ProxiesList}" SelectedValue="{Binding ProxyId}" />
+          </StackPanel>
+          <StackPanel Visibility="{Binding AdditionalValid, Converter={StaticResource visibilityConv}}">
+            <Label Content="{StaticResource Additional}" Style="{StaticResource AboveControlLabel}" Margin="0,15,0,3" />
+            <TextBox Text="{Binding Additional, UpdateSourceTrigger=PropertyChanged}" />
+          </StackPanel>
+          <StackPanel Visibility="{Binding UsePuTTY, Converter={StaticResource visibilityConv}}">
+            <Label Content="{StaticResource UsePuTTYSession}" Style="{StaticResource AboveControlLabel}" Margin="0,15,0,3" />
+            <Grid>
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="3*" />
+                <ColumnDefinition Width="15" />
+                <ColumnDefinition Width="1*" />
+              </Grid.ColumnDefinitions>
+              <Grid.RowDefinitions>
+                <RowDefinition Height="1*" />
+                <RowDefinition Height="1*" />
+              </Grid.RowDefinitions>
+              <ComboBox Grid.Row="0" Grid.Column="0" DisplayMemberPath="Display" SelectedValuePath="Key" Style="{StaticResource SimpleComboBox}" ItemsSource="{Binding PuTTYSessionList}" SelectedValue="{Binding PuTTYSessionId}"/>
+              <Button Grid.Row="0" Grid.Column="2" Content="{StaticResource Import}" Style="{StaticResource CustomWhiteButtonStyle}" VerticalAlignment="Top" Command="{Binding ImportPuTTYSessionCommand}" />
+            </Grid>
+            <StackPanel Visibility="{Binding PuTTYRegSessionValid, Converter={StaticResource visibilityConv}}">
+              <TextBlock FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource fg1}" HorizontalAlignment="Left" Margin="0,15,0,3">
+                <FrameworkElement.Style>
+                  <Style TargetType="{x:Type TextBlock}">
+                    <Style.Triggers>
+                      <Trigger Property="UIElement.IsMouseOver" Value="True">
+                        <Setter Property="TextDecorations" Value="Underline" />
+                        <Setter Property="Foreground" Value="{StaticResource u1}" />
+                      </Trigger>
+                    </Style.Triggers>
+                  </Style>
+                </FrameworkElement.Style>
+                <Hyperlink TextDecorations="None" Command="{Binding PuTTYConfigCommand}">
+                  <FrameworkContentElement.Style>
+                    <Style BasedOn="{StaticResource {x:Type Hyperlink}}" TargetType="{x:Type Hyperlink}">
+                      <Setter Property="Foreground" Value="{StaticResource fg1}" />
+                      <Style.Triggers>
+                        <Trigger Property="ContentElement.IsMouseOver" Value="True">
+                          <Setter Property="Foreground" Value="{StaticResource u1}" />
+                        </Trigger>
+                      </Style.Triggers>
+                    </Style>
+                  </FrameworkContentElement.Style>
+                  <TextBlock Text="{StaticResource PuTTYRegSession}" />
+                </Hyperlink>
+              </TextBlock>
+              <ComboBox DisplayMemberPath="Key" SelectedValuePath="Key" Style="{StaticResource SimpleComboBox}" ItemsSource="{Binding PuTTYRegSessionList}" SelectedValue="{Binding PuTTYSession}" />
+            </StackPanel>
+            <Label Content="{StaticResource TimeToWait}" Style="{StaticResource AboveControlLabel}" Margin="0,15,0,3" />
+            <StackPanel Orientation="Horizontal">
+              <TextBox HorizontalAlignment="Left" Width="80" Text="{Binding WaitSeconds, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True, Converter={StaticResource EmptyStringToIntConverter}}" />
+              <TextBlock Margin="10,0,0,0" FontSize="13" Foreground="{StaticResource fg1}" Background="{StaticResource bg1}" Text="{StaticResource Second}" VerticalAlignment="Center" />
+            </StackPanel>
+          </StackPanel>
+          <StackPanel Visibility="{Binding UseMSTSC, Converter={StaticResource visibilityConv}}">
+            <Label Content="{StaticResource UseRDPFile}" Style="{StaticResource AboveControlLabel}" Margin="0,15,0,3" />
+            <Grid Visibility="{Binding UseMSTSC, Converter={StaticResource visibilityConv}}">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="3*" />
+                <ColumnDefinition Width="15" />
+                <ColumnDefinition Width="1*" />
+              </Grid.ColumnDefinitions>
+              <Grid.RowDefinitions>
+                <RowDefinition Height="1*" />
+                <RowDefinition Height="1*" />
+              </Grid.RowDefinitions>
+              <ComboBox Grid.Row="0" Grid.Column="0" DisplayMemberPath="Display" SelectedValuePath="Key" Style="{StaticResource SimpleComboBox}" VerticalAlignment="Top" ItemsSource="{Binding RDPFiles}" SelectedValue="{Binding MSTSCId}" />
+              <Button Grid.Row="0" Grid.Column="2" Content="{StaticResource Import}" Style="{StaticResource CustomWhiteButtonStyle}" VerticalAlignment="Top" Command="{Binding ImportRDPFileCommand}" />
+            </Grid>
+            <Grid Visibility="{Binding WidthHeightValid, Converter={StaticResource visibilityConv}}">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*" />
+                <ColumnDefinition Width="15" />
+                <ColumnDefinition Width="1*" />
+              </Grid.ColumnDefinitions>
+              <Grid.RowDefinitions>
+                <RowDefinition Height="1*" />
+                <RowDefinition Height="1*" />
+                <RowDefinition Height="1*" />
+                <RowDefinition Height="1*" />
+              </Grid.RowDefinitions>
+              <Label Grid.Row="0" Grid.Column="0" Content="{StaticResource Width}" Style="{StaticResource AboveControlLabel}" VerticalAlignment="Top" Margin="0,15,0,3" />
+              <Label Grid.Row="0" Grid.Column="2" Content="{StaticResource Height}" Style="{StaticResource AboveControlLabel}" VerticalAlignment="Top" Margin="0,15,0,3" />
+              <TextBox Grid.Row="1" Grid.Column="0" VerticalAlignment="Top" Text="{Binding Width, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True, Converter={StaticResource EmptyStringToIntConverter}}" />
+              <TextBox Grid.Row="1" Grid.Column="2" VerticalAlignment="Top" Text="{Binding Height, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True, Converter={StaticResource EmptyStringToIntConverter}}" />
+            </Grid>
+          </StackPanel>
+          <StackPanel Visibility="{Binding UseWinSCP, Converter={StaticResource visibilityConv}}">
+            <Label Content="{StaticResource RemoteDirectory}" Style="{StaticResource AboveControlLabel}" Margin="0,15,0,3" />
+            <TextBox Text="{Binding RemoteDirectory, UpdateSourceTrigger=PropertyChanged}" />
+            <Label Content="{StaticResource UseWinSCPIni}" Style="{StaticResource AboveControlLabel}" Margin="0,15,0,3" />
+            <Grid>
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="3*" />
+                <ColumnDefinition Width="15" />
+                <ColumnDefinition Width="1*" />
+              </Grid.ColumnDefinitions>
+              <Grid.RowDefinitions>
+                <RowDefinition Height="1*" />
+                <RowDefinition Height="1*" />
+              </Grid.RowDefinitions>
+              <ComboBox Grid.Row="0" Grid.Column="0" DisplayMemberPath="Display" SelectedValuePath="Key" Style="{StaticResource SimpleComboBox}" VerticalAlignment="Top" ItemsSource="{Binding WinSCPInis}" SelectedValue="{Binding WinSCPId}" />
+              <Button Grid.Row="0" Grid.Column="2" Content="{StaticResource Import}" Style="{StaticResource CustomWhiteButtonStyle}" VerticalAlignment="Top" Command="{Binding ImportWinSCPIniCommand}" />
+            </Grid>
+          </StackPanel>
+          <Label Content="{StaticResource CUSTOMIZATION}" Margin="0,15,0,0" Style="{StaticResource AboveControlLabel}" />
+          <CheckBox Content="{StaticResource SSHv2Share}" Style="{StaticResource SimpleCheckBox}" Margin="0,15,0,0" Visibility="{Binding SSHv2ShareValid, Converter={StaticResource visibilityConv}}" IsChecked="{Binding SSHv2ShareCheck}" IsThreeState="{Binding SSHv2ShareCheckThree}"/>
+          <CheckBox Content="{StaticResource PasswordOnly}" Style="{StaticResource SimpleCheckBox}" Margin="0,15,0,0" Visibility="{Binding PasswordOnlyValid, Converter={StaticResource visibilityConv}}" IsChecked="{Binding PasswordOnlyCheck}" IsThreeState="{Binding PasswordOnlyCheckThree}"/>
+          <CheckBox Content="{StaticResource EnableLogging}" Style="{StaticResource SimpleCheckBox}" Margin="0,15,0,0" Visibility="{Binding UsePuTTY, Converter={StaticResource visibilityConv}}" IsChecked="{Binding LoggingCheck}" IsThreeState="{Binding LoggingCheckThree}" />
+          <CheckBox Content="{StaticResource UseScript}" Style="{StaticResource SimpleCheckBox}" Margin="0,15,0,3" Visibility="{Binding UsePuTTY, Converter={StaticResource visibilityConv}}" IsChecked="{Binding UseScriptCheck}" IsThreeState="{Binding UseScriptCheckThree}" />
+          <Grid Visibility="{Binding UseScriptCheck, Converter={StaticResource visibilityConv}}">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="3*" />
+              <ColumnDefinition Width="15" />
+              <ColumnDefinition Width="1*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+              <RowDefinition Height="1*" />
+              <RowDefinition Height="1*" />
+            </Grid.RowDefinitions>
+            <ComboBox Grid.Row="0" Grid.Column="0" DisplayMemberPath="Display" SelectedValuePath="Key" Style="{StaticResource SimpleComboBox}" VerticalAlignment="Top" ItemsSource="{Binding ScriptFiles}" SelectedValue="{Binding ScriptId}" />
+            <Button Grid.Row="0" Grid.Column="2" Content="{StaticResource Import}" Style="{StaticResource CustomWhiteButtonStyle}" VerticalAlignment="Top" Command="{Binding ImportScriptCommand}" />
+          </Grid>
+          <CheckBox Content="{StaticResource WindowsKeyCombinations}" Style="{StaticResource SimpleCheckBox}" Margin="0,15,0,0" Visibility="{Binding UseMSTSC, Converter={StaticResource visibilityConv}}" IsChecked="{Binding WindowsKeyCombinationsCheck}" IsThreeState="{Binding WindowsKeyCombinationsCheckThree}" />
+          <CheckBox Content="{StaticResource OpenInTab}" Style="{StaticResource SimpleCheckBox}" Margin="0,15,0,0" IsChecked="{Binding OpenInTabCheck}" IsThreeState="{Binding OpenInTabCheckThree}" />
+          <CheckBox Content="{StaticResource SyncTitle}" Style="{StaticResource SimpleCheckBox}" Margin="0,15,0,0" Visibility="{Binding OpenInTabCheck, Converter={StaticResource visibilityConv}}" IsChecked="{Binding SyncTitleCheck}" IsThreeState="{Binding SyncTitleCheckThree}" />
+          <Label Content="{StaticResource MethodOfClosingTab}" Style="{StaticResource AboveControlLabel}" Visibility="{Binding OpenInTabCheck, Converter={StaticResource visibilityConv}}" Margin="0,15,0,3" />
+          <ComboBox DisplayMemberPath="Key" SelectedValuePath="Key" Style="{StaticResource SimpleComboBox}" Visibility="{Binding OpenInTabCheck, Converter={StaticResource visibilityConv}}" ItemsSource="{Binding MethodsList}" SelectedValue="{Binding Method}" />
+          <CheckBox Content="{StaticResource CloseIME}" Style="{StaticResource SimpleCheckBox}" Margin="0,15,0,0" IsChecked="{Binding CloseIMECheck}" IsThreeState="{Binding CloseIMECheckThree}" />
+          <StackPanel Visibility="{Binding RDPFullScreenValid, Converter={StaticResource visibilityConv}}">
+            <CheckBox Content="{StaticResource FullScreen}" Style="{StaticResource SimpleCheckBox}" Margin="0,15,0,0" IsChecked="{Binding FullScreenCheck}" IsThreeState="{Binding FullScreenCheckThree}" />
+            <StackPanel Visibility="{Binding FullScreenCheck, Converter={StaticResource visibilityConv}}">
+              <CheckBox Content="{StaticResource MultiMonitors}" Style="{StaticResource SimpleCheckBox}" Margin="0,15,0,0" IsChecked="{Binding MultiMonitorsCheck}" IsThreeState="{Binding MultiMonitorsCheckThree}" />
+              <StackPanel Visibility="{Binding MultiMonitorsCheck, Converter={StaticResource visibilityConv}}">
+                <Label Content="{StaticResource SelectMonitors}" Style="{StaticResource AboveControlLabel}" Margin="0,15,0,3" ToolTip="{Binding SelectMonitors}" />
+                <TextBox Text="{Binding SelectedMonitors, UpdateSourceTrigger=PropertyChanged}" />
+              </StackPanel>
+            </StackPanel>
+          </StackPanel>
+          <Label Content="{StaticResource Monitor}" Style="{StaticResource AboveControlLabel}" Visibility="{Binding MonitorValid, Converter={StaticResource visibilityConv}}" Margin="0,15,0,3" />
+          <ComboBox DisplayMemberPath="Display" SelectedValuePath="Key" Style="{StaticResource SimpleComboBox}" Visibility="{Binding MonitorValid, Converter={StaticResource visibilityConv}}" ItemsSource="{Binding Monitors}" SelectedValue="{Binding Monitor}" />
+          <Label Content="{StaticResource AssignedTags}" Style="{StaticResource AboveControlLabel}" Margin="0,15,0,3" />
+          <ListView BorderThickness="0" Background="{StaticResource bg1}" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ItemContainerStyle="{StaticResource ListItemEmptyStyle}" ItemsSource="{Binding AssignedTags}" PreviewMouseWheel="ListViewTags_OnPreviewMouseWheel">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate>
+                <WrapPanel Margin="0" />
+              </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <Border BorderThickness="1" BorderBrush="{StaticResource bb1}" Background="{StaticResource bg3}" CornerRadius="15" Padding="3,0,3,0">
+                  <StackPanel Orientation="Horizontal">
+                    <Label FontSize="11" Foreground="{StaticResource fg1}" FontFamily="{StaticResource Font2}" Content="{Binding Key}" />
+                    <Button Style="{StaticResource CustomCircleWhiteButtonStyle}" Command="{Binding DataContext.DeleteAssignedTagCommand, ElementName=MyControl}" CommandParameter="{Binding Key}" />
+                  </StackPanel>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ListView>
+          <Grid Margin="0,5,0,0">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="3*" />
+              <ColumnDefinition Width="15" />
+              <ColumnDefinition Width="1*" />
+            </Grid.ColumnDefinitions>
+            <ComboBox Style="{StaticResource SimpleComboBox}" DisplayMemberPath="Key" SelectedValuePath="Key" SelectedIndex="0" Grid.Column="0" ItemsSource="{Binding UnassignedTags}" SelectedItem="{Binding SelectedTag}" />
+            <Button Grid.Column="2" Content="{StaticResource Assign}" Style="{StaticResource CustomWhiteButtonStyle}" Command="{Binding AssignCommand}" />
+          </Grid>
+          <Label Content="{StaticResource Comment}" Style="{StaticResource AboveControlLabel}" Margin="0,15,0,3"/>
+          <TextBox TextWrapping="Wrap" AcceptsReturn="True" Text="{Binding Comment, UpdateSourceTrigger=PropertyChanged}" ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}"/>
+          <StackPanel Visibility="{Binding BatchMode, Converter={StaticResource inverseVisibilityConv}}">
+            <CheckBox Content="{StaticResource SetColor}" Style="{StaticResource SimpleCheckBox}" Margin="0,15,0,0" IsChecked="{Binding SaveSessionColorCheck}" />
+            <StackPanel Visibility="{Binding SaveSessionColorCheck, Converter={StaticResource visibilityConv}}">
+              <ListView ScrollViewer.HorizontalScrollBarVisibility="Disabled" BorderThickness="0,0,0,0" ItemContainerStyle="{StaticResource ListItemEmptyStyle}" SelectionMode="Single" Background="{StaticResource bg1}" Margin="0,10,0,0" SelectedValue="{Binding SelectedColor}" ItemsSource="{Binding ColorList}">
+                <ItemsControl.ItemsPanel>
+                  <ItemsPanelTemplate>
+                    <WrapPanel Cursor="Hand" />
+                  </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate>
+                    <Grid>
+                      <Rectangle Width="16" Height="16" RadiusX="3" RadiusY="3" Fill="{Binding}" />
+                      <Path StrokeThickness="2" SnapsToDevicePixels="False" Data="M3,8 L7,12 M7,12 L13,5">
+                        <FrameworkElement.Style>
+                          <Style TargetType="{x:Type Path}">
+                            <Setter Property="Stroke" Value="{Binding}" />
+                            <Style.Triggers>
+                              <DataTrigger Value="true" Binding="{Binding IsMouseOver, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListViewItem}}}">
+                                <Setter Property="Stroke" Value="{StaticResource g2}" />
+                              </DataTrigger>
+                              <DataTrigger Value="True" Binding="{Binding IsSelected, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListViewItem}}}">
+                                <Setter Property="Stroke" Value="{StaticResource g2}" />
+                              </DataTrigger>
+                            </Style.Triggers>
+                          </Style>
+                        </FrameworkElement.Style>
+                      </Path>
+                    </Grid>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ListView>
+            </StackPanel>
+          </StackPanel>
+        </StackPanel>
+        <StackPanel DockPanel.Dock="Bottom" VerticalAlignment="Bottom">
+          <Border Margin="15,0,15,10" Background="{StaticResource a1}" BorderThickness="1" BorderBrush="{StaticResource a2}" Style="{StaticResource BorderAnimation}" Visibility="{Binding OkValidationVisibility}">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Height="35" HorizontalAlignment="Center">
+              <Canvas Margin="10,9,20,0">
+                <Ellipse Height="16" Width="16" Fill="{StaticResource a2}" Canvas.Left="0" />
+                <Path Stroke="{StaticResource a1}" Canvas.Left="0" StrokeThickness="2" SnapsToDevicePixels="False" Data="M3,8 L7,12 M7,12 L13,5" />
+              </Canvas>
+              <Label Content="{StaticResource DetailsSaved}" FontSize="13" Margin="0,5,0,0" />
+            </StackPanel>
+          </Border>
+          <Border BorderThickness="0,1,0,0" BorderBrush="{StaticResource bb1}" Margin="0,0,0,0" Background="{StaticResource bg1}">
+            <StackPanel Orientation="Horizontal" Margin="10,10,15,10" VerticalAlignment="Center" HorizontalAlignment="Right">
+              <Button IsDefault="True" Content="{StaticResource Save}" Style="{StaticResource CustomBlueButtonStyle}" Width="100" Margin="0,0,10,0" Command="{Binding SaveCommand}" />
+              <Button Content="{StaticResource SaveNew}" Style="{StaticResource CustomBlueButtonStyle}" Width="100" Visibility="{Binding EditMode, Converter={StaticResource visibilityConv}}" Command="{Binding SaveNewCommand}" />
+            </StackPanel>
+          </Border>
+        </StackPanel>
+      </DockPanel>
+    </ScrollViewer>
+  </Grid>
+</UserControl>

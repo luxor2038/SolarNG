@@ -1,0 +1,105 @@
+﻿<UserControl x:Class="SolarNG.UserControls.Settings.ProxiesList" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:local="clr-namespace:SolarNG.UserControls" xmlns:conv="clr-namespace:SolarNG.Converters" BorderThickness="0,0,1,0" BorderBrush="{StaticResource bb1}">
+  <FrameworkElement.Resources>
+    <ResourceDictionary>
+      <conv:AddSessionParamConverter x:Key="AddSessionParamConverter" />
+      <conv:BooleanToVisibilityConverter x:Key="booleanToVisibilityConverter" />
+      <conv:InverseGuidToVisibilityConverter x:Key="inverseGuidToVisibilityConv" />
+      <DataTemplate x:Key="SessionTemplate">
+        <Border BorderThickness="0,1,0,0" MinHeight="40" BorderBrush="{StaticResource bb1}">
+          <DockPanel LastChildFill="False">
+            <Ellipse Width="9" Height="9" Margin="10,0,0,0" DockPanel.Dock="Left" VerticalAlignment="Center" Fill="{Binding Color2}" />
+            <local:HightlightTextBlock Margin="5,0,0,0" DockPanel.Dock="Left" FontSize="12" VerticalAlignment="Center" Foreground="{StaticResource fg1}" Text="{Binding Name}" SearchText="{Binding ElementName=TxBoxSearch}" />
+            <local:HightlightTextBlock Margin="10,0,0,0" DockPanel.Dock="Left" FontSize="11" VerticalAlignment="Center" Foreground="{StaticResource g0}" Text="{Binding DisplayName}" SearchText="{Binding ElementName=TxBoxSearch}" />
+            <local:HightlightTextBlock Margin="10,0,0,0" DockPanel.Dock="Left" FontSize="11" VerticalAlignment="Center" Foreground="{StaticResource g0}" Text="{Binding CredentialName}" Visibility="{Binding CredentialId2, Converter={StaticResource inverseGuidToVisibilityConv}}" SearchText="{Binding ElementName=TxBoxSearch}" />
+            <WrapPanel DockPanel.Dock="Right" Orientation="Horizontal" Margin="0,0,5,0" VerticalAlignment="Center">
+              <ItemsControl Margin="5,0,0,0" FontSize="11" ItemsSource="{Binding Tags}" IsTabStop="False" FontFamily="{StaticResource Font2}">
+                <ItemsControl.ItemsPanel>
+                  <ItemsPanelTemplate>
+                    <WrapPanel Margin="0" />
+                  </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate>
+                    <Border Margin="5,5,0,0" Padding="8,1,10,2" Width="Auto" HorizontalAlignment="Left" VerticalAlignment="Top" BorderThickness="1" CornerRadius="10" MaxWidth="150" Background="{StaticResource bg3}">
+                      <local:HightlightTextBlock FontSize="11" TextTrimming="CharacterEllipsis" Foreground="{StaticResource fg1}" Text="{Binding}" SearchText="{Binding ElementName=TxBoxSearch}" ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}" />
+                    </Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </WrapPanel>
+          </DockPanel>
+        </Border>
+      </DataTemplate>
+    </ResourceDictionary>
+  </FrameworkElement.Resources>
+  <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="40" />
+      <RowDefinition Height="50" />
+      <RowDefinition Height="*" />
+    </Grid.RowDefinitions>
+    <Border Grid.Row="0" BorderThickness="0" BorderBrush="{StaticResource bb1}">
+      <StackPanel Orientation="Horizontal" Background="{Binding ButtonPanelBackground}">
+        <Button Margin="10,0,10,0" Style="{StaticResource CustomTransparentButtonStyle}" Command="{Binding CreateNewItemCommand}">
+          <StackPanel Orientation="Horizontal">
+            <Image Source="../../Images/add.png" Stretch="None" />
+            <Label Content="{StaticResource Create}" Foreground="{StaticResource u1}" />
+          </StackPanel>
+        </Button>
+        <Button Margin="0,0,10,0" Style="{StaticResource CustomRedButtonStyle}" Visibility="{Binding DeleteButtonVisible}" Command="{Binding DeleteItemsCommand}">
+          <ButtonBase.CommandParameter>
+            <MultiBinding Converter="{StaticResource AddSessionParamConverter}">
+              <Binding ElementName="ListItemsView" />
+            </MultiBinding>
+          </ButtonBase.CommandParameter>
+          <StackPanel Orientation="Horizontal">
+            <Image Source="../../Images/remove.png" Stretch="None" />
+            <Label Content="{StaticResource Delete}" Foreground="{StaticResource r0}" />
+          </StackPanel>
+        </Button>
+        <Button Margin="0,0,10,0" Style="{StaticResource CustomTransparentButtonStyle}" Visibility="{Binding SaveButtonVisible}" Command="{Binding SaveItemCommand}">
+          <StackPanel Orientation="Horizontal">
+            <Image Source="../../Images/save.png" Stretch="None" />
+            <Label Content="{StaticResource Save}" Foreground="{StaticResource u1}" />
+          </StackPanel>
+        </Button>
+        <Button Margin="0,0,10,0" Style="{StaticResource CustomTransparentButtonStyle}" Visibility="{Binding SaveNewButtonVisible}" Command="{Binding SaveNewItemCommand}">
+          <StackPanel Orientation="Horizontal">
+            <Image Source="../../Images/savenew.png" Stretch="None" />
+            <Label Content="{StaticResource SaveNew}" Foreground="{StaticResource u1}" />
+          </StackPanel>
+        </Button>
+      </StackPanel>
+    </Border>
+    <Border Grid.Row="1" Background="{StaticResource bg1}" BorderThickness="0" BorderBrush="{StaticResource bb1}" Margin="15,0">
+      <DockPanel>
+        <Grid HorizontalAlignment="Stretch" Margin="0">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*" />
+          </Grid.ColumnDefinitions>
+          <TextBlock Grid.Row="0" Grid.Column="0" FontSize="13" Padding="10,8,0,0" Height="30" Text="{StaticResource Search}" Foreground="{StaticResource fg1}" Background="{StaticResource bg1}" Visibility="{Binding ElementName=TxBoxSearch, Path=Text.IsEmpty, Converter={StaticResource booleanToVisibilityConverter}}" />
+          <TextBox Name="TxBoxSearch" Grid.Column="0" Foreground="{StaticResource fg1}" Background="{StaticResource bg2}" Text="{Binding ByUserTypedName, UpdateSourceTrigger=PropertyChanged}">
+            <UIElement.InputBindings>
+              <KeyBinding Key="Enter" Command="" CommandParameter="" />
+            </UIElement.InputBindings>
+          </TextBox>
+          <Image Grid.Column="0" Source="../../Images/search.png" HorizontalAlignment="Right" Margin="0,0,10,0" VerticalAlignment="Center" Height="16" />
+        </Grid>
+      </DockPanel>
+    </Border>
+    <ListView Name="ListItemsView" Grid.Row="2" Background="{StaticResource bg1}" BorderThickness="0" ItemsSource="{Binding FilteredSessions}" ItemContainerStyle="{StaticResource CustomListItemStyle}" ItemTemplate="{StaticResource SessionTemplate}" Selector.SelectedItem="{Binding SelectedObject}" SelectionChanged="ListItemsView_SelectionChanged" MouseDoubleClick="ListItemsView_MouseDoubleClick">
+      <ListView.Resources>
+        <Style TargetType="{x:Type ScrollViewer}" BasedOn="{StaticResource CustomScrollViewerStyle}"/>
+      </ListView.Resources>
+      <UIElement.InputBindings>
+        <KeyBinding Key="Delete" Command="{Binding DeleteItemsCommand}">
+          <InputBinding.CommandParameter>
+            <MultiBinding Converter="{StaticResource AddSessionParamConverter}">
+              <Binding ElementName="ListItemsView" />
+            </MultiBinding>
+          </InputBinding.CommandParameter>
+        </KeyBinding>
+      </UIElement.InputBindings>
+    </ListView>
+  </Grid>
+</UserControl>

@@ -1,0 +1,50 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:system="clr-namespace:System;assembly=mscorlib">
+  <Color x:Key="c1">#D5D5D5</Color>
+  <Color x:Key="c2">#CCCCCC</Color>
+  <Color x:Key="c3">#C2C2C2</Color>
+  <system:Double x:Key="o1">0.5</system:Double>
+  <SolidColorBrush x:Key="t00" Color="#FF000000" />
+  <SolidColorBrush x:Key="t0" Color="#FF202020" />
+  <SolidColorBrush x:Key="t1" Color="#FFCDCDCD" />
+  <SolidColorBrush x:Key="t2" Color="#FFDADADA" />
+  <SolidColorBrush x:Key="t3" Color="#FFF7F7F7" />
+  <SolidColorBrush x:Key="t4" Color="#FF727272" />
+  <SolidColorBrush x:Key="t5" Color="#FFACACAC" />
+  <SolidColorBrush x:Key="t6" Color="#FFA3A3A3" />
+  <SolidColorBrush x:Key="t7" Color="#FFCDCDCD" />
+  <SolidColorBrush x:Key="t8" Color="#FF00C4D2" />
+  <SolidColorBrush x:Key="t9" Color="#FF176998" />
+  <SolidColorBrush x:Key="u1" Color="#FF2E5E9E" />
+  <SolidColorBrush x:Key="u2" Color="#FF1E4E8E" />
+  <SolidColorBrush x:Key="u3" Color="#FFF7F7F7" />
+  <SolidColorBrush x:Key="b0" Color="#FF2E5E9E" />
+  <SolidColorBrush x:Key="b1" Color="#FFF7F7F7" />
+  <SolidColorBrush x:Key="b2" Color="#FFEAEAEA" />
+  <SolidColorBrush x:Key="b3" Color="#FFDADADA" />
+  <SolidColorBrush x:Key="s1" Color="#FFEAEAEA" />
+  <SolidColorBrush x:Key="r0" Color="#FFDD2C00" />
+  <SolidColorBrush x:Key="g0" Color="#FF808080" />
+  <SolidColorBrush x:Key="g1" Color="#FF111111" />
+  <SolidColorBrush x:Key="g2" Color="#FFF7F7F7" />
+  <SolidColorBrush x:Key="a1" Color="#FFE5F6E9" />
+  <SolidColorBrush x:Key="a2" Color="#FF00A753" />
+  <SolidColorBrush x:Key="a3" Color="#FFFEC405" />
+  <SolidColorBrush x:Key="bg1" Color="#FFF7F7F7" />
+  <SolidColorBrush x:Key="bg2" Color="#80F6F6F6" />
+  <SolidColorBrush x:Key="bg3" Color="#FFD5D5D5" />
+  <SolidColorBrush x:Key="bg4" Color="#FFF0F0F0" />
+  <SolidColorBrush x:Key="bg5" Color="#FFEDEDED" />
+  <SolidColorBrush x:Key="bg6" Color="#FFE8E8E8" />
+  <SolidColorBrush x:Key="bg8" Color="#FFE5F9FA" />
+  <SolidColorBrush x:Key="fg1" Color="#FF303030" />
+  <SolidColorBrush x:Key="fg2" Color="#FF000000" />
+  <SolidColorBrush x:Key="fg3" Color="#4CF99D1C" />
+  <SolidColorBrush x:Key="bb1" Color="#FFD5D5D5" />
+  <SolidColorBrush x:Key="bb2" Color="#FF6ACCD3" />
+  <SolidColorBrush x:Key="bb3" Color="#FFACACAC" />
+  <SolidColorBrush x:Key="bb5" Color="#FFFFFFFF" />
+  <BitmapImage x:Key="ImageNormalized" UriSource="pack://application:,,,/images/normalize.png" />
+  <BitmapImage x:Key="ImageMaximized" UriSource="pack://application:,,,/images/maximize.png" />
+  <BitmapImage x:Key="ImageMinimize" UriSource="pack://application:,,,/images/minimize.png" />
+  <BitmapImage x:Key="ImageClose" UriSource="pack://application:,,,/images/close.png" />
+</ResourceDictionary>

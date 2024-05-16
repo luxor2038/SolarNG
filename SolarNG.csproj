@@ -1,0 +1,464 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ProjectGuid>{6E40507C-68D0-4C43-A8E3-DE5A28FA7201}</ProjectGuid>
+    <ProjectTypeGuids>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <OutputType>WinExe</OutputType>
+    <LangVersion>latest</LangVersion>
+    <AssemblyName>SolarNG</AssemblyName>
+    <TargetFrameworkIdentifier>.NETFramework</TargetFrameworkIdentifier>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Platform)' == 'AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <OutputPath>bin\Debug\</OutputPath>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <OutputPath>bin\Release\</OutputPath>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+    <DefineConstants>NET_2_0;NET_4_0;NET_4_5;NET45;NET472_;</DefineConstants>
+    <Prefer32Bit>false</Prefer32Bit>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
+    <DefineConstants>NET_2_0;NET_4_0;NET_4_5;NET45;NET472_;</DefineConstants>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>app.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup />
+  <ItemGroup>
+    <Reference Include="PresentationFramework" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System" />
+    <Reference Include="WindowsBase" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Management" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="WindowsFormsIntegration" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Security" />
+  </ItemGroup>
+  <ItemGroup>
+    <ApplicationIcon Include="app.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ChromeTabs\AddTabButtonBehavior.cs" />
+    <Compile Include="ChromeTabs\ChromeTabControl.cs" />
+    <Compile Include="ChromeTabs\ChromeTabItem.cs" />
+    <Compile Include="ChromeTabs\ChromeTabPanel.cs" />
+    <Compile Include="ChromeTabs\ContainerOverrideEventArgs.cs" />
+    <Compile Include="ChromeTabs\Converters\IsLessThanConverter.cs" />
+    <Compile Include="ChromeTabs\Converters\TabPersistBehaviorToContentPresenterVisibilityConverter.cs" />
+    <Compile Include="ChromeTabs\Converters\TabPersistBehaviorToItemHolderVisibilityConverter.cs" />
+    <Compile Include="ChromeTabs\TabDragEventArgs.cs" />
+    <Compile Include="ChromeTabs\TabPersistBehavior.cs" />
+    <Compile Include="ChromeTabs\TabReorder.cs" />
+    <Compile Include="ChromeTabs\TabShape.cs" />
+    <Compile Include="ChromeTabs\Utilities\MouseUtilities.cs" />
+    <Compile Include="GalaSoft.MvvmLight\CommandWpf\RelayCommand.cs" />
+    <Compile Include="GalaSoft.MvvmLight\Command\RelayCommand.cs" />
+    <Compile Include="GalaSoft.MvvmLight\Helpers\DesignerLibrary.cs" />
+    <Compile Include="GalaSoft.MvvmLight\Helpers\DesignerPlatformLibrary.cs" />
+    <Compile Include="GalaSoft.MvvmLight\Helpers\Empty.cs" />
+    <Compile Include="GalaSoft.MvvmLight\Helpers\FeatureDetection.cs" />
+    <Compile Include="GalaSoft.MvvmLight\Helpers\IExecuteWithObject.cs" />
+    <Compile Include="GalaSoft.MvvmLight\Helpers\IExecuteWithObjectAndResult.cs" />
+    <Compile Include="GalaSoft.MvvmLight\Helpers\WeakAction.cs" />
+    <Compile Include="GalaSoft.MvvmLight\Helpers\WeakFunc.cs" />
+    <Compile Include="GalaSoft.MvvmLight\ICleanup.cs" />
+    <Compile Include="GalaSoft.MvvmLight\Messaging\GenericMessage.cs" />
+    <Compile Include="GalaSoft.MvvmLight\Messaging\IMessenger.cs" />
+    <Compile Include="GalaSoft.MvvmLight\Messaging\MessageBase.cs" />
+    <Compile Include="GalaSoft.MvvmLight\Messaging\Messenger.cs" />
+    <Compile Include="GalaSoft.MvvmLight\Messaging\NotificationMessage.cs" />
+    <Compile Include="GalaSoft.MvvmLight\Messaging\NotificationMessageAction.cs" />
+    <Compile Include="GalaSoft.MvvmLight\Messaging\NotificationMessageWithCallback.cs" />
+    <Compile Include="GalaSoft.MvvmLight\Messaging\PropertyChangedMessage.cs" />
+    <Compile Include="GalaSoft.MvvmLight\Messaging\PropertyChangedMessageBase.cs" />
+    <Compile Include="GalaSoft.MvvmLight\ObservableObject.cs" />
+    <Compile Include="GalaSoft.MvvmLight\ViewModelBase.cs" />
+    <Compile Include="LitJson\IJsonWrapper.cs" />
+    <Compile Include="LitJson\JsonData.cs" />
+    <Compile Include="LitJson\JsonException.cs" />
+    <Compile Include="LitJson\JsonMapper.cs" />
+    <Compile Include="LitJson\JsonMockWrapper.cs" />
+    <Compile Include="LitJson\JsonReader.cs" />
+    <Compile Include="LitJson\JsonWriter.cs" />
+    <Compile Include="LitJson\Lexer.cs" />
+    <Compile Include="LitJson\ParserToken.cs" />
+    <Compile Include="log4net\Appender\AppenderCollection.cs" />
+    <Compile Include="log4net\Appender\AppenderSkeleton.cs" />
+    <Compile Include="log4net\Appender\BufferingAppenderSkeleton.cs" />
+    <Compile Include="log4net\Appender\ConsoleAppender.cs" />
+    <Compile Include="log4net\Appender\FileAppender.cs" />
+    <Compile Include="log4net\Appender\IAppender.cs" />
+    <Compile Include="log4net\Appender\IBulkAppender.cs" />
+    <Compile Include="log4net\Appender\IFlushable.cs" />
+    <Compile Include="log4net\Appender\RollingFileAppender.cs" />
+    <Compile Include="log4net\Appender\TextWriterAppender.cs" />
+    <Compile Include="log4net\Config\AliasRepositoryAttribute.cs" />
+    <Compile Include="log4net\Config\BasicConfigurator.cs" />
+    <Compile Include="log4net\Config\ConfiguratorAttribute.cs" />
+    <Compile Include="log4net\Config\Log4NetConfigurationSectionHandler.cs" />
+    <Compile Include="log4net\Config\PluginAttribute.cs" />
+    <Compile Include="log4net\Config\RepositoryAttribute.cs" />
+    <Compile Include="log4net\Config\XmlConfigurator.cs" />
+    <Compile Include="log4net\Config\XmlConfiguratorAttribute.cs" />
+    <Compile Include="log4net\Core\CompactRepositorySelector.cs" />
+    <Compile Include="log4net\Core\DefaultRepositorySelector.cs" />
+    <Compile Include="log4net\Core\ErrorCode.cs" />
+    <Compile Include="log4net\Core\ExceptionEvaluator.cs" />
+    <Compile Include="log4net\Core\FixFlags.cs" />
+    <Compile Include="log4net\Core\IAppenderAttachable.cs" />
+    <Compile Include="log4net\Core\IErrorHandler.cs" />
+    <Compile Include="log4net\Core\IFixingRequired.cs" />
+    <Compile Include="log4net\Core\ILogger.cs" />
+    <Compile Include="log4net\Core\ILoggerWrapper.cs" />
+    <Compile Include="log4net\Core\IOptionHandler.cs" />
+    <Compile Include="log4net\Core\IRepositorySelector.cs" />
+    <Compile Include="log4net\Core\ITriggeringEventEvaluator.cs" />
+    <Compile Include="log4net\Core\Level.cs" />
+    <Compile Include="log4net\Core\LevelCollection.cs" />
+    <Compile Include="log4net\Core\LevelEvaluator.cs" />
+    <Compile Include="log4net\Core\LevelMap.cs" />
+    <Compile Include="log4net\Core\LocationInfo.cs" />
+    <Compile Include="log4net\Core\LogException.cs" />
+    <Compile Include="log4net\Core\LoggerManager.cs" />
+    <Compile Include="log4net\Core\LoggerWrapperImpl.cs" />
+    <Compile Include="log4net\Core\LoggingEvent.cs" />
+    <Compile Include="log4net\Core\LogImpl.cs" />
+    <Compile Include="log4net\Core\MethodItem.cs" />
+    <Compile Include="log4net\Core\SecurityContext.cs" />
+    <Compile Include="log4net\Core\SecurityContextProvider.cs" />
+    <Compile Include="log4net\Core\StackFrameItem.cs" />
+    <Compile Include="log4net\Core\TimeEvaluator.cs" />
+    <Compile Include="log4net\Core\WrapperMap.cs" />
+    <Compile Include="log4net\DateFormatter\AbsoluteTimeDateFormatter.cs" />
+    <Compile Include="log4net\DateFormatter\DateTimeDateFormatter.cs" />
+    <Compile Include="log4net\DateFormatter\IDateFormatter.cs" />
+    <Compile Include="log4net\DateFormatter\Iso8601DateFormatter.cs" />
+    <Compile Include="log4net\DateFormatter\SimpleDateFormatter.cs" />
+    <Compile Include="log4net\Filter\DenyAllFilter.cs" />
+    <Compile Include="log4net\Filter\FilterDecision.cs" />
+    <Compile Include="log4net\Filter\FilterSkeleton.cs" />
+    <Compile Include="log4net\Filter\IFilter.cs" />
+    <Compile Include="log4net\Filter\LevelMatchFilter.cs" />
+    <Compile Include="log4net\Filter\LevelRangeFilter.cs" />
+    <Compile Include="log4net\Filter\LoggerMatchFilter.cs" />
+    <Compile Include="log4net\Filter\MdcFilter.cs" />
+    <Compile Include="log4net\Filter\NdcFilter.cs" />
+    <Compile Include="log4net\Filter\PropertyFilter.cs" />
+    <Compile Include="log4net\Filter\StringMatchFilter.cs" />
+    <Compile Include="log4net\GlobalContext.cs" />
+    <Compile Include="log4net\ILog.cs" />
+    <Compile Include="log4net\Layout\ILayout.cs" />
+    <Compile Include="log4net\Layout\LayoutSkeleton.cs" />
+    <Compile Include="log4net\Layout\PatternLayout.cs" />
+    <Compile Include="log4net\Layout\Pattern\AppDomainPatternConverter.cs" />
+    <Compile Include="log4net\Layout\Pattern\DatePatternConverter.cs" />
+    <Compile Include="log4net\Layout\Pattern\ExceptionPatternConverter.cs" />
+    <Compile Include="log4net\Layout\Pattern\FileLocationPatternConverter.cs" />
+    <Compile Include="log4net\Layout\Pattern\FullLocationPatternConverter.cs" />
+    <Compile Include="log4net\Layout\Pattern\IdentityPatternConverter.cs" />
+    <Compile Include="log4net\Layout\Pattern\LevelPatternConverter.cs" />
+    <Compile Include="log4net\Layout\Pattern\LineLocationPatternConverter.cs" />
+    <Compile Include="log4net\Layout\Pattern\LoggerPatternConverter.cs" />
+    <Compile Include="log4net\Layout\Pattern\MessagePatternConverter.cs" />
+    <Compile Include="log4net\Layout\Pattern\MethodLocationPatternConverter.cs" />
+    <Compile Include="log4net\Layout\Pattern\NamedPatternConverter.cs" />
+    <Compile Include="log4net\Layout\Pattern\NdcPatternConverter.cs" />
+    <Compile Include="log4net\Layout\Pattern\PatternLayoutConverter.cs" />
+    <Compile Include="log4net\Layout\Pattern\PropertyPatternConverter.cs" />
+    <Compile Include="log4net\Layout\Pattern\RelativeTimePatternConverter.cs" />
+    <Compile Include="log4net\Layout\Pattern\StackTraceDetailPatternConverter.cs" />
+    <Compile Include="log4net\Layout\Pattern\StackTracePatternConverter.cs" />
+    <Compile Include="log4net\Layout\Pattern\ThreadPatternConverter.cs" />
+    <Compile Include="log4net\Layout\Pattern\TypeNamePatternConverter.cs" />
+    <Compile Include="log4net\Layout\Pattern\UserNamePatternConverter.cs" />
+    <Compile Include="log4net\Layout\Pattern\UtcDatePatternConverter.cs" />
+    <Compile Include="log4net\LogicalThreadContext.cs" />
+    <Compile Include="log4net\LogManager.cs" />
+    <Compile Include="log4net\ObjectRenderer\DefaultRenderer.cs" />
+    <Compile Include="log4net\ObjectRenderer\IObjectRenderer.cs" />
+    <Compile Include="log4net\ObjectRenderer\RendererMap.cs" />
+    <Compile Include="log4net\Plugin\IPlugin.cs" />
+    <Compile Include="log4net\Plugin\IPluginFactory.cs" />
+    <Compile Include="log4net\Plugin\PluginCollection.cs" />
+    <Compile Include="log4net\Plugin\PluginMap.cs" />
+    <Compile Include="log4net\Plugin\PluginSkeleton.cs" />
+    <Compile Include="log4net\Repository\ConfigurationChangedEventArgs.cs" />
+    <Compile Include="log4net\Repository\Hierarchy\DefaultLoggerFactory.cs" />
+    <Compile Include="log4net\Repository\Hierarchy\Hierarchy.cs" />
+    <Compile Include="log4net\Repository\Hierarchy\ILoggerFactory.cs" />
+    <Compile Include="log4net\Repository\Hierarchy\Logger.cs" />
+    <Compile Include="log4net\Repository\Hierarchy\LoggerKey.cs" />
+    <Compile Include="log4net\Repository\Hierarchy\ProvisionNode.cs" />
+    <Compile Include="log4net\Repository\Hierarchy\RootLogger.cs" />
+    <Compile Include="log4net\Repository\Hierarchy\XmlHierarchyConfigurator.cs" />
+    <Compile Include="log4net\Repository\IBasicRepositoryConfigurator.cs" />
+    <Compile Include="log4net\Repository\ILoggerRepository.cs" />
+    <Compile Include="log4net\Repository\IXmlRepositoryConfigurator.cs" />
+    <Compile Include="log4net\Repository\LoggerRepositorySkeleton.cs" />
+    <Compile Include="log4net\ThreadContext.cs" />
+    <Compile Include="log4net\Util\AppenderAttachedImpl.cs" />
+    <Compile Include="log4net\Util\CompositeProperties.cs" />
+    <Compile Include="log4net\Util\ContextPropertiesBase.cs" />
+    <Compile Include="log4net\Util\ConverterInfo.cs" />
+    <Compile Include="log4net\Util\CountingQuietTextWriter.cs" />
+    <Compile Include="log4net\Util\CyclicBuffer.cs" />
+    <Compile Include="log4net\Util\EmptyCollection.cs" />
+    <Compile Include="log4net\Util\EmptyDictionary.cs" />
+    <Compile Include="log4net\Util\FormattingInfo.cs" />
+    <Compile Include="log4net\Util\GlobalContextProperties.cs" />
+    <Compile Include="log4net\Util\ILogExtensions.cs" />
+    <Compile Include="log4net\Util\LevelMapping.cs" />
+    <Compile Include="log4net\Util\LevelMappingEntry.cs" />
+    <Compile Include="log4net\Util\LogicalThreadContextProperties.cs" />
+    <Compile Include="log4net\Util\LogicalThreadContextStack.cs" />
+    <Compile Include="log4net\Util\LogicalThreadContextStacks.cs" />
+    <Compile Include="log4net\Util\LogLog.cs" />
+    <Compile Include="log4net\Util\NativeError.cs" />
+    <Compile Include="log4net\Util\NullDictionaryEnumerator.cs" />
+    <Compile Include="log4net\Util\NullEnumerator.cs" />
+    <Compile Include="log4net\Util\NullSecurityContext.cs" />
+    <Compile Include="log4net\Util\OnlyOnceErrorHandler.cs" />
+    <Compile Include="log4net\Util\OptionConverter.cs" />
+    <Compile Include="log4net\Util\PatternConverter.cs" />
+    <Compile Include="log4net\Util\PatternParser.cs" />
+    <Compile Include="log4net\Util\PatternString.cs" />
+    <Compile Include="log4net\Util\PatternStringConverters\AppDomainPatternConverter.cs" />
+    <Compile Include="log4net\Util\PatternStringConverters\AppSettingPatternConverter.cs" />
+    <Compile Include="log4net\Util\PatternStringConverters\DatePatternConverter.cs" />
+    <Compile Include="log4net\Util\PatternStringConverters\EnvironmentFolderPathPatternConverter.cs" />
+    <Compile Include="log4net\Util\PatternStringConverters\EnvironmentPatternConverter.cs" />
+    <Compile Include="log4net\Util\PatternStringConverters\IdentityPatternConverter.cs" />
+    <Compile Include="log4net\Util\PatternStringConverters\LiteralPatternConverter.cs" />
+    <Compile Include="log4net\Util\PatternStringConverters\NewLinePatternConverter.cs" />
+    <Compile Include="log4net\Util\PatternStringConverters\ProcessIdPatternConverter.cs" />
+    <Compile Include="log4net\Util\PatternStringConverters\PropertyPatternConverter.cs" />
+    <Compile Include="log4net\Util\PatternStringConverters\RandomStringPatternConverter.cs" />
+    <Compile Include="log4net\Util\PatternStringConverters\UserNamePatternConverter.cs" />
+    <Compile Include="log4net\Util\PatternStringConverters\UtcDatePatternConverter.cs" />
+    <Compile Include="log4net\Util\PropertiesDictionary.cs" />
+    <Compile Include="log4net\Util\PropertyEntry.cs" />
+    <Compile Include="log4net\Util\ProtectCloseTextWriter.cs" />
+    <Compile Include="log4net\Util\QuietTextWriter.cs" />
+    <Compile Include="log4net\Util\ReaderWriterLock.cs" />
+    <Compile Include="log4net\Util\ReadOnlyPropertiesDictionary.cs" />
+    <Compile Include="log4net\Util\ReusableStringWriter.cs" />
+    <Compile Include="log4net\Util\SystemInfo.cs" />
+    <Compile Include="log4net\Util\SystemStringFormat.cs" />
+    <Compile Include="log4net\Util\TextWriterAdapter.cs" />
+    <Compile Include="log4net\Util\ThreadContextProperties.cs" />
+    <Compile Include="log4net\Util\ThreadContextStack.cs" />
+    <Compile Include="log4net\Util\ThreadContextStacks.cs" />
+    <Compile Include="log4net\Util\Transform.cs" />
+    <Compile Include="log4net\Util\TypeConverters\BooleanConverter.cs" />
+    <Compile Include="log4net\Util\TypeConverters\ConversionNotSupportedException.cs" />
+    <Compile Include="log4net\Util\TypeConverters\ConverterRegistry.cs" />
+    <Compile Include="log4net\Util\TypeConverters\EncodingConverter.cs" />
+    <Compile Include="log4net\Util\TypeConverters\IConvertFrom.cs" />
+    <Compile Include="log4net\Util\TypeConverters\IConvertTo.cs" />
+    <Compile Include="log4net\Util\TypeConverters\IPAddressConverter.cs" />
+    <Compile Include="log4net\Util\TypeConverters\PatternLayoutConverter.cs" />
+    <Compile Include="log4net\Util\TypeConverters\PatternStringConverter.cs" />
+    <Compile Include="log4net\Util\TypeConverters\TypeConverter.cs" />
+    <Compile Include="log4net\Util\TypeConverters\TypeConverterAttribute.cs" />
+    <Compile Include="Configs\Config.cs" />
+    <Compile Include="Configs\GUIConfig.cs" />
+    <Compile Include="Configs\PlinkXConfig.cs" />
+    <Compile Include="Configs\ProgramConfig.cs" />
+    <Compile Include="Configs\PuTTYConfig.cs" />
+    <Compile Include="Configs\MSTSCConfig.cs" />
+    <Compile Include="Configs\VNCViewerConfig.cs" />
+    <Compile Include="Configs\WinSCPConfig.cs" />
+    <Compile Include="Sessions\Credential.cs" />
+    <Compile Include="Sessions\ConfigFile.cs" />
+    <Compile Include="Sessions\ExportModel.cs" />
+    <Compile Include="Sessions\History.cs" />
+    <Compile Include="Sessions\HistoryModel.cs" />
+    <Compile Include="Sessions\Session.cs" />
+    <Compile Include="Sessions\SessionType.cs" />
+    <Compile Include="Converters\AddSessionParamConverter.cs" />
+    <Compile Include="Converters\BooleanToVisibilityConverter.cs" />
+    <Compile Include="Converters\EmptyStringToIntConverter.cs" />
+    <Compile Include="Converters\GuidToVisibilityConverter.cs" />
+    <Compile Include="Converters\InverseBooleanToVisibilityConverter.cs" />
+    <Compile Include="Converters\InverseGuidToVisibilityConverter.cs" />
+    <Compile Include="Converters\StringContentToVisibility.cs" />
+    <Compile Include="UserControls\HightlightTextBlock.cs" />
+    <Compile Include="UserControls\MyWinFormsHost.cs" />
+    <Compile Include="UserControls\OverviewTab.cs" />
+    <Compile Include="UserControls\Settings\AppsList.cs" />
+    <Compile Include="UserControls\Settings\ConfigFilesList.cs" />
+    <Compile Include="UserControls\Settings\CredentialsList.cs" />
+    <Compile Include="UserControls\Settings\ProxiesList.cs" />
+    <Compile Include="UserControls\Settings\SessionsList.cs" />
+    <Compile Include="UserControls\Settings\TagsList.cs" />
+    <Compile Include="UserControls\Settings\EditApp.cs" />
+    <Compile Include="UserControls\Settings\EditCredential.cs" />
+    <Compile Include="UserControls\Settings\EditConfigFile.cs" />
+    <Compile Include="UserControls\Settings\EditProxy.cs" />
+    <Compile Include="UserControls\Settings\EditSession.cs" />
+    <Compile Include="UserControls\Settings\EditTag.cs" />
+    <Compile Include="UserControls\Settings\EditMisc.cs" />
+    <Compile Include="UserControls\Settings\SettingsGeneralLayout.cs" />
+    <Compile Include="UserControls\UserControl1.cs" />
+    <Compile Include="Utilities\CommandLine.cs" />
+    <Compile Include="Utilities\Crypto.cs" />
+    <Compile Include="Utilities\FlashWindow.cs" />
+    <Compile Include="Utilities\HotKey.cs" />
+    <Compile Include="Utilities\HotKeys.cs" />
+    <Compile Include="Utilities\JumpListManager.cs" />
+    <Compile Include="Utilities\KeyModifier.cs" />
+    <Compile Include="Utilities\PasswordBoxHelper.cs" />
+    <Compile Include="Utilities\PipeServer.cs" />
+    <Compile Include="Utilities\ProcessHelper.cs" />
+    <Compile Include="Utilities\RegistryHelper.cs" />
+    <Compile Include="Utilities\SafeString.cs" />
+    <Compile Include="Utilities\SendInputHelper.cs" />
+    <Compile Include="Utilities\SessionParser.cs" />
+    <Compile Include="Utilities\SolarNGX.cs" />
+    <Compile Include="Utilities\W32Point.cs" />
+    <Compile Include="Utilities\W32Rect.cs" />
+    <Compile Include="Utilities\Win32.cs" />
+    <Compile Include="ViewModel\ComboBoxTwo.cs" />
+    <Compile Include="ViewModel\ComboBoxGuid.cs" />
+    <Compile Include="ViewModel\ComboBoxOne.cs" />
+    <Compile Include="ViewModel\ConnectionState.cs" />
+    <Compile Include="ViewModel\MainWindowViewModel.cs" />
+    <Compile Include="ViewModel\OverviewTabViewModel.cs" />
+    <Compile Include="ViewModel\AppTabViewModel.cs" />
+    <Compile Include="ViewModel\TabBase.cs" />
+    <Compile Include="ViewModel\Settings\AppsListViewModel.cs" />
+    <Compile Include="ViewModel\Settings\ConfigFilesListViewModel.cs" />
+    <Compile Include="ViewModel\Settings\CredentialsListViewModel.cs" />
+    <Compile Include="ViewModel\Settings\ProxiesListViewModel.cs" />
+    <Compile Include="ViewModel\Settings\SessionsListViewModel.cs" />
+    <Compile Include="ViewModel\Settings\TagsListViewModel.cs" />
+    <Compile Include="ViewModel\Settings\EditAppViewModel.cs" />
+    <Compile Include="ViewModel\Settings\EditCredentialViewModel.cs" />
+    <Compile Include="ViewModel\Settings\EditConfigFileViewModel.cs" />
+    <Compile Include="ViewModel\Settings\EditMiscViewModel.cs" />
+    <Compile Include="ViewModel\Settings\EditProxyViewModel.cs" />
+    <Compile Include="ViewModel\Settings\EditSessionViewModel.cs" />
+    <Compile Include="ViewModel\Settings\EditTagViewModel.cs" />
+    <Compile Include="ViewModel\Settings\SettingsViewModel.cs" />
+    <Compile Include="AboutWindow.cs" />
+    <Compile Include="App.cs" />
+    <Compile Include="ConfirmationDialog.cs" />
+    <Compile Include="DeleteConfirmationDialog.cs" />
+    <Compile Include="IWcfService.cs" />
+    <Compile Include="MainWindow.cs" />
+    <Compile Include="Options.cs" />
+    <Compile Include="PromptDialog.cs" />
+    <Compile Include="WcfService.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="images\add.png" />
+    <Resource Include="images\close-white.png" />
+    <Resource Include="images\close.png" />
+    <Resource Include="images\edit.png" />
+    <Resource Include="images\gear.png" />
+    <Resource Include="images\history.png" />
+    <Resource Include="images\info.png" />
+    <Resource Include="images\maximize-white.png" />
+    <Resource Include="images\maximize.png" />
+    <Resource Include="images\menu-white.png" />
+    <Resource Include="images\menu.png" />
+    <Resource Include="images\minimize-white.png" />
+    <Resource Include="images\minimize.png" />
+    <Resource Include="images\normalize-white.png" />
+    <Resource Include="images\normalize.png" />
+    <Resource Include="images\pin.png" />
+    <Resource Include="images\remove.png" />
+    <Resource Include="images\search.png" />
+    <Resource Include="images\tab.png" />
+    <Resource Include="images\tag.png" />
+    <Resource Include="images\warning.png" />
+    <Resource Include="images\app.png" />
+    <Resource Include="images\save.png" />
+    <Resource Include="images\savenew.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ApplicationDefinition Include="App.xaml" />
+    <Page Include="chrometabs\themes\generic.xaml" />
+    <Page Include="colors.dark.xaml" />
+    <Page Include="colors.xaml" />
+    <Page Include="AboutWindow.xaml" />
+    <Page Include="ConfirmationDialog.xaml" />
+    <Page Include="DeleteConfirmationDialog.xaml" />
+    <Page Include="MainWindow.xaml" />
+    <Page Include="PromptDialog.xaml" />
+    <Page Include="UserControls\OverviewTab.xaml" />
+    <Page Include="UserControls\Settings\AppsList.xaml" />
+    <Page Include="UserControls\Settings\ConfigFilesList.xaml" />
+    <Page Include="UserControls\Settings\CredentialsList.xaml" />
+    <Page Include="UserControls\Settings\ProxiesList.xaml" />
+    <Page Include="UserControls\Settings\SessionsList.xaml" />
+    <Page Include="UserControls\Settings\TagsList.xaml" />
+    <Page Include="UserControls\Settings\EditApp.xaml" />
+    <Page Include="UserControls\Settings\EditCredential.xaml" />
+    <Page Include="UserControls\Settings\EditConfigFile.xaml" />
+    <Page Include="UserControls\Settings\EditProxy.xaml" />
+    <Page Include="UserControls\Settings\EditSession.xaml" />
+    <Page Include="UserControls\Settings\EditTag.xaml" />
+    <Page Include="UserControls\Settings\EditMisc.xaml" />
+    <Page Include="UserControls\Settings\SettingsGeneralLayout.xaml" />
+    <Page Include="UserControls\UserControl1.xaml" />
+    <Page Include="strings.xaml" />
+    <Page Include="strings.zh-cn.xaml" />
+    <Page Include="styles.xaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include=".editorconfig" />
+    <None Include="app.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

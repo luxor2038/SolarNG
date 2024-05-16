@@ -1,0 +1,18 @@
+﻿<Window x:Class="SolarNG.AboutWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="{StaticResource About}" SizeToContent="Height" Width="400" Background="{StaticResource bg1}" WindowStyle="SingleBorderWindow" WindowStartupLocation="CenterOwner" ResizeMode="NoResize">
+  <Grid>
+    <StackPanel>
+      <StackPanel Margin="10,10,10,20">
+        <Label Name="Product" Grid.Column="0" Foreground="{StaticResource fg1}" FontSize="18" FontFamily="{StaticResource Font1}" FontWeight="SemiBold" />
+        <Label Name="Copyright" Foreground="{StaticResource fg1}" FontFamily="{StaticResource Font1}"/>
+        <TreeView Background="{StaticResource bg1}" BorderThickness="0" Margin="-5,10,0,0" FontFamily="{StaticResource Font1}">
+          <TreeViewItem Foreground="{StaticResource fg1}" Header="{StaticResource Thirdparty}">
+            <TreeViewItem Foreground="{StaticResource fg1}" Header="WPF Chrome tabs - MVVM 1.4.0, MIT license type" Margin="-18,2,0,0" />
+            <TreeViewItem Foreground="{StaticResource fg1}" Header="MvvmLight 5.4.1, MIT license type" Margin="-18,2,0,0" />
+            <TreeViewItem Foreground="{StaticResource fg1}" Header="LitJSON 0.18.0, Unlicense license type" Margin="-18,2,0,0" />
+            <TreeViewItem Foreground="{StaticResource fg1}" Header="log4net 2.0.15, Apache license type" Margin="-18,2,0,0" />
+          </TreeViewItem>
+        </TreeView>
+      </StackPanel>
+    </StackPanel>
+  </Grid>
+</Window>
