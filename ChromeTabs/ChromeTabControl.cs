@@ -60,7 +60,25 @@ namespace ChromeTabs
         private ConditionalWeakTable<object, DependencyObject> _objectToContainerMap;
         public static readonly DependencyProperty SelectedContentProperty = DependencyProperty.Register("SelectedContent", typeof(object), typeof(ChromeTabControl), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender));
 
-        internal bool CanAddTabInternal { get; set; }
+        private bool _CanAddTabInternal;
+        internal bool CanAddTabInternal 
+        { 
+            get
+            {
+                return _CanAddTabInternal;
+            }
+            set
+            {
+                if(_CanAddTabInternal != value) 
+                {
+                    if(ItemsHost as ChromeTabPanel != null)
+                    {
+                        ((ChromeTabPanel)ItemsHost).SetAddButtonTooltip(!value);
+                    }
+                }
+                _CanAddTabInternal = value;
+           }
+        }
 
         public static readonly DependencyProperty CloseTabNoKillCommandProperty =
     DependencyProperty.Register(

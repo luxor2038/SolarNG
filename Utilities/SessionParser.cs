@@ -16,7 +16,7 @@ public class SessionParser
     internal static Session TryParseSession(string arguments)
     {
         Session result = null;
-        if (!string.IsNullOrEmpty(arguments))
+        if (!string.IsNullOrWhiteSpace(arguments))
         {
             try
             {
@@ -78,12 +78,6 @@ public class SessionParser
     private static Session ParseSession(string arguments)
     {
         Session session = null;
-
-        if(string.IsNullOrWhiteSpace(arguments))
-        {
-            return null;
-        }
-
         arguments = arguments.Trim();
 
         foreach (SessionType type in App.BuiltinSessionTypes.Where((SessionType t) => (t.iFlags & SessionType.FLAG_SPECIAL_TYPE)==0 || t.Name == "app"))

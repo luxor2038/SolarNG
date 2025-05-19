@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Runtime.Serialization;
@@ -15,6 +16,16 @@ internal class Config
 
     [DataMember]
     public bool MasterPassword = false;
+
+    [DataMember]
+    public Dictionary<string, string> ShortcutsLocations = new Dictionary<string, string>()
+    { 
+        {"CommonStartMenu", "%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs" },
+        {"StartMenu", "%APPDATA%\\Microsoft\\Windows\\Start Menu\\Programs" }, 
+        {"CommonDesktop", "%PUBLIC%\\Desktop" },
+        {"Desktop", "%USERPROFILE%\\Desktop" },
+        {"QuickLaunch", "%APPDATA%\\Microsoft\\Internet Explorer\\Quick Launch" }
+    };
 
     [DataMember]
     public GUIConfig GUI = new GUIConfig();

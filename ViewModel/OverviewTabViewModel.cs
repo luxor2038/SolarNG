@@ -3,24 +3,50 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using GalaSoft.MvvmLight.Command;
+using log4net;
 using SolarNG.Configs;
 using SolarNG.Sessions;
 using SolarNG.Utilities;
-using SolarNG.ViewModel.Settings;
+
 
 namespace SolarNG.ViewModel;
+
+public static class StringExtensions
+{
+    public static string Replace(this string source, string oldValue, string newValue, StringComparison comparisonType)
+    {
+        if (source == null) return null;
+        if (string.IsNullOrEmpty(oldValue)) return source;
+        
+        int index = source.IndexOf(oldValue, comparisonType);
+        if (index < 0) return source;
+        
+        StringBuilder result = new StringBuilder();
+        int pos = 0;
+        
+        while (index >= 0)
+        {
+            result.Append(source, pos, index - pos);
+            result.Append(newValue);
+            pos = index + oldValue.Length;
+            index = source.IndexOf(oldValue, pos, comparisonType);
+        }
+        
+        result.Append(source, pos, source.Length - pos);
+        return result.ToString();
+    }
+}
 
 public class OverviewTabViewModel : TabBase
 {
@@ -53,14 +79,62 @@ public class OverviewTabViewModel : TabBase
         return "Name";
     }
 
-    public override string Menu_OrderBy => string.Format(System.Windows.Application.Current.Resources["OrderBy"] as string, NextOverviewOrderBy);
+    public override string Menu_OrderBy => string.Format(Application.Current.Resources["OrderBy"] as string, NextOverviewOrderBy);
+
+    public void KickAll()
+    {
+        Application.Current.Dispatcher.Invoke(delegate
+        {
+            base.MainWindow.MainWindowVM.KickAllTab();
+        });
+    }
 
     public ObservableCollection<Session> AllSessions => App.Sessions.Sessions;
 
     public ObservableCollection<Credential> AllCredentials => App.Sessions.Credentials;
 
+    private CancellationTokenSource _cancellationTokenSource;
+    private readonly object _lockObject = new object();
+
+    private async void AyncFilterSessions(string str)
+    {
+        try
+        {
+            lock (_lockObject)
+            {
+                if (_cancellationTokenSource != null)
+                {
+                    _cancellationTokenSource.Cancel();
+                    _cancellationTokenSource.Dispose();
+                    _cancellationTokenSource = null;
+                }
+            }
+
+            _cancellationTokenSource = new CancellationTokenSource();
+            var cancellationToken = _cancellationTokenSource.Token;
+
+            await Task.Delay(200, cancellationToken);
+
+            await Task.Run(() =>
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                Application.Current?.Dispatcher.Invoke(() =>
+                {
+                    FilterSessions(str);
+                });
+            }, cancellationToken);
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        catch (Exception ex)
+        {
+            log.Error(ex);
+        }
+    }
+
     private string _ByUserTypedSession;
-    [RegularExpression("^\\S*$", ErrorMessage = "No white spaces allowed in the new session address.")]
     public string ByUserTypedSession
     {
         get
@@ -71,7 +145,9 @@ public class OverviewTabViewModel : TabBase
         {
             _ByUserTypedSession = value;
             RaisePropertyChanged("ByUserTypedSession");
-            FilterSessions(ByUserTypedSession);
+
+            AyncFilterSessions(ByUserTypedSession);
+            
             if (base.HasErrors)
             {
                 ValidateProperty("ByUserTypedSession", value);
@@ -203,6 +279,10 @@ public class OverviewTabViewModel : TabBase
         {
             GetAllWindows();
         }
+        else if(Type == "shortcut")
+        {
+            GetAllShortcuts();
+        }
 
         FilterSessions(ByUserTypedSession);
     }
@@ -250,6 +330,42 @@ public class OverviewTabViewModel : TabBase
         }
 
         Session session = SelectedSession;
+        if(SelectedSession.Type == "lnk")
+        {
+            try
+            {
+                string programfiles = ProgramConfig.ExpandEnvironmentVariables("%programfilesnative%");
+                if(!programfiles.EndsWith("\\"))
+                {
+                    programfiles += "\\";
+                }
+                if (!string.IsNullOrEmpty(session.Program.DisplayName) && (session.Program.DisplayName.StartsWith(programfiles, StringComparison.OrdinalIgnoreCase) || session.Program.DisplayName.IndexOf("\\System32\\", StringComparison.OrdinalIgnoreCase) >= 0))
+                {
+                    string explorer = ProgramConfig.ExpandEnvironmentVariables("%windir%\\explorer.exe");
+                    ProcessStartInfo processStartInfo = new ProcessStartInfo(explorer)
+                    {
+                        Arguments = "\"" + session.Program.Path + "\"",
+                        UseShellExecute = true
+                    };
+                    Process.Start(processStartInfo);
+                }
+                else
+                {
+                    ProcessStartInfo processStartInfo = new ProcessStartInfo(session.Program.Path)
+                    {
+                        UseShellExecute = true
+                    };
+                    Process.Start(processStartInfo);
+                }
+
+            }
+            catch (Exception exception)
+            {
+                log.Warn("Failed to start process", exception);
+            }
+            return;
+        }
+
         if(SelectedSession.Type == "history")
         {
             if(SelectedSession.Tab != null)
@@ -355,12 +471,41 @@ public class OverviewTabViewModel : TabBase
     public RelayCommand EditSessionCommand { get; set; }
     private void EditSession()
     {
+        Session session = SelectedSession;
+        if(SelectedSession.Type == "lnk")
+        { 
+            session = new Session("app");
+            session.Name = SelectedSession.Name;
+            session.Program.Path = SelectedSession.Program.DisplayName;
+            session.Program.WorkingDir = SelectedSession.Program.WorkingDir;
+            session.Program.CommandLine = SelectedSession.Program.CommandLine;
+
+            if(!string.IsNullOrEmpty(session.Program.Path))
+            {
+                string programfiles = ProgramConfig.ExpandEnvironmentVariables("%programfilesnative%");
+                if(!programfiles.EndsWith("\\"))
+                {
+                    programfiles += "\\";
+                }
+                if(session.Program.Path.StartsWith(programfiles, StringComparison.OrdinalIgnoreCase))
+                {
+                    session.Program.Path = "%programfilesnative%\\" + session.Program.Path.Substring(programfiles.Length);
+                }
+                if(session.Program.Path.IndexOf("\\System32\\", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    session.Program.Path = session.Program.Path.Replace("\\System32\\", "\\%sysnative%\\", StringComparison.OrdinalIgnoreCase);
+                }
+            }
+
+            base.MainWindow.MainWindowVM.OpenSettingsTab(session, null, true);
+            return;
+        }
+
         if(SelectedSession.Type == "history" && !SelectedSession.HistorySession.SessionTypeIsNormal && SelectedSession.HistorySession.Type != "app" && SelectedSession.HistorySession.Type != "proxy" )
         {
             return;
         }
 
-        Session session = SelectedSession;
         if(SelectedSession.Type == "history")
         {
             session = SelectedSession.HistorySession;
@@ -438,7 +583,20 @@ public class OverviewTabViewModel : TabBase
     private Session currentTag;
     private Stack<Session> TagStack = new Stack<Session>();
 
-    private ObservableCollection<Session> AllSessionsByTag;
+    private ObservableCollection<Session> _AllSessionsByTag;
+    private ObservableCollection<Session> AllSessionsByTag
+    {
+        get
+        {
+            return _AllSessionsByTag;
+        }
+        set
+        {
+            _AllSessionsByTag = value;
+            base.TabName = (string)Application.Current.Resources["Overview"] + " (" + value?.Count + ")";
+        }
+    }
+
     private void RefreshAllSessionsByTag()
     {
         if(currentTag == null)
@@ -465,11 +623,18 @@ public class OverviewTabViewModel : TabBase
 
         if (Type == "process" || Type == "window")
         {
-            foreach (Session session in AllItems.OrderBy((Session s) => s.Name))
+            if(string.IsNullOrWhiteSpace(text))
             {
-                if (session.Matches(text))
+                FilteredSessions = AllItems;
+            }
+            else
+            {
+                foreach (Session session in AllItems)
                 {
-                    FilteredSessions.Add(session);
+                    if (session.Matches(text))
+                    {
+                        FilteredSessions.Add(session);
+                    }
                 }
             }
 
@@ -480,14 +645,43 @@ public class OverviewTabViewModel : TabBase
 
         if (Type == "history")
         {
-            foreach (Session session in AllItems.OrderBy((Session s) => s.Tab == null).ThenByDescending((Session s) => s.OpenTime))
+            if(string.IsNullOrWhiteSpace(text))
             {
-                if (session.Matches(text))
+                FilteredSessions = AllItems;
+            }
+            else
+            {
+                foreach (Session session in AllItems)
                 {
-                    FilteredSessions.Add(session);
+                    if (session.Matches(text))
+                    {
+                        FilteredSessions.Add(session);
+                    }
                 }
             }
 
+            RaisePropertyChanged("FilteredSessions");
+            RaisePropertyChanged("SelectedSession");
+            return;
+        }
+
+        if (Type == "shortcut")
+        {
+            if(string.IsNullOrWhiteSpace(text))
+            {
+                FilteredSessions = AllItems;
+            }
+            else
+            {
+                foreach (Session session in AllItems)
+                {
+                    if (session.Matches(text))
+                    {
+                        FilteredSessions.Add(session);
+                    }
+                }
+            }
+            
             RaisePropertyChanged("FilteredSessions");
             RaisePropertyChanged("SelectedSession");
             return;
@@ -628,7 +822,9 @@ public class OverviewTabViewModel : TabBase
             {
             }
         }
-        FilteredSessions = new ObservableCollection<Session>(AllItems.OrderBy((Session s) => s.Name));
+        AllItems = new ObservableCollection<Session>(AllItems.OrderBy((Session s) => s.Name));
+        FilteredSessions = AllItems;
+        base.TabName = (string)Application.Current.Resources["Process"] + " (" + AllItems.Count + ")";
     }
 
     private void GetAllWindows()
@@ -726,13 +922,62 @@ public class OverviewTabViewModel : TabBase
             }
         }
 
-        FilteredSessions = new ObservableCollection<Session>(AllItems.OrderBy((Session s) => s.Name));
+        AllItems = new ObservableCollection<Session>(AllItems.OrderBy((Session s) => s.Name));
+        FilteredSessions = AllItems;
+        base.TabName = (string)Application.Current.Resources["Window"] + " (" + AllItems.Count + ")";
     }
 
     private void GetAllHistories()
     {
         AllItems = App.HistorySessions;
-        FilteredSessions = new ObservableCollection<Session>(AllItems.OrderBy((Session s) => s.Tab == null).ThenByDescending((Session s) => s.OpenTime));
+        AllItems = new ObservableCollection<Session>(AllItems.OrderBy((Session s) => s.Tab == null).ThenByDescending((Session s) => s.OpenTime));
+        FilteredSessions = AllItems;
+        base.TabName = (string)Application.Current.Resources["History"] + " (" + AllItems.Count + ")";
+    }
+
+    private void GetAllShortcuts()
+    {
+        AllItems = new ObservableCollection<Session>();
+        ShortcutScanner scanner = new ShortcutScanner();
+
+        foreach (ShortcutInfo shortcutInfo in scanner.ScanAllLocations())
+        {
+            if(shortcutInfo.IsDirectory)
+            {
+                continue;
+            }
+            bool isExcluded = false;
+            foreach (string str in App.Config.GUI.ExcludeShortcuts)
+            {
+                if(shortcutInfo.Name.IndexOf(str, StringComparison.CurrentCultureIgnoreCase) >= 0)
+                {
+                    isExcluded = true;
+                    break;
+                }
+                if(shortcutInfo.AppPath.IndexOf(str, StringComparison.CurrentCultureIgnoreCase) >= 0)
+                {
+                    isExcluded = true;
+                    break;
+                }
+            }
+            if(isExcluded)
+            {
+                continue;
+            }
+
+            Session session = new Session("lnk");
+            session.Name = shortcutInfo.Name;
+            session.Program.Path = shortcutInfo.Path;
+            session.Program.CommandLine = shortcutInfo.Arguments;
+            session.Program.WorkingDir = shortcutInfo.WorkingDirectory;
+            session.Program.DisplayName = shortcutInfo.AppPath;
+            session.Color = (SolidColorBrush)new BrushConverter().ConvertFrom(App.GetColor(true));
+
+            AllItems.Add(session);
+        }
+        AllItems = new ObservableCollection<Session>(AllItems.OrderBy((Session s) => s.Name));
+        FilteredSessions = AllItems;
+        base.TabName = (string)Application.Current.Resources["Shortcut"] + " (" + AllItems.Count + ")";
     }
 
     public string Type;
@@ -742,6 +987,7 @@ public class OverviewTabViewModel : TabBase
         OverviewOrderBy = App.Config.GUI.OverviewOrderBy;
         NextOverviewOrderBy = GetNextOverviewOrderBy(OverviewOrderBy);
         OrderByCommand = new RelayCommand(OrderBy);
+        KickAllCommand = new RelayCommand(KickAll);
         TypedSessionOpenCommand = new RelayCommand(TypedSessionOpen);
         SessionAddCommand = new RelayCommand(SessionAdd);
         SelectedSessionOpenCommand = new RelayCommand(SelectedSessionOpen);
@@ -756,32 +1002,39 @@ public class OverviewTabViewModel : TabBase
 
         Type = type;
 
+        base.TabPathVisibility = Visibility.Visible;
+
         if (Type == "process")
         {
-            base.TabName = (string)Application.Current.Resources["Process"];
+            base.TabPath = Application.Current.Resources["ProcessPath"] as Geometry;
             GetAllProcesses();
             return;
         }
 
         if (Type == "window")
         {
-            base.TabName = (string)Application.Current.Resources["Window"];
+            base.TabPath = Application.Current.Resources["WindowPath"] as Geometry;
             GetAllWindows();
             return;
         }
 
         if (Type == "history")
         {
-            base.TabIcon = new BitmapImage(new Uri("/SolarNG;component/Images/history.png", UriKind.Relative));
-            base.TabIconVisibility = Visibility.Visible;
-            base.TabName = (string)Application.Current.Resources["History"];
+            base.TabPath = Application.Current.Resources["HistoryPath"] as Geometry;
             GetAllHistories();
 
-            App.HistorySessions.CollectionChanged += UpdateSessions;
+            App.HistorySessions.CollectionChanged += UpdateHistorySessions;
             return;
         }
 
-        base.TabName = (string)Application.Current.Resources["Overview"];
+        if (Type == "shortcut")
+        {
+            base.TabPath = Application.Current.Resources["ShortcutPath"] as Geometry;
+            GetAllShortcuts();
+            return;
+        }
+
+        base.TabPath = Application.Current.Resources["OverviewPath"] as Geometry;
 
         UpdateSessions(null, null);
         
@@ -794,7 +1047,7 @@ public class OverviewTabViewModel : TabBase
     {
         if (Type == "history") 
         {
-            App.HistorySessions.CollectionChanged += UpdateSessions;
+            App.HistorySessions.CollectionChanged -= UpdateHistorySessions;
         }
         else if(string.IsNullOrEmpty(Type))
         {
@@ -807,6 +1060,12 @@ public class OverviewTabViewModel : TabBase
             }
         }
         base.Cleanup();
+    }
+
+    private void UpdateHistorySessions(object sender, NotifyCollectionChangedEventArgs notifyCollectionChangedEventArgs)
+    {
+        GetAllHistories();
+        FilterSessions(ByUserTypedSession);
     }
 
     private void UpdateSessions(object sender, NotifyCollectionChangedEventArgs notifyCollectionChangedEventArgs)
@@ -833,4 +1092,6 @@ public class OverviewTabViewModel : TabBase
     {
         UpdateSessions2(null, null);
     }
+
+    private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 }

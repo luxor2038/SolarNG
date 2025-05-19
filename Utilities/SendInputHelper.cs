@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Threading;
 using log4net;
 
 namespace SolarNG.Utilities;
@@ -65,6 +66,20 @@ public class SendInputHelper
 
     [DllImport("user32.dll")]
     private static extern uint SendInput(uint numberOfInput, [In][MarshalAs(UnmanagedType.LPArray)] Input[] input, int sizeOfInput);
+
+    public static void Type(IntPtr hwnd, string text, bool enter = false)
+    {
+        foreach (char ch in text)
+        {
+            Win32.SendMessage(hwnd, Win32.WM_CHAR, ch, 0);
+            Thread.Sleep(10);
+        }
+
+        if(enter)
+        {
+            Win32.SendMessage(hwnd, Win32.WM_KEYDOWN, VK_RETURN, 0);
+        }
+    }
 
     public static void Type(string text, bool enter = false)
     {

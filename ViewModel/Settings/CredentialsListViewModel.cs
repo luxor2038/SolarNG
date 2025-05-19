@@ -15,7 +15,8 @@ namespace SolarNG.ViewModel.Settings;
 public class CredentialsListViewModel : ViewModelBase, INotifyPropertyChanged
 {
     private ObservableCollection<Credential> AllCredentials => App.Sessions.Credentials;
-    public ObservableCollection<Credential> FilteredCredentials { get; set; }
+    private ObservableCollection<Credential> AllSortedCredentials = new ObservableCollection<Credential>();
+    public ObservableCollection<Credential> FilteredCredentials { get; set; } = new ObservableCollection<Credential>();
 
     private MainWindow MainWindow => SettingsVM.MainWindow;
 
@@ -29,7 +30,7 @@ public class CredentialsListViewModel : ViewModelBase, INotifyPropertyChanged
         EditCredentialVM.CredentialsListVM = this;
         SettingsVM = settingsVM;
 
-        FilteredCredentials = new ObservableCollection<Credential>(AllCredentials.OrderBy((Credential s) => s.Name));
+        UpdateCredentials(null, null);
 
         SelectedObject = FilteredCredentials.FirstOrDefault(); 
 
@@ -44,8 +45,15 @@ public class CredentialsListViewModel : ViewModelBase, INotifyPropertyChanged
         base.Cleanup();
     }
 
+    public int GetCount()
+    {
+        return AllSortedCredentials.Count;
+    }
+
     private void UpdateCredentials(object sender, EventArgs args)
     {
+        AllSortedCredentials = new ObservableCollection<Credential>(AllCredentials.OrderBy((Credential c) => c.Name));
+        SettingsVM.UpdateTitle();
         FilterObjects();
     }
 
@@ -80,20 +88,22 @@ public class CredentialsListViewModel : ViewModelBase, INotifyPropertyChanged
         {
             if ((sender as DeleteConfirmationDialog).Confirmed)
             {
-                List<Guid> list = new List<Guid>();
                 ListView listView = (ListView)((object[])array)[0];
                 if (listView.SelectedItems.Count > 0)
                 {
+                    int nextSelectedIndex = GetNextSelectedIndex(listView);
+
+                    List<Guid> list = new List<Guid>();
                     foreach (object selectedItem in listView.SelectedItems)
                     {
                         list.Add(((Credential)selectedItem).Id);
-                     }
+                    }
                     foreach (Guid item in list)
                     {
                         DeleteItem(item);
                     }
+                    SelectedObject = FilteredCredentials.ElementAtOrDefault(nextSelectedIndex);
                 }
-                SelectedObject = FilteredCredentials.FirstOrDefault();
             }
         };
         deleteConfirmationDialog.ShowDialog();
@@ -111,6 +121,26 @@ public class CredentialsListViewModel : ViewModelBase, INotifyPropertyChanged
         {
             session.CredentialId = Guid.Empty;
         }
+    }
+
+    private int GetNextSelectedIndex(ListView listView)
+    {
+        int lastIndex = 0;
+        foreach(Credential selectedItem in listView.SelectedItems)
+        {
+            int i = FilteredCredentials.IndexOf(selectedItem);
+            if(lastIndex < i)
+            {
+                lastIndex = i;
+            }
+        }
+
+        if(lastIndex < (FilteredCredentials.Count - 1))
+        {
+            return (lastIndex - listView.SelectedItems.Count + 1);
+        }
+
+        return (FilteredCredentials.Count - listView.SelectedItems.Count - 1);
     }
 
     private bool CreatingNew;
@@ -140,7 +170,7 @@ public class CredentialsListViewModel : ViewModelBase, INotifyPropertyChanged
     {
         FilteredCredentials.Clear();
 
-        foreach (Credential credential in AllCredentials.OrderBy((Credential c) => c.Name))
+        foreach (Credential credential in AllSortedCredentials)
         {
             if (credential.Matches(ByUserTypedName))
             {

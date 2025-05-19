@@ -11,7 +11,6 @@ using System.Linq;
 using System.Reflection;
 using System.Security;
 using System.Windows;
-using System.Windows.Forms;
 using System.Windows.Media;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
@@ -73,7 +72,7 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
 
             EditedSession.Type = value;
 
-            iFlags = EditedSession.SessionType.Program.iFlags | (iFlags & (ProgramConfig.FLAG_NOTINTAB | ProgramConfig.FLAG_PINNED | ProgramConfig.FLAG_SYNCTITLE | ProgramConfig.FLAG_SSHV2SHARE));
+            iFlags = EditedSession.SessionType.Program.iFlags | (iFlags & (ProgramConfig.FLAG_NOTINTAB | ProgramConfig.FLAG_PINNED | ProgramConfig.FLAG_SYNCTITLE | ProgramConfig.FLAG_ENABLEHOTKEY | ProgramConfig.FLAG_SSHV2SHARE));
 
             PasswordOnlyCheck = VNCSelected;
 
@@ -87,11 +86,14 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
             NotifyPropertyChanged("SSHv2ShareValid");
             NotifyPropertyChanged("PasswordOnlyValid");
             NotifyPropertyChanged("UseScriptCheck");
+            NotifyPropertyChanged("StartRemoteAppCheck");
+            NotifyPropertyChanged("RemoteAppValid");
+            NotifyPropertyChanged("RemoteAppNotValid");
+            NotifyPropertyChanged("StartShellValid");
+            NotifyPropertyChanged("ShellWorkingDirValid");
+            NotifyPropertyChanged("RemoteAppNotValid");
             NotifyPropertyChanged("WindowsKeyCombinationsCheck");
-            NotifyPropertyChanged("RDPFullScreenValid");
-            NotifyPropertyChanged("FullScreenCheck");
-            NotifyPropertyChanged("MultiMonitorsCheck");
-            NotifyPropertyChanged("SelectedMonitors");
+            NotifyPropertyChanged("MultiMonitorsValid");
             NotifyPropertyChanged("WidthHeightValid");
             NotifyPropertyChanged("MonitorValid");
         }
@@ -119,7 +121,7 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
         { 
             if((type.iFlags & SessionType.FLAG_SPECIAL_TYPE)==0)
             {
-                ComboBoxTwo t = new ComboBoxTwo(type.Name, type.DisplayName + (File.Exists(type.Program.FullPath)?"":" " + System.Windows.Application.Current.Resources["NA"] as string));
+                ComboBoxTwo t = new ComboBoxTwo(type.Name, type.DisplayName + (File.Exists(type.Program.FullPath)?"":" " + Application.Current.Resources["NA"] as string));
                 SessionTypeList.Add(t);
             }
         }
@@ -150,7 +152,7 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
         }
     }
 
-    [Range(-1, 65535, ErrorMessage = "Invalid port")]
+    [Range(-1, 65535, ErrorMessage = "0-65535")]
     public int Port
     {
         get
@@ -198,7 +200,7 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
     {
         CredentialList = new ObservableCollection<ComboBoxGuid>
         {
-            new ComboBoxGuid(Guid.Empty, System.Windows.Application.Current.Resources["CreateCredential_"] as string)
+            new ComboBoxGuid(Guid.Empty, Application.Current.Resources["CreateCredential_"] as string)
         };
 
         if(EditedSession.CredentialId == NoChangeId)
@@ -219,7 +221,7 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
     {
         get
         {
-            if (PasswordOnlyCheck != null && PasswordOnlyCheck.Value && !SafeString.IsNullOrEmpty(EditedCredential.Password))
+            if (PasswordOnlyCheck == true && !SafeString.IsNullOrEmpty(EditedCredential.Password))
             {
                 EditedCredential.Username = _SessionType;
             }
@@ -291,9 +293,9 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
     public RelayCommand ImportPrivateKeyCommand { get; set; }
     private void OnImportPrivateKey()
     {
-        OpenFileDialog openFileDialog = new OpenFileDialog() { Filter = "*.ppk|*.ppk|*.*|*.*" };
+        System.Windows.Forms.OpenFileDialog openFileDialog = new System.Windows.Forms.OpenFileDialog() { Filter = "*.ppk|*.ppk|*.*|*.*" };
         openFileDialog.ShowDialog();
-        if (!string.IsNullOrEmpty(openFileDialog.FileName))
+        if (!string.IsNullOrWhiteSpace(openFileDialog.FileName))
         {
             ConfigFile configFile = new ConfigFile("PrivateKey") { RealPath = openFileDialog.FileName };
 
@@ -364,7 +366,7 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
     {
         ProxiesList = new ObservableCollection<ComboBoxGuid>
         {
-            new ComboBoxGuid(Guid.Empty, System.Windows.Application.Current.Resources["ChooseProxy"] as string)
+            new ComboBoxGuid(Guid.Empty, Application.Current.Resources["ChooseProxy"] as string)
         };
 
         if(AddNoChange)
@@ -461,9 +463,9 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
     public RelayCommand ImportPuTTYSessionCommand { get; set; }
     private void OnImportPuTTYSession()
     {
-        OpenFileDialog openFileDialog = new OpenFileDialog() { Filter = "*.ini;*.reg|*.ini;*.reg|*.*|*.*" };
+        System.Windows.Forms.OpenFileDialog openFileDialog = new System.Windows.Forms.OpenFileDialog() { Filter = "*.ini;*.reg|*.ini;*.reg|*.*|*.*" };
         openFileDialog.ShowDialog();
-        if (!string.IsNullOrEmpty(openFileDialog.FileName))
+        if (!string.IsNullOrWhiteSpace(openFileDialog.FileName))
         {
             ConfigFile configFile = new ConfigFile("PuTTY") { RealPath = openFileDialog.FileName };
 
@@ -578,9 +580,9 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
     public RelayCommand ImportRDPFileCommand { get; set; }
     private void OnImportRDPFile()
     {
-        OpenFileDialog openFileDialog = new OpenFileDialog() { Filter = "*.rdp|*.rdp|*.*|*.*" };
+        System.Windows.Forms.OpenFileDialog openFileDialog = new System.Windows.Forms.OpenFileDialog() { Filter = "*.rdp|*.rdp|*.*|*.*" };
         openFileDialog.ShowDialog();
-        if (!string.IsNullOrEmpty(openFileDialog.FileName))
+        if (!string.IsNullOrWhiteSpace(openFileDialog.FileName))
         {
             ConfigFile configFile = new ConfigFile("RDP") { RealPath = openFileDialog.FileName };
 
@@ -595,38 +597,6 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
             configFile.Name = text;
             App.Sessions.ConfigFiles.Add(configFile);
             MSTSCId = configFile.Id;
-        }
-    }
-
-    public bool WidthHeightValid => UseMSTSC && (FullScreenCheck ==null || !FullScreenCheck.Value);
-
-    [Range(-1, 8192, ErrorMessage = "Invalid Width")]
-    public int Width
-    {
-        get
-        {
-            return EditedSession.Width;
-        }
-        set
-        {
-            EditedSession.Width = value;
-            NotifyPropertyChanged("Width");
-            ValidateProperty("Width", value);
-        }
-    }
-
-    [Range(-1, 8192, ErrorMessage = "Invalid Height")]
-    public int Height
-    {
-        get
-        {
-            return EditedSession.Height;
-        }
-        set
-        {
-            EditedSession.Height = value;
-            NotifyPropertyChanged("Height");
-            ValidateProperty("Height", value);
         }
     }
 
@@ -674,9 +644,9 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
     public RelayCommand ImportWinSCPIniCommand { get; set; }
     private void OnImportWinSCPIni()
     {
-        OpenFileDialog openFileDialog = new OpenFileDialog() { Filter = "*.ini|*.ini|*.*|*.*" };
+        System.Windows.Forms.OpenFileDialog openFileDialog = new System.Windows.Forms.OpenFileDialog() { Filter = "*.ini|*.ini|*.*|*.*" };
         openFileDialog.ShowDialog();
-        if (!string.IsNullOrEmpty(openFileDialog.FileName))
+        if (!string.IsNullOrWhiteSpace(openFileDialog.FileName))
         {
             ConfigFile configFile = new ConfigFile("WinSCP") { RealPath = openFileDialog.FileName };
 
@@ -699,7 +669,7 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
     {
         PrivateKeys = new ObservableCollection<ComboBoxGuid>
         {
-            new ComboBoxGuid(Guid.Empty, System.Windows.Application.Current.Resources["ChoosePrivateKey"] as string)
+            new ComboBoxGuid(Guid.Empty, Application.Current.Resources["ChoosePrivateKey"] as string)
         };
 
         foreach (ConfigFile privateKey in from s in App.Sessions.ConfigFiles where s.Type == "PrivateKey" orderby s.Name select s)
@@ -722,7 +692,7 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
 
         PuTTYSessionList = new ObservableCollection<ComboBoxGuid>
         {
-            new ComboBoxGuid(Guid.Empty, System.Windows.Application.Current.Resources["ChoosePuTTYSession"] as string)
+            new ComboBoxGuid(Guid.Empty, Application.Current.Resources["ChoosePuTTYSession"] as string)
         };
 
         foreach (ConfigFile configFile in from s in App.Sessions.ConfigFiles where s.Type == "PuTTY" orderby s.Name select s)
@@ -745,7 +715,7 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
   
         RDPFiles = new ObservableCollection<ComboBoxGuid>()
         {
-            new ComboBoxGuid(Guid.Empty, System.Windows.Application.Current.Resources["ChooseRDPFile"] as string)
+            new ComboBoxGuid(Guid.Empty, Application.Current.Resources["ChooseRDPFile"] as string)
         };
 
         foreach (ConfigFile configFile in from s in App.Sessions.ConfigFiles where s.Type == "RDP" orderby s.Name select s)
@@ -768,7 +738,7 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
 
         WinSCPInis = new ObservableCollection<ComboBoxGuid>()
         {
-            new ComboBoxGuid(Guid.Empty, System.Windows.Application.Current.Resources["ChooseWinSCPIni"] as string)
+            new ComboBoxGuid(Guid.Empty, Application.Current.Resources["ChooseWinSCPIni"] as string)
         };
 
         foreach (ConfigFile configFile in from s in App.Sessions.ConfigFiles where s.Type == "WinSCP" orderby s.Name select s)
@@ -818,7 +788,7 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
     }
 
     private bool _SSHv2ShareValid = false;
-    public bool SSHv2ShareValid => (OpenInTabCheck != null && OpenInTabCheck.Value) && (BatchMode ? _SSHv2ShareValid : _SessionType == "ssh");
+    public bool SSHv2ShareValid => (OpenInTabCheck == true) && (BatchMode ? _SSHv2ShareValid : _SessionType == "ssh");
 
     private bool _SSHv2ShareCheckThree;
     public bool SSHv2ShareCheckThree => BatchMode && _SSHv2ShareCheckThree;
@@ -844,7 +814,7 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
         {
             _SSHv2ShareCheck = value;
 
-            if (value != null && value.Value)
+            if (value == true)
             {
                 EditedSession.iFlags |= ProgramConfig.FLAG_SSHV2SHARE;
             }
@@ -883,7 +853,7 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
         {
             _PasswordOnlyCheck = value;
 
-            if (value != null && value.Value)
+            if (value == true)
             {
                 EditedSession.iFlags |= ProgramConfig.FLAG_PASSWORD_ONLY;
             }
@@ -939,7 +909,7 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
         set
         {
             _UseScriptCheck = value;
-            if ((value != null && !value.Value) && UsePuTTY)
+            if ((value == false) && UsePuTTY)
             {
                 ScriptId = Guid.Empty;
             }
@@ -971,9 +941,9 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
     public RelayCommand ImportScriptCommand { get; set; }
     private void OnImportScript()
     {
-        OpenFileDialog openFileDialog = new OpenFileDialog() { Filter = "*.sh;*.txt|*.sh;*.txt|*.*|*.*" };
+        System.Windows.Forms.OpenFileDialog openFileDialog = new System.Windows.Forms.OpenFileDialog() { Filter = "*.sh;*.txt|*.sh;*.txt|*.*|*.*" };
         openFileDialog.ShowDialog();
-        if (!string.IsNullOrEmpty(openFileDialog.FileName))
+        if (!string.IsNullOrWhiteSpace(openFileDialog.FileName))
         {
             ConfigFile configFile = new ConfigFile("Script") { RealPath = openFileDialog.FileName };
 
@@ -988,6 +958,154 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
             configFile.Name = text;
             App.Sessions.ConfigFiles.Add(configFile);
             ScriptId = configFile.Id;
+        }
+    }
+
+    private bool _StartRemoteAppCheckThree;
+    public bool StartRemoteAppCheckThree => BatchMode && _StartRemoteAppCheckThree;
+
+    private Nullable<bool> _StartRemoteAppCheck;
+    public Nullable<bool> StartRemoteAppCheck
+    {
+        get
+        {
+            return _StartRemoteAppCheck;
+        }
+        set
+        {
+            _StartRemoteAppCheck = value;
+
+            _RemoteAppValid = _StartRemoteAppCheck == true;
+            _RemoteAppNotValid = _StartRemoteAppCheck == false;
+            if(_RemoteAppValid)
+            {
+                _StartShellValid = false;
+                _ShellWorkingDirValid = true;
+            }
+
+            if(_RemoteAppNotValid)
+            {
+                _StartShellValid = _ShellWorkingDirValid = StartShellCheck == true; 
+            }
+
+            if(_StartRemoteAppCheck == null)
+            {
+                _StartShellValid = false;
+                _ShellWorkingDirValid = false;
+            }
+
+            NotifyPropertyChanged("StartRemoteAppCheck");
+            NotifyPropertyChanged("RemoteAppValid");
+            NotifyPropertyChanged("RemoteAppNotValid");
+            NotifyPropertyChanged("StartShellValid");
+            NotifyPropertyChanged("ShellWorkingDirValid");
+        }
+    }
+
+    private bool _RemoteAppValid = false;
+    public bool RemoteAppValid => BatchMode ? _RemoteAppValid : (UseMSTSC && (_StartRemoteAppCheck == true));
+
+    private bool _RemoteAppNotValid = false;
+    public bool RemoteAppNotValid => BatchMode ? _RemoteAppNotValid : (!UseMSTSC || (_StartRemoteAppCheck == false));
+
+    private bool _StartShellValid = false;
+    public bool StartShellValid => BatchMode ? _StartShellValid : (UseMSTSC && (_StartShellCheck == true && _StartRemoteAppCheck != true));
+
+    private bool _StartShellCheckThree;
+    public bool StartShellCheckThree => BatchMode && _StartShellCheckThree;
+
+    private Nullable<bool> _StartShellCheck;
+    public Nullable<bool> StartShellCheck
+    {
+        get
+        {
+             return _StartShellCheck;
+        }
+        set
+        {
+            _StartShellCheck = value;
+            _StartShellValid = _ShellWorkingDirValid = _StartShellCheck == true;
+
+            NotifyPropertyChanged("StartShellCheck");
+            NotifyPropertyChanged("StartShellValid");
+            NotifyPropertyChanged("ShellWorkingDirValid");
+        }
+    }
+
+    public string ShellPath
+    {
+        get
+        {
+            if(UseMSTSC)
+            {
+                return EditedSession.ShellPath;
+            }
+
+            return null;
+        }
+        set
+        {
+            EditedSession.ShellPath = value;
+
+            NotifyPropertyChanged("ShellPath");
+        }
+    }
+
+    public string RemoteAppPath
+    {
+        get
+        {
+            if(UseMSTSC)
+            {
+                return EditedSession.RemoteAppPath;
+            }
+
+            return null;
+        }
+        set
+        {
+            EditedSession.RemoteAppPath = value;
+
+            NotifyPropertyChanged("RemoteAppPath");
+        }
+    }
+
+    public string RemoteAppCmdline
+    {
+        get
+        {
+            if(UseMSTSC)
+            {
+                return EditedSession.RemoteAppCmdline;
+            }
+
+            return null;
+        }
+        set
+        {
+            EditedSession.RemoteAppCmdline = value;
+            NotifyPropertyChanged("RemoteAppCmdline");
+        }
+    }
+
+    private bool _ShellWorkingDirValid = false;
+    public bool ShellWorkingDirValid => BatchMode ? _ShellWorkingDirValid : (RemoteAppValid || StartShellValid);
+
+    public string ShellWorkingDir
+    {
+        get
+        {
+            if(UseMSTSC)
+            {
+                return EditedSession.ShellWorkingDir;
+            }
+
+            return null;
+        }
+        set
+        {
+            EditedSession.ShellWorkingDir = value;
+            NotifyPropertyChanged("ShellWorkingDir");
         }
     }
 
@@ -1014,7 +1132,7 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
         {
             _WindowsKeyCombinationsCheck = value;
 
-            EditedSession.KeyboardHook = (value != null && value.Value) ? 1 : 2;
+            EditedSession.KeyboardHook = (value == true) ? 1 : 2;
             NotifyPropertyChanged("WindowsKeyCombinationsCheck");
         }
     }
@@ -1038,7 +1156,7 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
         {
             _OpenInTabCheck = value;
 
-            if (value != null && value.Value)
+            if (value == true)
             {
                 EditedSession.iFlags &= ~ProgramConfig.FLAG_NOTINTAB;
                 EditedSession.iFlags |= EditedSession.SessionType.Program.iFlags & ProgramConfig.FLAG_CLOSE_MASK;
@@ -1050,7 +1168,10 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
             NotifyPropertyChanged("OpenInTabCheck");
             NotifyPropertyChanged("SSHv2ShareValid");
             NotifyPropertyChanged("MonitorValid");
-            NotifyPropertyChanged("RDPFullScreenValid");
+            NotifyPropertyChanged("WidthHeightValid");
+            NotifyPropertyChanged("RDSizeModeValid");
+            NotifyPropertyChanged("RDSizeModesList");
+            NotifyPropertyChanged("RDSizeMode");
             NotifyPropertyChanged("Method");
         }
     }
@@ -1073,7 +1194,7 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
         set
         {
             _SyncTitleCheck = value;
-            if (value != null && value.Value)
+            if (value == true)
             {
                 EditedSession.iFlags |= ProgramConfig.FLAG_SYNCTITLE;
             }
@@ -1082,6 +1203,36 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
                 EditedSession.iFlags &= ~ProgramConfig.FLAG_SYNCTITLE;
             }
             NotifyPropertyChanged("SyncTitleCheck");
+        }
+    }
+
+    private bool _EnableHotkeyCheckThree;
+    public bool EnableHotkeyCheckThree => BatchMode && _EnableHotkeyCheckThree;  
+
+    private Nullable<bool> _EnableHotkeyCheck;
+    public Nullable<bool> EnableHotkeyCheck
+    {
+        get
+        {
+            if (BatchMode)
+            {
+                return _EnableHotkeyCheck;
+            }
+
+            return (EditedSession.iFlags & ProgramConfig.FLAG_ENABLEHOTKEY) != 0;
+        }
+        set
+        {
+            _EnableHotkeyCheck = value;
+            if (value == true)
+            {
+                EditedSession.iFlags |= ProgramConfig.FLAG_ENABLEHOTKEY;
+            }
+            else
+            {
+                EditedSession.iFlags &= ~ProgramConfig.FLAG_ENABLEHOTKEY;
+            }
+            NotifyPropertyChanged("EnableHotkeyCheck");
         }
     }
 
@@ -1190,7 +1341,7 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
         set
         {
             _CloseIMECheck = value;
-            if (value != null && value.Value)
+            if (value == true)
             {
                 EditedSession.iFlags &= ~ProgramConfig.FLAG_NOTCLOSEIME;
             }
@@ -1202,70 +1353,82 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
         }
     }
 
-    public bool RDPFullScreenValid => UseMSTSC && (OpenInTabCheck != null && !OpenInTabCheck.Value);
+    public bool RDSizeModeValid => UseMSTSC && (OpenInTabCheck != null);
 
-    private bool _FullScreenCheckThree;
-    public bool FullScreenCheckThree => BatchMode && _FullScreenCheckThree;
-
-    private Nullable<bool> _FullScreenCheck;
-    public Nullable<bool> FullScreenCheck
+    private string _RDSizeMode;
+    public string RDSizeMode
     {
         get
         {
-            if(BatchMode)
+            if (OpenInTabCheck != false)
             {
-                return _FullScreenCheck;
+                if(string.IsNullOrEmpty(_RDSizeMode) || _RDSizeMode=="F" || _RDSizeMode=="M")
+                {
+                    return "A";
+                }
+            }
+            else
+            {
+                if(string.IsNullOrEmpty(_RDSizeMode) || _RDSizeMode=="A")
+                {
+                    return "F";
+                }
             }
 
-            if (RDPFullScreenValid)
-            {
-                return EditedSession.FullScreen;
-            }
-            return false;
+            return _RDSizeMode;
         }
         set
         {
-            _FullScreenCheck = value;
+            _RDSizeMode = value;
 
-            if(value != null)
+            if(_RDSizeMode == "C")
             {
-                EditedSession.FullScreen = value.Value;
+                SetDefaultWidthHeight();
             }
-            NotifyPropertyChanged("FullScreenCheck");
+
+            NotifyPropertyChanged("RDSizeMode");
             NotifyPropertyChanged("MonitorValid");
+            NotifyPropertyChanged("MultiMonitorsValid");
             NotifyPropertyChanged("WidthHeightValid");
+            NotifyPropertyChanged("Width");
+            NotifyPropertyChanged("Height");
         }
     }
 
-    private bool _MultiMonitorsCheckThree;
-    public bool MultiMonitorsCheckThree => BatchMode && _MultiMonitorsCheckThree;
+    private void SetDefaultWidthHeight()
+    {
+        if(Width <= 0)
+        {
+            Width = 1024;
+        }
 
-    private Nullable<bool> _MultiMonitorsCheck;
-    public Nullable<bool> MultiMonitorsCheck
+        if(Height <= 0)
+        {
+            Height = 768;
+        }
+    }
+
+    private ObservableCollection<ComboBoxTwo> _RDSizeModesList;
+    private ObservableCollection<ComboBoxTwo> _RDSizeModesList2;
+    public ObservableCollection<ComboBoxTwo> RDSizeModesList
     {
         get
         {
-            if(BatchMode)
+            if(OpenInTabCheck != false)
             {
-                return _MultiMonitorsCheck;
+                return _RDSizeModesList;
             }
 
-            if (FullScreenCheck != null && FullScreenCheck.Value)
-            {
-                return EditedSession.MultiMonitors;
-            }
-            return false;
+            return _RDSizeModesList2;
         }
         set
         {
-            _MultiMonitorsCheck = value;
-            if(value != null)
-            {
-                EditedSession.MultiMonitors = value.Value;
-            }
-            NotifyPropertyChanged("MultiMonitorsCheck");
+            _RDSizeModesList = value;
+            NotifyPropertyChanged("RDSizeModesList");
         }
     }
+
+    public bool MultiMonitorsValid => UseMSTSC && (RDSizeMode == "M");
 
     public string SelectMonitors
     {
@@ -1299,7 +1462,39 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
         }
     }
 
-    public bool MonitorValid => (OpenInTabCheck != null && !OpenInTabCheck.Value) && (FullScreenCheck != null && !FullScreenCheck.Value);
+    public bool WidthHeightValid =>  UseMSTSC && (RDSizeMode == "C");
+
+    [Range(-1, 8192, ErrorMessage = "200-8192")]
+    public int Width
+    {
+        get
+        {
+            return EditedSession.Width;
+        }
+        set
+        {
+            EditedSession.Width = value;
+            NotifyPropertyChanged("Width");
+            ValidateProperty("Width", value);
+        }
+    }
+
+    [Range(-1, 8192, ErrorMessage = "200-8192")]
+    public int Height
+    {
+        get
+        {
+            return EditedSession.Height;
+        }
+        set
+        {
+            EditedSession.Height = value;
+            NotifyPropertyChanged("Height");
+            ValidateProperty("Height", value);
+        }
+    }
+
+    public bool MonitorValid => (OpenInTabCheck == false) && (RDSizeMode == "C");
     public string Monitor
     {
         get
@@ -1316,6 +1511,7 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
             NotifyPropertyChanged("Monitor");
         }
     }
+
     public ObservableCollection<ComboBoxTwo> Monitors { get; set; }
 
     private void CreateMonitors()
@@ -1323,7 +1519,7 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
         Monitors = new ObservableCollection<ComboBoxTwo>
         {
             new ComboBoxTwo(null, "default"),
-            new ComboBoxTwo("*", System.Windows.Application.Current.Resources["MainMonitor"] as string)
+            new ComboBoxTwo("*", Application.Current.Resources["MainMonitor"] as string)
         };
 
         int monitor = 0;
@@ -1606,6 +1802,19 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
             new ComboBoxOne("Kill")
         };
 
+        _RDSizeModesList2 = new ObservableCollection<ComboBoxTwo>
+        {
+            new ComboBoxTwo("F", Application.Current.Resources["FullScreen"] as string),
+            new ComboBoxTwo("M", Application.Current.Resources["MultiMonitors"] as string),
+            new ComboBoxTwo("C", Application.Current.Resources["Custom"] as string)
+        };
+
+        RDSizeModesList = new ObservableCollection<ComboBoxTwo>
+        {
+            new ComboBoxTwo("A", Application.Current.Resources["AutoFit"] as string),
+            new ComboBoxTwo("C", Application.Current.Resources["Custom"] as string)
+        };
+
         CreateMonitors();
 
         DeleteAssignedTagCommand = new RelayCommand<string>(OnDeleteAssignedTag);
@@ -1750,6 +1959,14 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
         {
             MethodsList.RemoveAt(0);
         }
+        if(_RDSizeModesList.ElementAt(0).Key == "!NoChange!")
+        {
+            _RDSizeModesList.RemoveAt(0);
+        }
+        if(_RDSizeModesList2.ElementAt(0).Key == "!NoChange!")
+        {
+            _RDSizeModesList2.RemoveAt(0);
+        }
         if(Monitors.ElementAt(0).Key == "!NoChange!")
         {
             Monitors.RemoveAt(0);
@@ -1769,7 +1986,7 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
             return;
         }
 
-        TitleBackground = System.Windows.Application.Current.Resources["bg8"] as SolidColorBrush;
+        TitleBackground = Application.Current.Resources["bg8"] as SolidColorBrush;
         BatchMode = true;
         NewMode = false;
         _UsePuTTY = true;
@@ -1780,17 +1997,28 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
         _SSHv2ShareValid = true;
         _PasswordOnlyValid = true;
         _AdditionalValid = true;
+        _RemoteAppValid = true;
+        _RemoteAppNotValid = true;
+        _StartShellValid = true;
+        _ShellWorkingDirValid = true;
 
         SelectedSession = new Session("");
 
         CreatePuTTYRegSessionList();
 
         string ProgramName = null;
+        uint iFlags = 0;
+        bool hasRemoteApp = false;
+        bool hasRemoteApp1 = false;
         foreach(Session session in sessions)
         {
             if(string.IsNullOrEmpty(ProgramName))
             {
                 ProgramName = session.SessionType.ProgramName;
+                iFlags = session.iFlags;
+                _OpenInTabCheck = (iFlags & ProgramConfig.FLAG_NOTINTAB) == 0;
+                _OpenInTabCheckThree = false;
+                hasRemoteApp1 = (session.SessionType.ProgramName == "MSTSC") && !string.IsNullOrEmpty(session.RemoteAppPath);
             }
 
             if(session.SessionType.ProgramName != "PuTTY" )
@@ -1801,6 +2029,33 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
             if(session.SessionType.ProgramName != "MSTSC" )
             {
                 _UseMSTSC = false;
+                _RemoteAppValid = false;
+                _RemoteAppNotValid = !hasRemoteApp;
+                _StartShellValid = false;
+                _ShellWorkingDirValid = false;
+            }
+            else
+            {
+                if(string.IsNullOrEmpty(session.ShellPath))
+                {
+                    _StartShellValid = false;
+                    if(string.IsNullOrEmpty(session.RemoteAppPath))
+                    {
+                        _ShellWorkingDirValid = false;
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(session.RemoteAppPath))
+                {
+                    _RemoteAppNotValid = false;
+                    _RemoteAppValid = hasRemoteApp1;
+                    hasRemoteApp  = true;
+                }
+                else
+                {
+                    _RemoteAppValid = false;
+                    _RemoteAppNotValid = !hasRemoteApp1;
+                }
             }
 
             if(session.SessionType.ProgramName != "WinSCP" )
@@ -1836,6 +2091,11 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
                 _AdditionalValid = false;
             }
 
+            if(OpenInTabCheck != null && (iFlags & ProgramConfig.FLAG_NOTINTAB) != (session.iFlags & ProgramConfig.FLAG_NOTINTAB))
+            {
+                _OpenInTabCheck = null;
+                _OpenInTabCheckThree = true;
+            }
         }
 
         EditedSession = null;
@@ -1861,10 +2121,14 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
                     WinSCPId = session.WinSCPId,
                     RemoteDirectory = session.RemoteDirectory,
 
-                    Width = session.Width,
-                    Height = session.Height,
+                    ShellPath = session.ShellPath,
+                    ShellWorkingDir = session.ShellWorkingDir,
+                    RemoteAppPath = session.RemoteAppPath,
+                    RemoteAppCmdline = session.RemoteAppCmdline,
                     MSTSCId = session.MSTSCId,
                     KeyboardHook2 = session.KeyboardHook,
+                    Width = session.Width,
+                    Height = session.Height,
                     FullScreen = session.FullScreen,
                     MultiMonitors = session.MultiMonitors,
                     SelectedMonitors = session.SelectedMonitors,
@@ -1875,10 +2139,10 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
                 SelectedSession.Tags = (session.Tags != null) ? new ObservableCollection<string>(session.Tags) : new ObservableCollection<string>();
                 iFlags = session.iFlags;
 
-                _OpenInTabCheck = (EditedSession.iFlags & ProgramConfig.FLAG_NOTINTAB) == 0;
-                _OpenInTabCheckThree = false;
-                _SyncTitleCheck = OpenInTabCheck.Value && (EditedSession.iFlags & ProgramConfig.FLAG_SYNCTITLE) != 0;
+                _SyncTitleCheck = (OpenInTabCheck == true) && (EditedSession.iFlags & ProgramConfig.FLAG_SYNCTITLE) != 0;
                 _SyncTitleCheckThree = false;
+                _EnableHotkeyCheck = (OpenInTabCheck == true) && (EditedSession.iFlags & ProgramConfig.FLAG_ENABLEHOTKEY) != 0;
+                _EnableHotkeyCheckThree = false;
                 _CloseIMECheck = (EditedSession.iFlags & ProgramConfig.FLAG_NOTCLOSEIME) == 0;
                 _CloseIMECheckThree = false;
 
@@ -1894,12 +2158,14 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
                 _UseScriptCheck = EditedSession.ScriptId != Guid.Empty;
                 _UseScriptCheckThree = false;
 
+                _StartRemoteAppCheck = !string.IsNullOrEmpty(EditedSession.RemoteAppPath);
+                _StartRemoteAppCheckThree = false;
+
+                _StartShellCheck = !string.IsNullOrEmpty(EditedSession.ShellPath);
+                _StartShellCheckThree = false;
+
                 _WindowsKeyCombinationsCheck = (EditedSession.KeyboardHook2 == 1);
                 _WindowsKeyCombinationsCheckThree = false;
-                _FullScreenCheck = EditedSession.FullScreen;
-                _FullScreenCheckThree = false;
-                _MultiMonitorsCheck = EditedSession.MultiMonitors;
-                _MultiMonitorsCheckThree = false;
                 continue;
             }
 
@@ -1913,19 +2179,19 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
                 Port = -1;
             }
 
-            if(OpenInTabCheck != null && (EditedSession.iFlags & ProgramConfig.FLAG_NOTINTAB) != (session.iFlags & ProgramConfig.FLAG_NOTINTAB))
-            {
-                _OpenInTabCheck = null;
-                _OpenInTabCheckThree = true;
-            }
-
-            if(OpenInTabCheck != null && OpenInTabCheck.Value && SyncTitleCheck != null && (EditedSession.iFlags & ProgramConfig.FLAG_SYNCTITLE) != (session.iFlags & ProgramConfig.FLAG_SYNCTITLE))
+            if(OpenInTabCheck == true && SyncTitleCheck != null && (EditedSession.iFlags & ProgramConfig.FLAG_SYNCTITLE) != (session.iFlags & ProgramConfig.FLAG_SYNCTITLE))
             {
                 _SyncTitleCheck = null;
                 _SyncTitleCheckThree = true;
             }
 
-            if(OpenInTabCheck != null && OpenInTabCheck.Value && Method != "!NoChange!" && (EditedSession.iFlags & ProgramConfig.FLAG_CLOSE_MASK) != (session.iFlags & ProgramConfig.FLAG_CLOSE_MASK))
+            if(OpenInTabCheck == true && EnableHotkeyCheck != null && (EditedSession.iFlags & ProgramConfig.FLAG_ENABLEHOTKEY) != (session.iFlags & ProgramConfig.FLAG_ENABLEHOTKEY))
+            {
+                _EnableHotkeyCheck = null;
+                _EnableHotkeyCheckThree = true;
+            }
+
+            if(OpenInTabCheck == true && Method != "!NoChange!" && (EditedSession.iFlags & ProgramConfig.FLAG_CLOSE_MASK) != (session.iFlags & ProgramConfig.FLAG_CLOSE_MASK))
             {
                 if(MethodsList.ElementAt(0).Key != "!NoChange!")
                 {
@@ -2052,14 +2318,48 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
                     MSTSCId = NoChangeId;
                 }
 
-                if(Width != -1 && Width != session.Width)
+                if(StartRemoteAppCheck != null && string.IsNullOrEmpty(EditedSession.RemoteAppPath) != string.IsNullOrEmpty(session.RemoteAppPath))
                 {
-                    Width = -1;
+                    _StartRemoteAppCheck = null;
+                    _StartRemoteAppCheckThree = true;
+                    _ShellWorkingDirValid = false;
+                    RemoteAppPath = null;
+                    RemoteAppCmdline = null;
+                    ShellWorkingDir = null;
+                    _OpenInTabCheck = null;
+                    _OpenInTabCheckThree = true;
                 }
 
-                if(Height != -1 && Height != session.Height)
+                if(StartShellCheck != null && string.IsNullOrEmpty(EditedSession.ShellPath) != string.IsNullOrEmpty(session.ShellPath))
                 {
-                    Height = -1;
+                    _StartShellCheck = null;
+                    _StartShellCheckThree = true;
+                    _ShellWorkingDirValid = false;
+                    ShellPath = null;
+                    ShellWorkingDir = null;
+                }
+
+                if(StartShellValid && ShellPath != "!NoChange!" && ShellPath != session.ShellPath)
+                {
+                    ShellPath = "!NoChange!";
+                }
+
+                if(RemoteAppValid)
+                {
+                    if(RemoteAppPath != "!NoChange!" && RemoteAppPath != session.RemoteAppPath)
+                    {
+                        RemoteAppPath = "!NoChange!";
+                    }
+
+                    if(RemoteAppCmdline != "!NoChange!" && RemoteAppCmdline != session.RemoteAppCmdline)
+                    {
+                        RemoteAppCmdline = "!NoChange!";
+                    }
+                }
+
+                if((RemoteAppValid || StartShellValid) && ShellWorkingDir != "!NoChange!" && ShellWorkingDir != session.ShellWorkingDir)
+                {
+                    ShellWorkingDir = "!NoChange!";
                 }
 
                 if(WindowsKeyCombinationsCheck != null && EditedSession.KeyboardHook2 != session.KeyboardHook)
@@ -2068,21 +2368,55 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
                     _WindowsKeyCombinationsCheckThree = true;
                 }
 
-                if(FullScreenCheck != null && EditedSession.FullScreen != session.FullScreen)
+                if(RDSizeModeValid)
                 {
-                    _FullScreenCheck = null;
-                    _FullScreenCheckThree = true;
+                    string rdsizemode;
+                    if(session.FullScreen)
+                    {
+                        rdsizemode = session.MultiMonitors ? "M":"F";
+                    }
+                    else
+                    {
+                        rdsizemode = (session.Width != 0 && session.Height != 0) ? "C":"A";
+                    }
+                    
+                    if(RDSizeMode != "!NoChange!" && (RDSizeMode != rdsizemode))
+                    {
+                        if(OpenInTabCheck == true)
+                        {
+                            if(_RDSizeModesList.ElementAt(0).Key != "!NoChange!")
+                            {
+                                _RDSizeModesList.Insert(0, new ComboBoxTwo("!NoChange!","!NoChange!"));
+                            }
+                        }
+                        else
+                        {
+                            if(_RDSizeModesList2.ElementAt(0).Key != "!NoChange!")
+                            {
+                                _RDSizeModesList2.Insert(0, new ComboBoxTwo("!NoChange!","!NoChange!"));
+                            }
+                        }
+                        
+                        RDSizeMode = "!NoChange!";
+                    }
                 }
 
-                if(MultiMonitorsCheck != null && EditedSession.MultiMonitors != session.MultiMonitors)
-                {
-                    _MultiMonitorsCheck = null;
-                    _MultiMonitorsCheckThree = true;
-                }
-
-                if(SelectedMonitors != "!NoChange!" && SelectedMonitors != session.SelectedMonitors)
+                if(MultiMonitorsValid && SelectedMonitors != "!NoChange!" && SelectedMonitors != session.SelectedMonitors)
                 {
                     SelectedMonitors = "!NoChange!";
+                }
+
+                if(WidthHeightValid)
+                {
+                    if(Width != -1 && Width != session.Width)
+                    {
+                        Width = -1;
+                    }
+
+                    if(Height != -1 && Height != session.Height)
+                    {
+                        Height = -1;
+                    }
                 }
             }
 
@@ -2110,15 +2444,31 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
 
     public void ShowSelectedSession(Session session)
     {
-        TitleBackground = System.Windows.Application.Current.Resources["bg1"] as SolidColorBrush;
+        TitleBackground = Application.Current.Resources["bg1"] as SolidColorBrush;
         BatchMode = false;
         NewMode = false;
         CreatePuTTYRegSessionList();
         EditedSession = LoadSelectedSession(session);
+
+        if(UseMSTSC)
+        {
+            StartRemoteAppCheck = !string.IsNullOrEmpty(EditedSession.RemoteAppPath);
+            StartShellCheck = !string.IsNullOrEmpty(EditedSession.ShellPath);
+
+            if(EditedSession.FullScreen)
+            {
+                RDSizeMode = EditedSession.MultiMonitors ? "M":"F";
+            }
+            else
+            {
+                RDSizeMode = (EditedSession.Width != 0 && EditedSession.Height != 0) ? "C":"A";
+            }
+        }
+
         if(EditedSession.Color != null)
         {
             SelectedColor = App.SessionColors.FirstOrDefault((Brush x) => x.ToString() == EditedSession.Color.ToString());
-            _SaveSessionColorCheck = ((SolidColorBrush)EditedSession.Color).Color != (System.Windows.Application.Current.Resources["t9"] as SolidColorBrush).Color;
+            _SaveSessionColorCheck = ((SolidColorBrush)EditedSession.Color).Color != (Application.Current.Resources["t9"] as SolidColorBrush).Color;
         }
         else
         {
@@ -2157,10 +2507,14 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
             RemoteDirectory = session.RemoteDirectory,
             WinSCPId = session.WinSCPId,
 
-            Width = session.Width,
-            Height = session.Height,
+            ShellPath = session.ShellPath,
+            ShellWorkingDir = session.ShellWorkingDir,
+            RemoteAppPath = session.RemoteAppPath,
+            RemoteAppCmdline = session.RemoteAppCmdline,
             MSTSCId = session.MSTSCId,
             KeyboardHook = session.KeyboardHook,
+            Width = session.Width,
+            Height = session.Height,
             FullScreen = session.FullScreen,
             MultiMonitors = session.MultiMonitors,
             SelectedMonitors = session.SelectedMonitors,
@@ -2183,14 +2537,14 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
         EditedSession = session;
         EditedCredential = credential;
 
-        TitleBackground = System.Windows.Application.Current.Resources["bg8"] as SolidColorBrush;
+        TitleBackground = Application.Current.Resources["bg8"] as SolidColorBrush;
         BatchMode = false;
         NewMode = true;
         SelectedSession = null;
         SelectedSessions = null;
 		
         _SessionType = session.Type;
-        EditedSession.Color = (SolidColorBrush)new BrushConverter().ConvertFrom(App.GetColor(true));
+        StartRemoteAppCheck  = false;
         UseScriptCheck = false;
         OpenInTabCheck = true;
         SelectedColor = null;
@@ -2235,6 +2589,18 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
                         }
                     }
 
+                    if(EnableHotkeyCheck != null)
+                    {
+                        if(EnableHotkeyCheck.Value)
+                        {
+                            session.iFlags |= ProgramConfig.FLAG_ENABLEHOTKEY;
+                        }
+                        else
+                        {
+                            session.iFlags &= ~ProgramConfig.FLAG_ENABLEHOTKEY;
+                        }
+                    }
+
                     if(Method != "!NoChange!")
                     {
                         session.iFlags &= ~ProgramConfig.FLAG_CLOSE_MASK;
@@ -2256,7 +2622,7 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
                 else
                 {
                     session.iFlags |= ProgramConfig.FLAG_NOTINTAB;
-                    session.iFlags &= ~(ProgramConfig.FLAG_SYNCTITLE | ProgramConfig.FLAG_CLOSE_MASK);
+                    session.iFlags &= ~(ProgramConfig.FLAG_SYNCTITLE | ProgramConfig.FLAG_ENABLEHOTKEY | ProgramConfig.FLAG_CLOSE_MASK);
                 }
             }
 
@@ -2403,33 +2769,103 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
                 {
                     session.MSTSCId = MSTSCId;
                 }
-                if(WindowsKeyCombinationsCheck != null)
-                {
-                    session.KeyboardHook = EditedSession.KeyboardHook;
-                }
-                if(FullScreenCheck != null)
-                {
-                    session.FullScreen = FullScreenCheck.Value;
 
-                    if(EditedSession.Width != -1)
+                if(RemoteAppValid) 
+                { 
+                    if(EditedSession.RemoteAppPath != "!NoChange!")
                     {
-                        session.Width = !FullScreenCheck.Value ? EditedSession.Width : 0;
+                        session.RemoteAppPath = string.IsNullOrEmpty(EditedSession.RemoteAppPath) ? null: EditedSession.RemoteAppPath;
                     }
 
-                    if(EditedSession.Height != -1)
+                    if(EditedSession.RemoteAppCmdline != "!NoChange!")
                     {
-                        session.Height = !FullScreenCheck.Value ? EditedSession.Height : 0;
+                        session.RemoteAppCmdline = string.IsNullOrWhiteSpace(EditedSession.RemoteAppCmdline) ? null: EditedSession.RemoteAppCmdline;
                     }
-                }
-                if (MultiMonitorsCheck != null)
-                {
-                    session.MultiMonitors = MultiMonitorsCheck.Value;
 
-                    if(EditedSession.SelectedMonitors != "!NoChange!")
+                    if(EditedSession.ShellWorkingDir != "!NoChange!")
                     {
-                        session.SelectedMonitors = MultiMonitorsCheck.Value ? (string.IsNullOrWhiteSpace(EditedSession.SelectedMonitors) ? null : EditedSession.SelectedMonitors.Trim()) : null;
+                        session.ShellWorkingDir = string.IsNullOrEmpty(EditedSession.ShellWorkingDir) ? null: EditedSession.ShellWorkingDir;
+                    }
+
+                    session.iFlags &= ~(ProgramConfig.FLAG_SYNCTITLE | ProgramConfig.FLAG_CLOSE_MASK | ProgramConfig.FLAG_SSHV2SHARE | ProgramConfig.FLAG_PASSWORD_ONLY | ProgramConfig.FLAG_NOTCLOSEIME | ProgramConfig.FLAG_ENABLEHOTKEY);
+                    session.iFlags |= ProgramConfig.FLAG_NOTINTAB;
+
+                    session.KeyboardHook = 0;
+                    session.ShellPath = null;
+                    session.FullScreen = false;
+                    session.Width = 0;
+                    session.Height = 0;
+                    session.MultiMonitors = false;
+                    session.SelectedMonitors = null;
+                }
+
+                if(StartShellValid)
+                {
+                    if(EditedSession.ShellPath != "!NoChange!")
+                    {
+                        session.ShellPath = string.IsNullOrEmpty(EditedSession.ShellPath) ? null: EditedSession.ShellPath;
+                    }
+
+                    if(EditedSession.ShellWorkingDir != "!NoChange!")
+                    {
+                        session.ShellWorkingDir = string.IsNullOrEmpty(EditedSession.ShellWorkingDir) ? null: EditedSession.ShellWorkingDir;
                     }
                 }
+                else
+                {
+                    session.ShellPath = null;
+                    session.ShellWorkingDir = null;
+                }
+
+                if(RemoteAppNotValid)
+                {
+                    session.RemoteAppPath = null;
+                    session.RemoteAppCmdline = null;
+
+                    if(WindowsKeyCombinationsCheck != null)
+                    {
+                        session.KeyboardHook = EditedSession.KeyboardHook;
+                    }
+
+                    if(RDSizeModeValid && RDSizeMode != "!NoChange!")
+                    {
+                        session.FullScreen = (RDSizeMode == "F" || RDSizeMode == "M");
+
+                        if(!session.FullScreen)
+                        {
+                            if(EditedSession.Width != -1)
+                            {
+                                session.Width = EditedSession.Width;
+                            }
+
+                            if(EditedSession.Height != -1)
+                            {
+                                session.Height = EditedSession.Height;
+                            }
+                        }
+                        else
+                        {
+                            session.Width = 0;
+                            session.Height = 0;
+                        }
+
+                        session.MultiMonitors = RDSizeMode == "M";
+
+                        if(session.MultiMonitors)
+                        {
+                            if(EditedSession.SelectedMonitors != "!NoChange!")
+                            {
+                                session.SelectedMonitors = string.IsNullOrWhiteSpace(EditedSession.SelectedMonitors) ? null : EditedSession.SelectedMonitors.Trim();
+                            }
+                        }
+                        else
+                        {
+                            session.SelectedMonitors = null;
+                        }
+                    }
+                }
+
+                RemoveRDPFile(session);
             }
 
             if(EditedSession.Comment != "!NoChange!")
@@ -2439,6 +2875,7 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
 
             session.OnPropertyChanged("DisplayName");
             session.OnPropertyChanged("CredentialName");
+            session.OnPropertyChanged("NameTooltip");
             session.SessionHistory?.OnPropertyChanged("DisplayName");
         }
 
@@ -2464,7 +2901,7 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
             }
             else
             {
-                EditedSession.Color = System.Windows.Application.Current.Resources["t9"] as SolidColorBrush;
+                EditedSession.Color = Application.Current.Resources["t9"] as SolidColorBrush;
             }
         }
         else
@@ -2476,7 +2913,7 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
         {
             SSHv2ShareCheck = false;
         }
-        if ((OpenInTabCheck != null && !OpenInTabCheck.Value))
+        if (OpenInTabCheck == false)
         {
             SyncTitleCheck = false;
             Method = "WM_CLOSE";
@@ -2539,19 +2976,34 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
         session.Logging = UsePuTTY && EditedSession.Logging;
         session.ScriptId = ScriptId;
 
-        session.RemoteDirectory = string.IsNullOrEmpty(RemoteDirectory) ? null: RemoteDirectory;
+        session.RemoteDirectory = (UseWinSCP && !string.IsNullOrEmpty(RemoteDirectory)) ? RemoteDirectory: null;
         session.WinSCPId = WinSCPId;
 
         session.KeyboardHook = UseMSTSC ? EditedSession.KeyboardHook : 0;
-        session.FullScreen = FullScreenCheck != null && FullScreenCheck.Value;
-        session.MultiMonitors = MultiMonitorsCheck != null && MultiMonitorsCheck.Value;
-        session.SelectedMonitors = (MultiMonitorsCheck != null && MultiMonitorsCheck.Value) ? (string.IsNullOrWhiteSpace(SelectedMonitors) ? null : SelectedMonitors.Trim()) : null;
-        session.Width = (UseMSTSC && (FullScreenCheck != null && !FullScreenCheck.Value)) ? Width : 0;
-        session.Height = (UseMSTSC && (FullScreenCheck != null && !FullScreenCheck.Value)) ? Height : 0;
+        if(RemoteAppValid)
+        {
+            session.iFlags &= ~(ProgramConfig.FLAG_SYNCTITLE | ProgramConfig.FLAG_CLOSE_MASK | ProgramConfig.FLAG_SSHV2SHARE | ProgramConfig.FLAG_PASSWORD_ONLY | ProgramConfig.FLAG_NOTCLOSEIME | ProgramConfig.FLAG_ENABLEHOTKEY);
+            session.iFlags |= ProgramConfig.FLAG_NOTINTAB;
+            session.KeyboardHook = 0;
+        }
+        session.FullScreen = UseMSTSC && (RDSizeMode == "F" || RDSizeMode == "M");
+        session.MultiMonitors = UseMSTSC && (RDSizeMode == "M");
+        session.SelectedMonitors = session.MultiMonitors ? (string.IsNullOrWhiteSpace(SelectedMonitors) ? null : SelectedMonitors.Trim()) : null;
+        session.Width = (UseMSTSC && !session.FullScreen) ? Width : 0;
+        session.Height = (UseMSTSC && !session.FullScreen) ? Height : 0;
+        session.ShellPath = StartShellValid ? ShellPath: null;
+        session.ShellWorkingDir = ((StartShellValid || RemoteAppValid) && !string.IsNullOrEmpty(ShellWorkingDir)) ? ShellWorkingDir: null;
+        session.RemoteAppPath = RemoteAppValid ? RemoteAppPath: null;
+        session.RemoteAppCmdline = (RemoteAppValid && !string.IsNullOrWhiteSpace(RemoteAppCmdline)) ? RemoteAppCmdline: null;
         session.MSTSCId = MSTSCId;
 
         session.Comment = string.IsNullOrWhiteSpace(Comment) ? null : Comment.Trim();
         session.Color = EditedSession.Color;
+
+        if(UseMSTSC)
+        {
+            RemoveRDPFile(session);
+        }
 
         if (SelectedSession == null)
         { 
@@ -2561,12 +3013,26 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
         {
             SelectedSession.OnPropertyChanged("DisplayName");
             SelectedSession.OnPropertyChanged("CredentialName");
+            SelectedSession.OnPropertyChanged("NameTooltip");
             SelectedSession.SessionHistory?.OnPropertyChanged("DisplayName");
         }
 
         JumpListManager.SetNewJumpList(App.Sessions.Sessions);
 
         return session;
+    }
+
+    private void RemoveRDPFile(Session session)
+    {
+        string rdpFile = session.GetRDPFile();
+
+        try
+        {
+            File.Delete(rdpFile);
+        }
+        catch (Exception)
+        {
+        }
     }
 
     private bool WantToSaveCredential()
@@ -2592,7 +3058,7 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
     {
         if (!BatchMode && string.IsNullOrWhiteSpace(Ip))
         {
-            AddError("Ip", "IP or hostname is required");
+            AddError("Ip", string.Format(Application.Current.Resources["Required"] as string, Application.Current.Resources["Address"]));
             return !HasErrors;
         }
 
@@ -2600,7 +3066,7 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
 
         if(Port == 0 || (!BatchMode && Port < 0))
         {
-            AddError("Port", "Port is required");
+            AddError("Port", string.Format(Application.Current.Resources["Required"] as string, Application.Current.Resources["Port"]));
         }
         else
         {
@@ -2629,7 +3095,7 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
             {
                 if (!NewMode)
                 {
-                    AddError("Name", "Session name already exists");
+                    AddError("Name", string.Format(Application.Current.Resources["Exist"] as string, Application.Current.Resources["SessionName"]));
                 }
                 else
                 {
@@ -2654,7 +3120,7 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
         {
             if (string.IsNullOrWhiteSpace(Username))
             {
-                AddError("Username", "Username is required");
+                AddError("Username", string.Format(Application.Current.Resources["Required"] as string, Application.Current.Resources["Username"]));
             }
             else
             {
@@ -2694,24 +3160,24 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
             RemoveError("Username");
         }
 
-        if (UseMSTSC)
+        if (WidthHeightValid)
         {
-            if((Width > 0 && Width < 200) || Width > 8192)
-            {
-                AddError("Width", "Invalid Width (200-8192)");
-            }
-            else
+            if((Width >=200 && Width <= 8192) || Width == -1)
             {
                 RemoveError("Width");
             }
-
-            if((Height > 0 && Height < 200) || Height > 8192)
+            else
             {
-                AddError("Height", "Invalid Height (200-8192)");
+                AddError("Width", "200-8192");
+            }
+
+            if((Height >=200 && Height <= 8192) || Height == -1)
+            {
+                RemoveError("Height");
             }
             else
             {
-                RemoveError("Height");
+                AddError("Height", "200-8192");
             }
         } 
         else
@@ -2720,16 +3186,31 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
             RemoveError("Height");
         }
 
-        if (UseScriptCheck != null && UseScriptCheck.Value)
+        if(RemoteAppValid && string.IsNullOrEmpty(RemoteAppPath))
         {
-            if(ScriptId == Guid.Empty)
-            {
-                AddError("ScriptId", "Script is required");
-            }
-            else
-            {
-                RemoveError("ScriptId");
-            }
+            AddError("RemoteAppPath", string.Format(Application.Current.Resources["Required"] as string, Application.Current.Resources["ProgramPath"]));
+        }
+        else
+        {
+            RemoveError("RemoteAppPath");
+        }
+
+        if(StartShellValid && string.IsNullOrEmpty(ShellPath))
+        {
+            AddError("ShellPath", string.Format(Application.Current.Resources["Required"] as string, Application.Current.Resources["ProgramPath"]));
+        }
+        else
+        {
+            RemoveError("ShellPath");
+        }
+
+        if (UseScriptCheck == true && ScriptId == Guid.Empty)
+        {
+            AddError("ScriptId", string.Format(Application.Current.Resources["Required"] as string, "Script"));
+        }
+        else
+        {
+            RemoveError("ScriptId");
         }
 
         return !HasErrors;
@@ -2743,7 +3224,9 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
         RemoveError("Username");
         RemoveError("Width");
         RemoveError("Height");
-        RemoveError("ConfigFileId");
+        RemoveError("RemoteAppPath");
+        RemoveError("ShellPath");
+        RemoveError("ScriptId");
     }
 
     public void UpdateGUI(Visibility controlVisibility = Visibility.Visible)
@@ -2787,21 +3270,11 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
         NotifyPropertyChanged("WaitSeconds");
         NotifyPropertyChanged("RDPFiles");
         NotifyPropertyChanged("MSTSCId");
-        NotifyPropertyChanged("WidthHeightValid");
-        NotifyPropertyChanged("Width");
-        NotifyPropertyChanged("Height");
         NotifyPropertyChanged("RemoteDirectory");
         NotifyPropertyChanged("WinSCPInis");
         NotifyPropertyChanged("WinSCPId");
         NotifyPropertyChanged("ScriptFiles");
         NotifyPropertyChanged("ScriptId");
-        NotifyPropertyChanged("OpenInTabCheckThree");
-        NotifyPropertyChanged("OpenInTabCheck");
-        NotifyPropertyChanged("SyncTitleCheckThree");
-        NotifyPropertyChanged("SyncTitleCheck");
-        NotifyPropertyChanged("Method");
-        NotifyPropertyChanged("CloseIMECheckThree");
-        NotifyPropertyChanged("CloseIMECheck");
         NotifyPropertyChanged("SSHv2ShareValid");
         NotifyPropertyChanged("SSHv2ShareCheckThree");
         NotifyPropertyChanged("SSHv2ShareCheck");
@@ -2812,15 +3285,38 @@ public class EditSessionViewModel : ViewModelBase, INotifyPropertyChanged, INoti
         NotifyPropertyChanged("LoggingCheck");
         NotifyPropertyChanged("UseScriptCheckThree");
         NotifyPropertyChanged("UseScriptCheck");
-        NotifyPropertyChanged("MonitorValid");
-        NotifyPropertyChanged("RDPFullScreenValid");
+        NotifyPropertyChanged("StartRemoteAppCheckThree");
+        NotifyPropertyChanged("StartRemoteAppCheck");
+        NotifyPropertyChanged("RemoteAppValid");
+        NotifyPropertyChanged("RemoteAppNotValid");
+        NotifyPropertyChanged("StartShellCheckThree");
+        NotifyPropertyChanged("StartShellCheck");
+        NotifyPropertyChanged("StartShellValid");
+        NotifyPropertyChanged("ShellPath");
+        NotifyPropertyChanged("RemoteAppPath");
+        NotifyPropertyChanged("RemoteAppCmdline");
+        NotifyPropertyChanged("ShellWorkingDirValid");
+        NotifyPropertyChanged("ShellWorkingDir");
         NotifyPropertyChanged("WindowsKeyCombinationsCheckThree");
         NotifyPropertyChanged("WindowsKeyCombinationsCheck");
-        NotifyPropertyChanged("FullScreenCheckThree");
-        NotifyPropertyChanged("FullScreenCheck");
-        NotifyPropertyChanged("MultiMonitorsCheckThree");
-        NotifyPropertyChanged("MultiMonitorsCheck");
+        NotifyPropertyChanged("OpenInTabCheckThree");
+        NotifyPropertyChanged("OpenInTabCheck");
+        NotifyPropertyChanged("SyncTitleCheckThree");
+        NotifyPropertyChanged("SyncTitleCheck");
+        NotifyPropertyChanged("EnableHotkeyCheckThree");
+        NotifyPropertyChanged("EnableHotkeyCheck");
+        NotifyPropertyChanged("Method");
+        NotifyPropertyChanged("CloseIMECheckThree");
+        NotifyPropertyChanged("CloseIMECheck");
+        NotifyPropertyChanged("RDSizeModeValid");
+        NotifyPropertyChanged("RDSizeModesList");
+        NotifyPropertyChanged("RDSizeMode");
+        NotifyPropertyChanged("MultiMonitorsValid");
         NotifyPropertyChanged("SelectedMonitors");
+        NotifyPropertyChanged("WidthHeightValid");
+        NotifyPropertyChanged("Width");
+        NotifyPropertyChanged("Height");
+        NotifyPropertyChanged("MonitorValid");
         NotifyPropertyChanged("Monitor");
         NotifyPropertyChanged("AssignedTags");
         NotifyPropertyChanged("UnassignedTags");

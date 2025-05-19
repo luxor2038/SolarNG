@@ -66,6 +66,9 @@ internal class GUIConfig
     [DataMember]
     public List<string> ExcludeClasses = new List<string>{ "Shell_TrayWnd",  "Windows.UI.Core.CoreWindow", "NarratorHelperWindow", "ThumbnailDeviceHelperWnd", "WorkerW" };
 
+    [DataMember]
+    public List<string> ExcludeShortcuts = new List<string>{ "SolarNG",  "unins" };
+
     public GUIConfig()
     {
     }

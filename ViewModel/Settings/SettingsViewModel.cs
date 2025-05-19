@@ -1,6 +1,6 @@
-using System;
 using System.Windows;
-using System.Windows.Media.Imaging;
+using System.Windows.Media;
+using GalaSoft.MvvmLight.Command;
 using SolarNG.Sessions;
 using SolarNG.UserControls.Settings;
 
@@ -17,6 +17,14 @@ public class SettingsViewModel : TabBase
     public Session SelectedSession;
 
     private SettingsGeneralLayout SettingsGeneralLayout;
+
+    public void KickAll()
+    {
+        Application.Current.Dispatcher.Invoke(delegate
+        {
+            base.MainWindow.MainWindowVM.KickAllTab();
+        });
+    }
 
     public void SetSettingsGeneralLayout(SettingsGeneralLayout settingsGeneralLayout)
     {
@@ -39,10 +47,29 @@ public class SettingsViewModel : TabBase
         SettingsGeneralLayout?.SetTab(this);
     }
 
+    private void UpdateTitle(int count)
+    {
+        base.TabName = (string)Application.Current.Resources["Settings"] + ((count>=0)?" (" + count + ")":"");
+    }
+
+    public void UpdateTitle()
+    {
+        int count = -1;
+
+        if(SettingsGeneralLayout != null)
+        {
+            count = SettingsGeneralLayout.GetCount();
+        }
+
+        UpdateTitle(count);
+    }
+
     public SettingsViewModel(MainWindow mainWindow) : base(mainWindow)
     {
-        base.TabName = System.Windows.Application.Current.Resources["Settings"] as string;
-        base.TabIcon = new BitmapImage(new Uri("/SolarNG;component/Images/gear.png", UriKind.Relative));
-        base.TabIconVisibility = Visibility.Visible;
+        UpdateTitle(-1);
+        base.TabPath = Application.Current.Resources["SettingsPath"] as Geometry;
+        base.TabPathVisibility = Visibility.Visible;
+
+        KickAllCommand = new RelayCommand(KickAll);
     }
 }

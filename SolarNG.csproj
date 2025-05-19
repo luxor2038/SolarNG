@@ -356,7 +356,9 @@
     <Compile Include="Utilities\SafeString.cs" />
     <Compile Include="Utilities\SendInputHelper.cs" />
     <Compile Include="Utilities\SessionParser.cs" />
+    <Compile Include="Utilities\ShortcutScanner.cs" />
     <Compile Include="Utilities\SolarNGX.cs" />
+    <Compile Include="Utilities\SuspendableObservableCollection.cs" />
     <Compile Include="Utilities\W32Point.cs" />
     <Compile Include="Utilities\W32Rect.cs" />
     <Compile Include="Utilities\Win32.cs" />
@@ -392,32 +394,6 @@
     <Compile Include="PromptDialog.cs" />
     <Compile Include="WcfService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="images\add.png" />
-    <Resource Include="images\close-white.png" />
-    <Resource Include="images\close.png" />
-    <Resource Include="images\edit.png" />
-    <Resource Include="images\gear.png" />
-    <Resource Include="images\history.png" />
-    <Resource Include="images\info.png" />
-    <Resource Include="images\maximize-white.png" />
-    <Resource Include="images\maximize.png" />
-    <Resource Include="images\menu-white.png" />
-    <Resource Include="images\menu.png" />
-    <Resource Include="images\minimize-white.png" />
-    <Resource Include="images\minimize.png" />
-    <Resource Include="images\normalize-white.png" />
-    <Resource Include="images\normalize.png" />
-    <Resource Include="images\pin.png" />
-    <Resource Include="images\remove.png" />
-    <Resource Include="images\search.png" />
-    <Resource Include="images\tab.png" />
-    <Resource Include="images\tag.png" />
-    <Resource Include="images\warning.png" />
-    <Resource Include="images\app.png" />
-    <Resource Include="images\save.png" />
-    <Resource Include="images\savenew.png" />
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml" />

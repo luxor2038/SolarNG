@@ -160,7 +160,7 @@
           </StackPanel>
           <StackPanel Visibility="{Binding UseMSTSC, Converter={StaticResource visibilityConv}}">
             <Label Content="{StaticResource UseRDPFile}" Style="{StaticResource AboveControlLabel}" Margin="0,15,0,3" />
-            <Grid Visibility="{Binding UseMSTSC, Converter={StaticResource visibilityConv}}">
+            <Grid>
               <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="3*" />
                 <ColumnDefinition Width="15" />
@@ -172,23 +172,6 @@
               </Grid.RowDefinitions>
               <ComboBox Grid.Row="0" Grid.Column="0" DisplayMemberPath="Display" SelectedValuePath="Key" Style="{StaticResource SimpleComboBox}" VerticalAlignment="Top" ItemsSource="{Binding RDPFiles}" SelectedValue="{Binding MSTSCId}" />
               <Button Grid.Row="0" Grid.Column="2" Content="{StaticResource Import}" Style="{StaticResource CustomWhiteButtonStyle}" VerticalAlignment="Top" Command="{Binding ImportRDPFileCommand}" />
-            </Grid>
-            <Grid Visibility="{Binding WidthHeightValid, Converter={StaticResource visibilityConv}}">
-              <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="1*" />
-                <ColumnDefinition Width="15" />
-                <ColumnDefinition Width="1*" />
-              </Grid.ColumnDefinitions>
-              <Grid.RowDefinitions>
-                <RowDefinition Height="1*" />
-                <RowDefinition Height="1*" />
-                <RowDefinition Height="1*" />
-                <RowDefinition Height="1*" />
-              </Grid.RowDefinitions>
-              <Label Grid.Row="0" Grid.Column="0" Content="{StaticResource Width}" Style="{StaticResource AboveControlLabel}" VerticalAlignment="Top" Margin="0,15,0,3" />
-              <Label Grid.Row="0" Grid.Column="2" Content="{StaticResource Height}" Style="{StaticResource AboveControlLabel}" VerticalAlignment="Top" Margin="0,15,0,3" />
-              <TextBox Grid.Row="1" Grid.Column="0" VerticalAlignment="Top" Text="{Binding Width, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True, Converter={StaticResource EmptyStringToIntConverter}}" />
-              <TextBox Grid.Row="1" Grid.Column="2" VerticalAlignment="Top" Text="{Binding Height, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True, Converter={StaticResource EmptyStringToIntConverter}}" />
             </Grid>
           </StackPanel>
           <StackPanel Visibility="{Binding UseWinSCP, Converter={StaticResource visibilityConv}}">
@@ -212,8 +195,10 @@
           <Label Content="{StaticResource CUSTOMIZATION}" Margin="0,15,0,0" Style="{StaticResource AboveControlLabel}" />
           <CheckBox Content="{StaticResource SSHv2Share}" Style="{StaticResource SimpleCheckBox}" Margin="0,15,0,0" Visibility="{Binding SSHv2ShareValid, Converter={StaticResource visibilityConv}}" IsChecked="{Binding SSHv2ShareCheck}" IsThreeState="{Binding SSHv2ShareCheckThree}"/>
           <CheckBox Content="{StaticResource PasswordOnly}" Style="{StaticResource SimpleCheckBox}" Margin="0,15,0,0" Visibility="{Binding PasswordOnlyValid, Converter={StaticResource visibilityConv}}" IsChecked="{Binding PasswordOnlyCheck}" IsThreeState="{Binding PasswordOnlyCheckThree}"/>
-          <CheckBox Content="{StaticResource EnableLogging}" Style="{StaticResource SimpleCheckBox}" Margin="0,15,0,0" Visibility="{Binding UsePuTTY, Converter={StaticResource visibilityConv}}" IsChecked="{Binding LoggingCheck}" IsThreeState="{Binding LoggingCheckThree}" />
-          <CheckBox Content="{StaticResource UseScript}" Style="{StaticResource SimpleCheckBox}" Margin="0,15,0,3" Visibility="{Binding UsePuTTY, Converter={StaticResource visibilityConv}}" IsChecked="{Binding UseScriptCheck}" IsThreeState="{Binding UseScriptCheckThree}" />
+          <StackPanel Visibility="{Binding UsePuTTY, Converter={StaticResource visibilityConv}}">
+            <CheckBox Content="{StaticResource EnableLogging}" Style="{StaticResource SimpleCheckBox}" Margin="0,15,0,0" IsChecked="{Binding LoggingCheck}" IsThreeState="{Binding LoggingCheckThree}" />
+            <CheckBox Content="{StaticResource UseScript}" Style="{StaticResource SimpleCheckBox}" Margin="0,15,0,3" IsChecked="{Binding UseScriptCheck}" IsThreeState="{Binding UseScriptCheckThree}" />
+          </StackPanel>
           <Grid Visibility="{Binding UseScriptCheck, Converter={StaticResource visibilityConv}}">
             <Grid.ColumnDefinitions>
               <ColumnDefinition Width="3*" />
@@ -227,24 +212,64 @@
             <ComboBox Grid.Row="0" Grid.Column="0" DisplayMemberPath="Display" SelectedValuePath="Key" Style="{StaticResource SimpleComboBox}" VerticalAlignment="Top" ItemsSource="{Binding ScriptFiles}" SelectedValue="{Binding ScriptId}" />
             <Button Grid.Row="0" Grid.Column="2" Content="{StaticResource Import}" Style="{StaticResource CustomWhiteButtonStyle}" VerticalAlignment="Top" Command="{Binding ImportScriptCommand}" />
           </Grid>
-          <CheckBox Content="{StaticResource WindowsKeyCombinations}" Style="{StaticResource SimpleCheckBox}" Margin="0,15,0,0" Visibility="{Binding UseMSTSC, Converter={StaticResource visibilityConv}}" IsChecked="{Binding WindowsKeyCombinationsCheck}" IsThreeState="{Binding WindowsKeyCombinationsCheckThree}" />
-          <CheckBox Content="{StaticResource OpenInTab}" Style="{StaticResource SimpleCheckBox}" Margin="0,15,0,0" IsChecked="{Binding OpenInTabCheck}" IsThreeState="{Binding OpenInTabCheckThree}" />
-          <CheckBox Content="{StaticResource SyncTitle}" Style="{StaticResource SimpleCheckBox}" Margin="0,15,0,0" Visibility="{Binding OpenInTabCheck, Converter={StaticResource visibilityConv}}" IsChecked="{Binding SyncTitleCheck}" IsThreeState="{Binding SyncTitleCheckThree}" />
-          <Label Content="{StaticResource MethodOfClosingTab}" Style="{StaticResource AboveControlLabel}" Visibility="{Binding OpenInTabCheck, Converter={StaticResource visibilityConv}}" Margin="0,15,0,3" />
-          <ComboBox DisplayMemberPath="Key" SelectedValuePath="Key" Style="{StaticResource SimpleComboBox}" Visibility="{Binding OpenInTabCheck, Converter={StaticResource visibilityConv}}" ItemsSource="{Binding MethodsList}" SelectedValue="{Binding Method}" />
-          <CheckBox Content="{StaticResource CloseIME}" Style="{StaticResource SimpleCheckBox}" Margin="0,15,0,0" IsChecked="{Binding CloseIMECheck}" IsThreeState="{Binding CloseIMECheckThree}" />
-          <StackPanel Visibility="{Binding RDPFullScreenValid, Converter={StaticResource visibilityConv}}">
-            <CheckBox Content="{StaticResource FullScreen}" Style="{StaticResource SimpleCheckBox}" Margin="0,15,0,0" IsChecked="{Binding FullScreenCheck}" IsThreeState="{Binding FullScreenCheckThree}" />
-            <StackPanel Visibility="{Binding FullScreenCheck, Converter={StaticResource visibilityConv}}">
-              <CheckBox Content="{StaticResource MultiMonitors}" Style="{StaticResource SimpleCheckBox}" Margin="0,15,0,0" IsChecked="{Binding MultiMonitorsCheck}" IsThreeState="{Binding MultiMonitorsCheckThree}" />
-              <StackPanel Visibility="{Binding MultiMonitorsCheck, Converter={StaticResource visibilityConv}}">
-                <Label Content="{StaticResource SelectMonitors}" Style="{StaticResource AboveControlLabel}" Margin="0,15,0,3" ToolTip="{Binding SelectMonitors}" />
-                <TextBox Text="{Binding SelectedMonitors, UpdateSourceTrigger=PropertyChanged}" />
-              </StackPanel>
+          <CheckBox Content="{StaticResource StartRemoteApp}" Style="{StaticResource SimpleCheckBox}" Margin="0,15,0,0" Visibility="{Binding UseMSTSC, Converter={StaticResource visibilityConv}}" IsChecked="{Binding StartRemoteAppCheck}" IsThreeState="{Binding StartRemoteAppCheckThree}" />
+          <StackPanel Visibility="{Binding RemoteAppNotValid, Converter={StaticResource visibilityConv}}">
+            <CheckBox Content="{StaticResource StartShell}" Style="{StaticResource SimpleCheckBox}" Margin="0,15,0,0" Visibility="{Binding UseMSTSC, Converter={StaticResource visibilityConv}}" IsChecked="{Binding StartShellCheck}" IsThreeState="{Binding StartShellCheckThree}"  />
+          </StackPanel>
+          <StackPanel Visibility="{Binding StartShellValid, Converter={StaticResource visibilityConv}}">
+            <Label Content="{StaticResource ProgramPath}" Style="{StaticResource AboveControlLabel}" Margin="0,15,0,3" />
+            <TextBox Text="{Binding ShellPath, UpdateSourceTrigger=PropertyChanged}" />
+          </StackPanel>
+          <StackPanel Visibility="{Binding RemoteAppValid, Converter={StaticResource visibilityConv}}">
+            <Label Content="{StaticResource ProgramPath}" Style="{StaticResource AboveControlLabel}" Margin="0,15,0,3" />
+            <TextBox Text="{Binding RemoteAppPath, UpdateSourceTrigger=PropertyChanged}" />
+            <Label Content="{StaticResource Cmdline}" Style="{StaticResource AboveControlLabel}" Margin="0,15,0,3" />
+            <TextBox Text="{Binding RemoteAppCmdline, UpdateSourceTrigger=PropertyChanged}" />
+          </StackPanel>
+          <StackPanel Visibility="{Binding ShellWorkingDirValid, Converter={StaticResource visibilityConv}}">
+            <Label Content="{StaticResource WorkingDir}" Style="{StaticResource AboveControlLabel}" Margin="0,15,0,3" />
+            <TextBox Text="{Binding ShellWorkingDir, UpdateSourceTrigger=PropertyChanged}" />
+          </StackPanel>
+          <StackPanel Visibility="{Binding RemoteAppNotValid, Converter={StaticResource visibilityConv}}">
+            <CheckBox Content="{StaticResource WindowsKeyCombinations}" Style="{StaticResource SimpleCheckBox}" Margin="0,15,0,0" Visibility="{Binding UseMSTSC, Converter={StaticResource visibilityConv}}" IsChecked="{Binding WindowsKeyCombinationsCheck}" IsThreeState="{Binding WindowsKeyCombinationsCheckThree}" />
+            <CheckBox Content="{StaticResource OpenInTab}" Style="{StaticResource SimpleCheckBox}" Margin="0,15,0,0" IsChecked="{Binding OpenInTabCheck}" IsThreeState="{Binding OpenInTabCheckThree}" />
+            <StackPanel Visibility="{Binding OpenInTabCheck, Converter={StaticResource visibilityConv}}">
+              <CheckBox Content="{StaticResource SyncTitle}" Style="{StaticResource SimpleCheckBox}" Margin="0,15,0,0" IsChecked="{Binding SyncTitleCheck}" IsThreeState="{Binding SyncTitleCheckThree}" />
+              <CheckBox Content="{StaticResource EnableHotkey}" Style="{StaticResource SimpleCheckBox}" Margin="0,15,0,0" IsChecked="{Binding EnableHotkeyCheck}" IsThreeState="{Binding EnableHotkeyCheckThree}" />
+              <Label Content="{StaticResource MethodOfClosingTab}" Style="{StaticResource AboveControlLabel}" Margin="0,15,0,3" />
+              <ComboBox DisplayMemberPath="Key" SelectedValuePath="Key" Style="{StaticResource SimpleComboBox}" ItemsSource="{Binding MethodsList}" SelectedValue="{Binding Method}" />
+            </StackPanel>
+            <CheckBox Content="{StaticResource CloseIME}" Style="{StaticResource SimpleCheckBox}" Margin="0,15,0,0" IsChecked="{Binding CloseIMECheck}" IsThreeState="{Binding CloseIMECheckThree}" />
+            <StackPanel Visibility="{Binding RDSizeModeValid, Converter={StaticResource visibilityConv}}">
+              <Label Content="{StaticResource RDSizeMode}" Style="{StaticResource AboveControlLabel}" Margin="0,15,0,3" />
+              <ComboBox DisplayMemberPath="Display" SelectedValuePath="Key" Style="{StaticResource SimpleComboBox}" ItemsSource="{Binding RDSizeModesList}" SelectedValue="{Binding RDSizeMode}" />
+            </StackPanel>
+            <StackPanel Visibility="{Binding MultiMonitorsValid, Converter={StaticResource visibilityConv}}">
+              <Label Content="{StaticResource SelectMonitors}" Style="{StaticResource AboveControlLabel}" Margin="0,15,0,3" ToolTip="{Binding SelectMonitors}" />
+              <TextBox Text="{Binding SelectedMonitors, UpdateSourceTrigger=PropertyChanged}" />
+            </StackPanel>
+            <Grid Visibility="{Binding WidthHeightValid, Converter={StaticResource visibilityConv}}">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*" />
+                <ColumnDefinition Width="15" />
+                <ColumnDefinition Width="1*" />
+              </Grid.ColumnDefinitions>
+              <Grid.RowDefinitions>
+                <RowDefinition Height="1*" />
+                <RowDefinition Height="1*" />
+                <RowDefinition Height="1*" />
+                <RowDefinition Height="1*" />
+              </Grid.RowDefinitions>
+              <Label Grid.Row="0" Grid.Column="0" Content="{StaticResource Width}" Style="{StaticResource AboveControlLabel}" VerticalAlignment="Top" Margin="0,15,0,3" />
+              <Label Grid.Row="0" Grid.Column="2" Content="{StaticResource Height}" Style="{StaticResource AboveControlLabel}" VerticalAlignment="Top" Margin="0,15,0,3" />
+              <TextBox Grid.Row="1" Grid.Column="0" VerticalAlignment="Top" Text="{Binding Width, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True, Converter={StaticResource EmptyStringToIntConverter}}" />
+              <TextBox Grid.Row="1" Grid.Column="2" VerticalAlignment="Top" Text="{Binding Height, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True, Converter={StaticResource EmptyStringToIntConverter}}" />
+            </Grid>
+            <StackPanel Visibility="{Binding MonitorValid, Converter={StaticResource visibilityConv}}">
+              <Label Content="{StaticResource Monitor}" Style="{StaticResource AboveControlLabel}" Margin="0,15,0,3" />
+              <ComboBox DisplayMemberPath="Display" SelectedValuePath="Key" Style="{StaticResource SimpleComboBox}" ItemsSource="{Binding Monitors}" SelectedValue="{Binding Monitor}" />
             </StackPanel>
           </StackPanel>
-          <Label Content="{StaticResource Monitor}" Style="{StaticResource AboveControlLabel}" Visibility="{Binding MonitorValid, Converter={StaticResource visibilityConv}}" Margin="0,15,0,3" />
-          <ComboBox DisplayMemberPath="Display" SelectedValuePath="Key" Style="{StaticResource SimpleComboBox}" Visibility="{Binding MonitorValid, Converter={StaticResource visibilityConv}}" ItemsSource="{Binding Monitors}" SelectedValue="{Binding Monitor}" />
           <Label Content="{StaticResource AssignedTags}" Style="{StaticResource AboveControlLabel}" Margin="0,15,0,3" />
           <ListView BorderThickness="0" Background="{StaticResource bg1}" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ItemContainerStyle="{StaticResource ListItemEmptyStyle}" ItemsSource="{Binding AssignedTags}" PreviewMouseWheel="ListViewTags_OnPreviewMouseWheel">
             <ItemsControl.ItemsPanel>
@@ -287,7 +312,7 @@
                   <DataTemplate>
                     <Grid>
                       <Rectangle Width="16" Height="16" RadiusX="3" RadiusY="3" Fill="{Binding}" />
-                      <Path StrokeThickness="2" SnapsToDevicePixels="False" Data="M3,8 L7,12 M7,12 L13,5">
+                      <Path StrokeThickness="2" SnapsToDevicePixels="False" Data="M3 8L7 12M7 12L13 5">
                         <FrameworkElement.Style>
                           <Style TargetType="{x:Type Path}">
                             <Setter Property="Stroke" Value="{Binding}" />
@@ -314,7 +339,7 @@
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Height="35" HorizontalAlignment="Center">
               <Canvas Margin="10,9,20,0">
                 <Ellipse Height="16" Width="16" Fill="{StaticResource a2}" Canvas.Left="0" />
-                <Path Stroke="{StaticResource a1}" Canvas.Left="0" StrokeThickness="2" SnapsToDevicePixels="False" Data="M3,8 L7,12 M7,12 L13,5" />
+                <Path Stroke="{StaticResource a1}" Canvas.Left="0" StrokeThickness="2" SnapsToDevicePixels="False" Data="M3 8L7 12M7 12L13 5" />
               </Canvas>
               <Label Content="{StaticResource DetailsSaved}" FontSize="13" Margin="0,5,0,0" />
             </StackPanel>

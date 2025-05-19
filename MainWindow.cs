@@ -11,7 +11,8 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Markup;
-using System.Windows.Media.Imaging;
+using System.Windows.Media;
+using System.Windows.Shapes;
 using ChromeTabs;
 using GalaSoft.MvvmLight.Command;
 using log4net;
@@ -100,6 +101,30 @@ public partial class MainWindow : Window, IStyleConnector
         {
             return;
         }
+        int num = 0;
+        foreach (TabBase item in MainWindowVM.ItemCollection)
+        {
+            if (item.ConfirmClosingTab())
+            {
+                num++;
+            }
+        }
+        if (num > 0)
+        {
+            ConfirmationDialog confirmationDialog = new ConfirmationDialog(this, Application.Current.Resources["CloseWindow"] as string, Application.Current.Resources["ClosingAllTabs"] as string) { Topmost = true };
+            confirmationDialog.Focus();
+            confirmationDialog.ShowDialog();
+            if (!confirmationDialog.Confirmed)
+            {
+                e.Cancel = true;
+                return;
+            }
+        }
+        foreach (TabBase tab in MainWindowVM.ItemCollection)
+        {
+            tab.CloseTab(noconfirm: true);
+            tab.Cleanup();
+        }
         if (App.mainWindows.Count == 1)
         {
             try
@@ -112,10 +137,6 @@ public partial class MainWindow : Window, IStyleConnector
                 log.Error(message);
             }
         }
-        foreach (TabBase tab in MainWindowVM.ItemCollection)
-        {
-            tab.CloseTab(noconfirm: true);
-        }
     }
 
     public bool IsWindowClosed;
@@ -126,20 +147,46 @@ public partial class MainWindow : Window, IStyleConnector
         App.mainWindows.Remove(this);
     }
 
+    private void setMaximizeIcon(WindowState windowState)
+    {
+        if(App.OSVersion.Major >= 10 &&  App.OSVersion.Build >= 22000)
+        {
+            if(windowState == WindowState.Maximized)
+            {
+                maximizeIcon.Data = Application.Current.Resources["Maximized11Path"] as Geometry;;
+            }
+            else
+            {
+                maximizeIcon.Data = Application.Current.Resources["Maximize11Path"] as Geometry;;
+            }
+        }
+        else
+        {
+            if(windowState == WindowState.Maximized)
+            {
+                maximizeIcon.Data = Application.Current.Resources["MaximizedPath"] as Geometry;;
+            }
+            else
+            {
+                maximizeIcon.Data = Application.Current.Resources["MaximizePath"] as Geometry;;
+            }
+        }
+    }
+
     private void Win_StateChanged(object sender, EventArgs e)
     {
-        ((Image)MyChromeTabControl.Template.FindName("ImageMaximizeNormalize", MyChromeTabControl)).Source = ((base.WindowState == WindowState.Normal) ? (Application.Current.Resources["ImageMaximized"] as BitmapImage) : (Application.Current.Resources["ImageNormalized"] as BitmapImage));
         RowDefinition rowDefinition = MainGrid.RowDefinitions.ElementAt(1);
         switch (base.WindowState)
         {
         case WindowState.Normal:
-            Chrome.ResizeBorderThickness = new Thickness(10.0);
+            Chrome.ResizeBorderThickness = new Thickness(5.0);
+            Chrome.GlassFrameThickness = new Thickness(0.0, 0.0, 0.0, 1.0);
             base.BorderThickness = new Thickness(0.0);
             if(App.Config.GUI.Logo)
             {
                 rowDefinition.Height = new GridLength(16.0);
             }
-
+            setMaximizeIcon(WindowState.Normal);
             break;
         case WindowState.Minimized:
             if (MainWindowVM.SelectedTab is AppTabViewModel appTabViewModel)
@@ -149,8 +196,10 @@ public partial class MainWindow : Window, IStyleConnector
             return;
         case WindowState.Maximized:
             Chrome.ResizeBorderThickness = new Thickness(0.0);
+            Chrome.GlassFrameThickness = new Thickness(0.0);
             base.BorderThickness = new Thickness(App.Config.GUI.MaximizedBorderThickness);
             rowDefinition.Height = new GridLength(0.0);
+            setMaximizeIcon(WindowState.Maximized);
             break;
         }
         MainWindowVM.ActivateTab();
@@ -164,8 +213,27 @@ public partial class MainWindow : Window, IStyleConnector
 
     private double InitHeight;
 
+    private HwndSource hwndSource;
+
+    private Button minimizeButton;
+    private Button maximizeButton;
+    private Button closeButton;
+    private Path minimizeIcon;
+    private Path maximizeIcon;
+    private Path closeIcon;
+
+    private ChromeTabPanel tabPanel; 
+
     private void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
     {
+        minimizeButton = MyChromeTabControl.Template.FindName("MinimizeButton", MyChromeTabControl) as Button;
+        maximizeButton = MyChromeTabControl.Template.FindName("MaximizeButton", MyChromeTabControl) as Button;
+        closeButton = MyChromeTabControl.Template.FindName("CloseButton", MyChromeTabControl) as Button;
+        minimizeIcon = MyChromeTabControl.Template.FindName("MinimizeIcon", MyChromeTabControl) as Path;
+        maximizeIcon = MyChromeTabControl.Template.FindName("MaximizeIcon", MyChromeTabControl) as Path;
+        closeIcon = MyChromeTabControl.Template.FindName("CloseIcon", MyChromeTabControl) as Path;
+        tabPanel = MyChromeTabControl.Template.FindName("PART_TabPanel", MyChromeTabControl) as ChromeTabPanel;
+        
         Handle = new WindowInteropHelper(this).Handle;
         MainWindowVM.RegisterWindowResizeEvent();
 
@@ -176,6 +244,12 @@ public partial class MainWindow : Window, IStyleConnector
         {
             MainGrid.RowDefinitions.ElementAt(1).Height = new GridLength(0.0);
         }
+
+        setMaximizeIcon(WindowState.Normal);
+
+        hwndSource = HwndSource.FromHwnd(Handle);
+        hwndSource.AddHook(WndProc);
+
         if (!First)
         {
             return;
@@ -211,52 +285,61 @@ public partial class MainWindow : Window, IStyleConnector
             CurScreen = System.Windows.Forms.Screen.AllScreens[monitor];
         }
 
+        double num = Win32.GetScalingFactor(this);
+        if (num == 0.0)
+        {
+            num = 1.0;
+        }
+        double ScreenWidth = CurScreen.WorkingArea.Width/num;
+        double ScreenHeight = CurScreen.WorkingArea.Height/num;
+
+        base.MinWidth /= num;
+        base.MinHeight /= num;
+        base.Width /= num;
+        base.Height /= num;
+
         if (App.Config.GUI.Width != 0 && App.Config.GUI.Height != 0)
         {
-            double num = Win32.GetScalingFactor(this);
-            if (num == 0.0)
-            {
-                num = 1.0;
-            }
-            if (base.MinWidth > (double)App.Config.GUI.Width)
-            {
-                base.MinWidth = App.Config.GUI.Width;
-            }
-            if (base.MinHeight > (double)App.Config.GUI.Height)
-            {
-                base.MinHeight = App.Config.GUI.Height;
-            }
-            base.MinWidth /= num;
-            base.MinHeight /= num;
-            base.Width = (double)App.Config.GUI.Width / num;
-            base.Height = (double)App.Config.GUI.Height / num;
-
-            if((base.Width / CurScreen.WorkingArea.Width) < App.Config.GUI.MinWidthScale)
-            {
-                base.Width = App.Config.GUI.MinWidthScale * CurScreen.WorkingArea.Width;
-                base.Height = base.Width * 0.75;
-            }
-
-            if(base.Width > CurScreen.WorkingArea.Width)
-            {
-                base.Width = CurScreen.WorkingArea.Width;
-            }
-            if(base.Height > CurScreen.WorkingArea.Height)
-            {
-                base.Height = CurScreen.WorkingArea.Height;
-            }
+            base.Width = (double)App.Config.GUI.Width/num;
+            base.Height = (double)App.Config.GUI.Height/num;
         }
+
+        if((base.Width / ScreenWidth) < App.Config.GUI.MinWidthScale)
+        {
+            base.Width = App.Config.GUI.MinWidthScale * ScreenWidth;
+            base.Height = base.Width * 0.75;
+        }
+
+        if(base.Width > ScreenWidth)
+        {
+            base.Width = ScreenWidth;
+        }
+        if(base.Height > ScreenHeight)
+        {
+            base.Height = ScreenHeight;
+        }
+
+        if (base.MinWidth > base.Width)
+        {
+            base.MinWidth = base.Width;
+        }
+        if (base.MinHeight > base.Height)
+        {
+            base.MinHeight = base.Height;
+        }
+
         InitWidth = base.Width;
         InitHeight = base.Height;
-        base.Left = CurScreen.WorkingArea.Left;
-        if(CurScreen.WorkingArea.Width > base.Width)
+
+        base.Left = CurScreen.WorkingArea.Left/num;
+        if(ScreenWidth > base.Width)
         {
-            base.Left += (CurScreen.WorkingArea.Width - base.Width) / 2.0;
+            base.Left += (ScreenWidth - base.Width) / 2.0;
         }
-        base.Top = CurScreen.WorkingArea.Top;
-        if(CurScreen.WorkingArea.Height > base.Height)
+        base.Top = CurScreen.WorkingArea.Top/num;
+        if(ScreenHeight > base.Height)
         {
-            base.Top += (CurScreen.WorkingArea.Height - base.Height) / 2.0;
+            base.Top += (ScreenHeight - base.Height) / 2.0;
         }
 
         if (!App.Config.GUI.Maximized)
@@ -303,21 +386,6 @@ public partial class MainWindow : Window, IStyleConnector
             (MainWindowVM.SelectedTab as AppTabViewModel).Resize();
         }
         MainWindowVM.CanActivate = true;
-    }
-
-    private void TextBlockMinimize_MouseUp(object sender, MouseButtonEventArgs e)
-    {
-        base.WindowState = WindowState.Minimized;
-    }
-
-    private void TextBlockMaximize_MouseUp(object sender, MouseButtonEventArgs e)
-    {
-        base.WindowState = ((base.WindowState == WindowState.Normal) ? WindowState.Maximized : WindowState.Normal);
-    }
-
-    private void TextBlockClose_MouseUp(object sender, MouseButtonEventArgs e)
-    {
-        CloseWindow();
     }
 
     public MainWindow(Options opts)
@@ -494,30 +562,7 @@ public partial class MainWindow : Window, IStyleConnector
 
     private void CloseWindow()
     {
-        int num = 0;
-        foreach (TabBase item in MainWindowVM.ItemCollection)
-        {
-            if (item.ConfirmClosingTab())
-            {
-                num++;
-            }
-        }
-        if (num > 0)
-        {
-            ConfirmationDialog confirmationDialog = new ConfirmationDialog(this, Application.Current.Resources["CloseWindow"] as string, Application.Current.Resources["ClosingAllTabs"] as string) { Topmost = true };
-            confirmationDialog.Focus();
-            confirmationDialog.ShowDialog();
-            if (!confirmationDialog.Confirmed)
-            {
-                return;
-            }
-        }
         Close();
-    }
-
-    public void CloseCurrentWindow()
-    {
-        CloseWindow();
     }
 
     private void ExitMenuItem_OnClick(object sender, RoutedEventArgs e)
@@ -556,6 +601,159 @@ public partial class MainWindow : Window, IStyleConnector
         mainWindow.Show();
         mainWindow.WindowState = base.WindowState;
         mainWindow.BringIntoView();
+    }
+
+    private bool isMinButtonHovered;
+    private bool isMaxButtonHovered;
+    private bool isCloseButtonHovered;
+
+    private SolidColorBrush closeColor = new SolidColorBrush(Color.FromArgb(255, 196, 43, 28));
+    private SolidColorBrush closeIconColor = new SolidColorBrush(Colors.White);
+    private void UpdateButtonVisualState()
+    {
+        minimizeButton.Background = isMinButtonHovered ? Application.Current.Resources["t10"] as SolidColorBrush : MyChromeTabControl.Background;
+        maximizeButton.Background = isMaxButtonHovered ? Application.Current.Resources["t10"] as SolidColorBrush : MyChromeTabControl.Background;
+        closeButton.Background = isCloseButtonHovered ?  closeColor : MyChromeTabControl.Background;
+
+        closeIcon.Fill = isCloseButtonHovered ? closeIconColor : Application.Current.Resources["t00"] as SolidColorBrush;
+
+        Dispatcher.Invoke(() => { });
+    }
+
+    private bool IsPointInControl(Point point, FrameworkElement control)
+    {
+        Point relativePoint = control.PointFromScreen(PointToScreen(point));
+        return (relativePoint.X >= 0 && relativePoint.X <= control.ActualWidth &&
+                relativePoint.Y >= 0 && relativePoint.Y <= control.ActualHeight);
+    }
+
+    private unsafe IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+    {
+        switch ((uint)msg)
+        {
+        case Win32.WM_KEYDOWN:
+        case Win32.WM_SYSKEYDOWN:
+            const int VK_F4 = 0x73;
+            var key = wParam.ToInt32();
+            bool altPressed = ((lParam.ToInt32() >> 29) & 1) == 1;
+            
+            if (key == VK_F4 && altPressed && !App.Config.GUI.Hotkey)
+            {
+                handled = true;
+            }
+            break;
+
+        case Win32.WM_NCHITTEST:
+            Point position = new Point((Int16)(((UIntPtr)lParam.ToPointer()).ToUInt32() & 0xFFFF), (Int16)(((UIntPtr)lParam.ToPointer()).ToUInt32() >> 16));
+            Point clientPoint = PointFromScreen(position);
+                    
+            bool wasMinButtonHovered = isMinButtonHovered;
+            bool wasMaxButtonHovered = isMaxButtonHovered;
+            bool wasCloseButtonHovered = isCloseButtonHovered;
+                    
+            isMinButtonHovered = false;
+            isMaxButtonHovered = false;
+            isCloseButtonHovered = false;
+                    
+            if (IsPointInControl(clientPoint, minimizeButton))
+            {
+                isMinButtonHovered = true;
+                handled = true;
+                if (wasMinButtonHovered != isMinButtonHovered)
+                {
+                    UpdateButtonVisualState();
+                }
+                return new IntPtr(Win32.HTMINBUTTON);
+            }
+            else if (IsPointInControl(clientPoint, maximizeButton))
+            {
+                isMaxButtonHovered = true;
+                handled = true;
+                if (wasMaxButtonHovered != isMaxButtonHovered)
+                {
+                    UpdateButtonVisualState();
+                }
+                return new IntPtr(Win32.HTMAXBUTTON);
+            }
+            else if (IsPointInControl(clientPoint, closeButton))
+            {
+                isCloseButtonHovered = true;
+                handled = true;
+                if (wasCloseButtonHovered != isCloseButtonHovered)
+                {
+                    UpdateButtonVisualState();
+                }
+                return new IntPtr(Win32.HTCLOSE);
+            }
+                    
+            if (wasMinButtonHovered != isMinButtonHovered ||
+                wasMaxButtonHovered != isMaxButtonHovered ||
+                wasCloseButtonHovered != isCloseButtonHovered)
+            {
+                UpdateButtonVisualState();
+            }
+            break;
+        case Win32.WM_NCLBUTTONDOWN:
+            position = new Point((Int16)(((UIntPtr)lParam.ToPointer()).ToUInt32() & 0xFFFF), (Int16)(((UIntPtr)lParam.ToPointer()).ToUInt32() >> 16));
+            clientPoint = PointFromScreen(position);
+                    
+            if (IsPointInControl(clientPoint, minimizeButton))
+            {
+                isMinButtonHovered = false;
+                isMaxButtonHovered = false;
+                isCloseButtonHovered = false;
+                UpdateButtonVisualState();
+
+                this.WindowState = WindowState.Minimized;
+
+                handled = true;
+                return IntPtr.Zero;
+            }
+            else if (IsPointInControl(clientPoint, maximizeButton))
+            {
+                isMinButtonHovered = false;
+                isMaxButtonHovered = false;
+                isCloseButtonHovered = false;
+                UpdateButtonVisualState();
+
+                if (this.WindowState == WindowState.Maximized)
+                    this.WindowState = WindowState.Normal;
+                else
+                    this.WindowState = WindowState.Maximized;
+
+                handled = true;
+                return IntPtr.Zero;
+            }
+            else if (IsPointInControl(clientPoint, closeButton))
+            {
+                CloseWindow();
+                handled = true;
+                return IntPtr.Zero;
+            }
+            break;
+        case Win32.WM_NCMOUSELEAVE:
+            if (isMinButtonHovered || isMaxButtonHovered || isCloseButtonHovered)
+            {
+                isMinButtonHovered = false;
+                isMaxButtonHovered = false;
+                isCloseButtonHovered = false;
+                UpdateButtonVisualState();
+            }
+            break;
+        case Win32.WM_NCMOUSEMOVE:
+            {
+                Win32.TRACKMOUSEEVENT tme = new Win32.TRACKMOUSEEVENT
+                {
+                    cbSize = (uint)Marshal.SizeOf(typeof(Win32.TRACKMOUSEEVENT)),
+                    dwFlags = Win32.TME_NONCLIENT | Win32.TME_LEAVE,
+                    hwndTrack = this.Handle,
+                    dwHoverTime = 0
+                };
+                Win32.TrackMouseEvent(ref tme);
+            }
+            break;
+        }
+        return IntPtr.Zero;
     }
 
     private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);

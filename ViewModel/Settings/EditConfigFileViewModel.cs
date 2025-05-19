@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Windows;
@@ -120,7 +121,7 @@ public class EditConfigFileViewModel : ViewModelBase, INotifyPropertyChanged, IN
             openFileDialog.Filter = "*.ini;*.reg|*.ini;*.reg|*.*|*.*";
         }
         openFileDialog.ShowDialog();
-        if (!string.IsNullOrEmpty(openFileDialog.FileName))
+        if (!string.IsNullOrWhiteSpace(openFileDialog.FileName))
         {
             Path = openFileDialog.FileName;
             UpdateGUI();
@@ -267,6 +268,21 @@ public class EditConfigFileViewModel : ViewModelBase, INotifyPropertyChanged, IN
                     credential.OnPropertyChanged("PrivateKeyName");
                 }
             }
+            else if(configFile.Type == "RDP")
+            {
+                foreach(Session session in App.Sessions.Sessions.Where(s => s.MSTSCId == configFile.Id))
+                {
+                    string rdpFile = session.GetRDPFile();
+
+                    try
+                    {
+                        File.Delete(rdpFile);
+                    }
+                    catch (Exception)
+                    {
+                    }
+                }
+            }
         }
 
         return configFile;
@@ -299,7 +315,7 @@ public class EditConfigFileViewModel : ViewModelBase, INotifyPropertyChanged, IN
             ShowSelectedConfigFile(configFiles[0]);
             return;
         }
-        TitleBackground = System.Windows.Application.Current.Resources["bg8"] as SolidColorBrush;
+        TitleBackground = Application.Current.Resources["bg8"] as SolidColorBrush;
         BatchMode = true;
         NewMode = false;
 
@@ -330,7 +346,7 @@ public class EditConfigFileViewModel : ViewModelBase, INotifyPropertyChanged, IN
 
     public void ShowSelectedConfigFile(ConfigFile configFile)
     {
-        TitleBackground = System.Windows.Application.Current.Resources["bg1"] as SolidColorBrush;
+        TitleBackground = Application.Current.Resources["bg1"] as SolidColorBrush;
         BatchMode = false;
         NewMode = false;
 
@@ -396,7 +412,7 @@ public class EditConfigFileViewModel : ViewModelBase, INotifyPropertyChanged, IN
 
     public void CreateNewConfigFile()
     {
-        TitleBackground = System.Windows.Application.Current.Resources["bg8"] as SolidColorBrush;
+        TitleBackground = Application.Current.Resources["bg8"] as SolidColorBrush;
         BatchMode = false;
         NewMode = true;
         SelectedConfigFile = null;
@@ -421,9 +437,9 @@ public class EditConfigFileViewModel : ViewModelBase, INotifyPropertyChanged, IN
             return true;
         }
 
-        if ((ConfigFileType != "PuTTY" || (ConfigFileType == "PuTTY" && PuTTYSession == null)) && (string.IsNullOrEmpty(Path) || string.IsNullOrEmpty(EditedConfigFile.Data)))
+        if ((ConfigFileType != "PuTTY" || (ConfigFileType == "PuTTY" && PuTTYSession == null)) && (string.IsNullOrWhiteSpace(Path) || string.IsNullOrEmpty(EditedConfigFile.Data)))
         {
-            AddError("Path", "File does not exist!");
+            AddError("Path", string.Format(Application.Current.Resources["NotExist"] as string, Application.Current.Resources["ConfigFilePath"]));
             return !HasErrors;
         }
         else
@@ -475,7 +491,7 @@ public class EditConfigFileViewModel : ViewModelBase, INotifyPropertyChanged, IN
         {
             if (!NewMode)
             {
-                AddError("Name", "Config file name already exists!");
+                AddError("Name", string.Format(Application.Current.Resources["Exist"] as string, Application.Current.Resources["ConfigFileName"]));
             }
             else
             {

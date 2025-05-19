@@ -103,34 +103,34 @@ public abstract class TabBase : ViewModelBase, INotifyDataErrorInfo
         }
     }
 
-    private ImageSource _TabIcon;
-    public ImageSource TabIcon
+    private Geometry _TabPath;
+    public Geometry TabPath
     {
         get
         {
-            return _TabIcon;
+            return _TabPath;
         }
         set
         {
-            if (_TabIcon != value)
+            if (_TabPath != value)
             {
-                Set(() => TabIcon, ref _TabIcon, value);
+                Set(() => TabPath, ref _TabPath, value);
             }
         }
     }
 
-    private Visibility _TabIconVisibility = Visibility.Collapsed;
-    public Visibility TabIconVisibility
+    private Visibility _TabPathVisibility = Visibility.Collapsed;
+    public Visibility TabPathVisibility
     {
         get
         {
-            return _TabIconVisibility;
+            return _TabPathVisibility;
         }
         set
         {
-            if (_TabIconVisibility != value)
+            if (_TabPathVisibility != value)
             {
-                Set(() => TabIconVisibility, ref _TabIconVisibility, value);
+                Set(() => TabPathVisibility, ref _TabPathVisibility, value);
             }
         }
     }
@@ -251,7 +251,7 @@ public abstract class TabBase : ViewModelBase, INotifyDataErrorInfo
     protected TabBase(MainWindow mainWindow)
     {
         MainWindow = mainWindow;
-        TabColor = System.Windows.Application.Current.Resources["t8"] as SolidColorBrush;
+        TabColor = Application.Current.Resources["t8"] as SolidColorBrush;
         DetachCommand = new RelayCommand<TabBase>(MainWindow.DetachTabToNewWindow);
     }
 

@@ -36,6 +36,7 @@
   <system:String x:Key="Refresh">Refresh</system:String>
   <system:String x:Key="Save">Save</system:String>
   <system:String x:Key="Session">Session</system:String>
+  <system:String x:Key="Shortcut">Shortcut</system:String>
   <system:String x:Key="Tab">Tab</system:String>
   <system:String x:Key="Tag">Tag</system:String>
   <system:String x:Key="Unpin">Unpin</system:String>
@@ -44,10 +45,12 @@
   <system:String x:Key="Window">Window</system:String>
   <system:String x:Key="Yes">Yes</system:String>
   <system:String x:Key="Menu">Main menu</system:String>
+  <system:String x:Key="Script">Script</system:String>
   <system:String x:Key="NewSession">Create new session</system:String>
   <system:String x:Key="NewTab">Open new tab</system:String>
   <system:String x:Key="NewWindow">Open new window</system:String>
   <system:String x:Key="NewHistory">Open history tab</system:String>
+  <system:String x:Key="NewShortcut">Open shortcut tab</system:String>
   <system:String x:Key="NewProcessTab">Open process tab</system:String>
   <system:String x:Key="NewWindowTab">Open window tab</system:String>
   <system:String x:Key="ImportSessions">Import sessions</system:String>
@@ -113,7 +116,13 @@
   <system:String x:Key="CUSTOMIZATION">CUSTOMIZATION</system:String>
   <system:String x:Key="SetColor">Set custom color of this session</system:String>
   <system:String x:Key="UseScript">Use post-authenticate script</system:String>
+  <system:String x:Key="StartRemoteApp">Start RemoteApp</system:String>
+  <system:String x:Key="ProgramPath">Program path</system:String>
+  <system:String x:Key="StartShell">Start the program on connection</system:String>
   <system:String x:Key="WindowsKeyCombinations">Apply Windows key combinations remotely</system:String>
+  <system:String x:Key="RDSizeMode">Remote desktop size mode</system:String>
+  <system:String x:Key="AutoFit">Autofit</system:String>
+  <system:String x:Key="Custom">Custom</system:String>
   <system:String x:Key="FullScreen">Full screen</system:String>
   <system:String x:Key="MultiMonitors">Multiple monitors</system:String>
   <system:String x:Key="SelectMonitors">Select monitors</system:String>
@@ -126,6 +135,7 @@
   <system:String x:Key="ClassName">Main window class name</system:String>
   <system:String x:Key="DisplayName">Display name</system:String>
   <system:String x:Key="SyncTitle">Sync Window Title</system:String>
+  <system:String x:Key="EnableHotkey">Enable keyboard shortcuts</system:String>
   <system:String x:Key="OpenInTab">Open in Tab</system:String>
   <system:String x:Key="CloseIME">Close IME</system:String>
   <system:String x:Key="ProcessName">Process name</system:String>
@@ -190,6 +200,7 @@
   <system:String x:Key="CreateSession2">Create the new session</system:String>
   <system:String x:Key="OpenSettings">Open the Settings tab</system:String>
   <system:String x:Key="OpenHistory">Open the History tab</system:String>
+  <system:String x:Key="OpenShortcut">Open the Shortcut tab</system:String>
   <system:String x:Key="Reconnects">Reconnect to the targeted machine</system:String>
   <system:String x:Key="OpenTab">Open a new tab</system:String>
   <system:String x:Key="Closes">Close the current tab</system:String>
@@ -213,6 +224,7 @@
   <system:String x:Key="Error9">Something bad happened({0}).</system:String>
   <system:String x:Key="DeleteConfirmation">Delete Confirmation</system:String>
   <system:String x:Key="AddTab">Add new tab</system:String>
+  <system:String x:Key="TabsFull">Tabs are full</system:String>
   <system:String x:Key="Thirdparty">Third party components</system:String>
   <system:String x:Key="PuttyNotFound">{0} is not found!{1}SSH/Telnet won't be working!</system:String>
   <system:String x:Key="InputMasterPassword">Input the master password</system:String>
@@ -235,4 +247,8 @@
   <system:String x:Key="Password2">Password({0}):</system:String>
   <system:String x:Key="Frequent">Frequently used</system:String>
   <system:String x:Key="InputAddress">Input the address</system:String>
+  <system:String x:Key="Session2"> session</system:String>
+  <system:String x:Key="Required">{0} is required</system:String>
+  <system:String x:Key="Exist">{0} already exists</system:String>
+  <system:String x:Key="NotExist">{0} does not exist</system:String>
 </ResourceDictionary>

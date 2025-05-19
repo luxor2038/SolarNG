@@ -9,13 +9,13 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Forms;
 using System.Windows.Media;
 using GalaSoft.MvvmLight.Command;
 using log4net;
@@ -38,7 +38,7 @@ public class AppTabViewModel : TabBase
     {
         if (IsSSHv2ShareMainTab())
         {
-            ConfirmationDialog confirmationDialog = new ConfirmationDialog(base.MainWindow, System.Windows.Application.Current.Resources["Reconnect"] as string, string.Format(System.Windows.Application.Current.Resources["Reconnecting"] as string, base.TabName)) { Topmost = true };
+            ConfirmationDialog confirmationDialog = new ConfirmationDialog(base.MainWindow, Application.Current.Resources["Reconnect"] as string, string.Format(Application.Current.Resources["Reconnecting"] as string, base.TabName)) { Topmost = true };
             confirmationDialog.Focus();
             confirmationDialog.ShowDialog();
             if (!confirmationDialog.Confirmed)
@@ -48,7 +48,7 @@ public class AppTabViewModel : TabBase
         }
         Task.Run(delegate
         {
-            System.Windows.Application.Current.Dispatcher.Invoke(delegate
+            Application.Current.Dispatcher.Invoke(delegate
             {
                 Disconnect();
                 Connect(BuildArguments());
@@ -180,7 +180,7 @@ public class AppTabViewModel : TabBase
         if (!AppProcess.HasExited && IsInTab)
         {
             KickTab();
-            System.Windows.Application.Current.Dispatcher.Invoke(delegate
+            Application.Current.Dispatcher.Invoke(delegate
             {
                 base.MainWindow.MainWindowVM.RemoveTab(this);
             });
@@ -236,7 +236,7 @@ public class AppTabViewModel : TabBase
 
     public void KickAll()
     {
-        System.Windows.Application.Current.Dispatcher.Invoke(delegate
+        Application.Current.Dispatcher.Invoke(delegate
         {
             base.MainWindow.MainWindowVM.KickAllTab();
         });
@@ -246,7 +246,7 @@ public class AppTabViewModel : TabBase
 
     public bool IsConnected => State == ConnectionState.Connected;
 
-    public Panel Panel { get; set; } = new Panel();
+    public System.Windows.Forms.Panel Panel { get; set; } = new System.Windows.Forms.Panel();
     private void Panel_Disposed(object sender, EventArgs e)
     {
         Cleanup();
@@ -289,13 +289,13 @@ public class AppTabViewModel : TabBase
             {
             case -1073741510:
             case 0:
-                ErrorMessage = System.Windows.Application.Current.Resources["Error0"] as string;
+                ErrorMessage = Application.Current.Resources["Error0"] as string;
                 break;
             case 1:
-                ErrorMessage = System.Windows.Application.Current.Resources["Error1"] as string;
+                ErrorMessage = Application.Current.Resources["Error1"] as string;
                 break;
             default:
-                ErrorMessage = string.Format(System.Windows.Application.Current.Resources["Error9"] as string, _ExitCode);
+                ErrorMessage = string.Format(Application.Current.Resources["Error9"] as string, _ExitCode);
                 break;
             }
             RaisePropertyChanged("ErrorMessage");
@@ -364,13 +364,10 @@ public class AppTabViewModel : TabBase
         Session.OpenCounter++;
         Session.OpenTime = DateTime.Now;
 
-        if (Session.Type == "rdp" || Session.Type == "vnc")
-        {
-            NeedDisableHotkey = true;
-        }
-
         iFlags = Session.iFlags2;
         Monitor = Session.Monitor;
+
+        NeedDisableHotkey = (iFlags & ProgramConfig.FLAG_ENABLEHOTKEY) == 0;
 
         if (Session.Type == "app")
         {
@@ -467,7 +464,7 @@ public class AppTabViewModel : TabBase
             }
             else if(ProxySession != null)
             {
-                base.TabColorName = System.Windows.Application.Current.Resources[ProxySession.SessionType.AbbrDisplayName] as string;
+                base.TabColorName = Application.Current.Resources[ProxySession.SessionType.AbbrDisplayName] as string;
                 base.TabColorNameVisibility = Visibility.Visible;
             }
             else
@@ -477,7 +474,7 @@ public class AppTabViewModel : TabBase
         }
         else
         {
-            base.TabColorName =  Session.SessionTypeIsNormal ? Session.SessionType.AbbrDisplayName : System.Windows.Application.Current.Resources[Session.SessionType.AbbrDisplayName] as string;
+            base.TabColorName =  Session.SessionTypeIsNormal ? Session.SessionType.AbbrDisplayName : Application.Current.Resources[Session.SessionType.AbbrDisplayName] as string;
             base.TabColorNameVisibility = Visibility.Visible;
         }
 
@@ -554,7 +551,7 @@ public class AppTabViewModel : TabBase
         }
         Task.Run(delegate
         {
-            System.Windows.Application.Current?.Dispatcher.Invoke(delegate
+            Application.Current?.Dispatcher.Invoke(delegate
             {
                 RemoveSSHv2ShareTabs();
             });
@@ -617,14 +614,14 @@ public class AppTabViewModel : TabBase
 
         if(Ip == "0.0.0.0")
         {
-            System.Windows.Application.Current.Dispatcher.Invoke(delegate
+            Application.Current.Dispatcher.Invoke(delegate
             {
                 while (Win32.GetForegroundWindow() != base.MainWindow.Handle)
                 {
                     Win32.SetForegroundWindow(base.MainWindow.Handle);
                     Thread.Sleep(100);
                 }
-                PromptDialog promptDialog = new PromptDialog(base.MainWindow, System.Windows.Application.Current.Resources["Connect"] as string, System.Windows.Application.Current.Resources["InputAddress"] as string, "") { Topmost = true };
+                PromptDialog promptDialog = new PromptDialog(base.MainWindow, Application.Current.Resources["Connect"] as string, Application.Current.Resources["InputAddress"] as string, "") { Topmost = true };
                 promptDialog.Focus();
                 bool? flag2 = promptDialog.ShowDialog();
                 if (!flag2.HasValue || !flag2.Value)
@@ -756,7 +753,34 @@ public class AppTabViewModel : TabBase
             {
                 rdpFileData += configFile.Data;
             }
-            rdpFileData += "\r\nkeyboardhook:i:" + Session.KeyboardHook;
+
+            if(!string.IsNullOrEmpty(Session.RemoteAppPath))
+            {
+                rdpFileData += "\r\nalternate shell:s:rdpinit.exe\r\ndisableremoteappcapscheck:i:1\r\nremoteapplicationmode:i:1\r\nremoteapplicationprogram:s:" + Session.RemoteAppPath;
+                if(!string.IsNullOrWhiteSpace(Session.RemoteAppCmdline))
+                {
+                    rdpFileData += "\r\nremoteapplicationexpandcmdline:i:1\r\nremoteapplicationcmdline:s:" + Session.RemoteAppCmdline;
+                }
+                if(!string.IsNullOrEmpty(Session.ShellWorkingDir))
+                {
+                    rdpFileData += "\r\nremoteapplicationexpandworkingdir:i:1\r\nshell working directory:s:" + Session.ShellWorkingDir;
+                }
+            }
+            else
+            {
+                if(!string.IsNullOrEmpty(Session.ShellPath))
+                {
+                    rdpFileData += "\r\nalternate shell:s:" + Session.ShellPath;
+
+                    if(!string.IsNullOrEmpty(Session.ShellWorkingDir))
+                    {
+                        rdpFileData += "\r\nshell working directory:s:" + Session.ShellWorkingDir;
+                    }
+                }
+
+                rdpFileData += "\r\nkeyboardhook:i:" + Session.KeyboardHook;
+            }
+
             if(!string.IsNullOrWhiteSpace(Session.SelectedMonitors))
             {
                 rdpFileData += "\r\nselectedmonitors:s:" + Session.SelectedMonitors.Trim();
@@ -767,7 +791,7 @@ public class AppTabViewModel : TabBase
                 rdpFileData += "\r\nusername:s:" + Credential.Username + (SafeString.IsNullOrEmpty(Credential?.Password) ? "" : "\r\npassword 51:b:" + BitConverter.ToString(ProtectedData.Protect(Encoding.Unicode.GetBytes(Credential.Password.ToString()), null, DataProtectionScope.CurrentUser)).Replace("-", string.Empty));
             }
 
-            if(CurProgram.UsePipe && UseHook)
+            if(CurProgram.UsePipe && UseHook && string.IsNullOrEmpty(Session.RemoteAppPath))
             {
                 string id = InstanceId.ToString();
                 rdpFile = "\\\\.\\pipe\\SolarNG.RDP." + id.Substring(id.Length - 12);
@@ -776,30 +800,11 @@ public class AppTabViewModel : TabBase
             }
             else
             {
-                bool rdpFileExists = false;
-                int num = BitConverter.ToInt32(App.UserHash, 0);
-                string user_id = Credential.Id.ToString();
-                user_id = "_" + user_id.Substring(user_id.Length - 12);
+                rdpFile = Session.GetRDPFile();
 
-                if (configFile != null)
-                {
-                    rdpFileExists = configFile.RealPathExists;
-                    rdpFile = configFile.RealPath;
-                }
-
-                if (string.IsNullOrEmpty(rdpFile))
-                {
-                    user_id = "SolarNG" + user_id;
-                }
-                else
-                {
-                    user_id = Path.GetFileNameWithoutExtension(rdpFile) + user_id;
-                }
-
-                rdpFile = Path.Combine(App.DataFilePath, "Temp", user_id + "_" + num.ToString("x") + ".rdp");
                 try
                 {
-                    if (!File.Exists(rdpFile) || !rdpFileExists)
+                    if (!File.Exists(rdpFile))
                     {
                         string directoryName = Path.GetDirectoryName(rdpFile);
                         if (!Directory.Exists(directoryName))
@@ -900,8 +905,8 @@ public class AppTabViewModel : TabBase
                 session_settings = Uri.EscapeDataString(plinkx_cmdline);
                 session_settings = ";x-proxymethod=5;x-proxytelnetcommand=" + session_settings.Replace("%5C", "\\\\");
             }
-            args = Protocol + "://";
-            string text5 = "";
+            args = "\"" + Protocol + "://";
+            string pass = "";
             if (!string.IsNullOrEmpty(Credential?.Username))
             {
                 if(CurProgram.UsePipe && App.Config.WinSCP.PasswordByPipe)
@@ -913,13 +918,13 @@ public class AppTabViewModel : TabBase
                     {
                         PipeServers.Add(new PipeServer(pwFile, Credential.Password.ToString(), 1));
 
-                        text5 = " /passwordsfromfiles /password=" + pwFile;
+                        pass = " /passwordsfromfiles /password=" + pwFile;
                     }
                     if (!SafeString.IsNullOrEmpty(Credential?.Passphrase))
                     {
                         PipeServers.Add(new PipeServer(pwFile, Credential.Passphrase.ToString(), 1));
 
-                        text5 = " /passwordsfromfiles /passphrase=" + pwFile;
+                        pass = " /passwordsfromfiles /passphrase=" + pwFile;
                     }
                 }
                 else
@@ -938,8 +943,26 @@ public class AppTabViewModel : TabBase
             {
                 args += session_settings + "@";
             }
-            args += Ip + ":" + Port + "/" + text5;
-            if (!string.IsNullOrEmpty(Credential?.PrivateKeyPath))
+            args += Ip + ":" + Port;
+            if(!string.IsNullOrEmpty(Session.RemoteDirectory))
+            {
+                if(!Session.RemoteDirectory.StartsWith("/"))
+                {
+                    args += "/";
+                }
+                args += Session.RemoteDirectory;
+                if(!Session.RemoteDirectory.EndsWith("/"))
+                {
+                    args += "/";
+                }
+            }
+            else
+            {
+                args += "/";
+            }
+            args += "\" /browse" + pass;
+
+            if (!string.IsNullOrWhiteSpace(Credential?.PrivateKeyPath))
             {
                 if (CurProgram.UsePipe)
                 {
@@ -1148,7 +1171,7 @@ public class AppTabViewModel : TabBase
                     }
                 }
             }
-            if (!string.IsNullOrEmpty(Credential?.PrivateKeyPath))
+            if (!string.IsNullOrWhiteSpace(Credential?.PrivateKeyPath))
             {
                 if (CurProgram.UsePipe)
                 {
@@ -1464,7 +1487,7 @@ public class AppTabViewModel : TabBase
                 {
                     if (SafeString.IsNullOrEmpty(password))
                     {
-                        System.Windows.Application.Current.Dispatcher.Invoke(delegate
+                        Application.Current.Dispatcher.Invoke(delegate
                         {
                             while (Win32.GetForegroundWindow() != base.MainWindow.Handle)
                             {
@@ -1478,12 +1501,12 @@ public class AppTabViewModel : TabBase
                                 {
                                     key = "Passphrase2";
                                 }
-                                string text5 = FixIpv6Address(proxy.Ip);
+                                string addr = FixIpv6Address(proxy.Ip);
                                 if (proxy.Port != 22)
                                 {
-                                    text5 = text5 + ":" + proxy.Port;
+                                    addr = addr + ":" + proxy.Port;
                                 }
-                                PromptDialog promptDialog = new PromptDialog(base.MainWindow, System.Windows.Application.Current.Resources["Login"] as string, string.Format(System.Windows.Application.Current.Resources[key] as string, text5), "", password: true) { Topmost = true };
+                                PromptDialog promptDialog = new PromptDialog(base.MainWindow, Application.Current.Resources["Login"] as string, string.Format(Application.Current.Resources[key] as string, addr), "", password: true) { Topmost = true };
                                 promptDialog.Focus();
                                 bool? flag2 = promptDialog.ShowDialog();
                                 if (!flag2.HasValue || !flag2.Value)
@@ -1654,7 +1677,15 @@ public class AppTabViewModel : TabBase
             Created = true;
             Task.Run(delegate
             {
-                MonitorAppMainWindow();
+                try
+                {
+                    MonitorAppMainWindow();
+                }
+                catch(Exception ex)
+                {
+                    log.Warn(ex);
+                    CloseSelf();
+                }
             });
         }
         State = ConnectionState.Connected;
@@ -1938,7 +1969,7 @@ public class AppTabViewModel : TabBase
         ExitCode = 0;
         Created = false;
 
-        System.Windows.Application.Current.Dispatcher.Invoke(delegate
+        Application.Current.Dispatcher.Invoke(delegate
         {
             base.MainWindow.MainWindowVM.RemoveTab(this);
         });
@@ -2380,7 +2411,7 @@ public class AppTabViewModel : TabBase
 
                         if (string.IsNullOrEmpty(Protocol) && SSHv2Share && App.SSHv2ShareManager[ShareKey][0] == this)
                         {
-                            base.TabColorName = System.Windows.Application.Current.Resources["MAIN"] as string;
+                            base.TabColorName = Application.Current.Resources["MAIN"] as string;
                             base.TabColorNameVisibility = Visibility.Visible;
                             base.TabColorVisibility = Visibility.Collapsed;
                         }
@@ -2576,7 +2607,7 @@ public class AppTabViewModel : TabBase
             IntPtr hwd = IntPtr.Zero;
             if (hwndPanel == IntPtr.Zero)
             {
-                System.Windows.Application.Current.Dispatcher.Invoke(delegate
+                Application.Current.Dispatcher.Invoke(delegate
                 {
                     hwndPanel = Panel.Handle;
                 });
@@ -2742,7 +2773,7 @@ public class AppTabViewModel : TabBase
 
             if (!AppNoGUI || isConsoleWindow)
             {
-                System.Windows.Application.Current?.Dispatcher.Invoke(RegisterWindowsEventHook);
+                Application.Current?.Dispatcher.Invoke(RegisterWindowsEventHook);
             }
             else
             {
@@ -2791,7 +2822,7 @@ public class AppTabViewModel : TabBase
                     while (failed && count < 60)
                     {
                         count++;
-                        System.Windows.Application.Current.Dispatcher.Invoke(delegate
+                        Application.Current.Dispatcher.Invoke(delegate
                         {
                             failed = !_SwitchWindowTitleBar();
                         });
@@ -2993,7 +3024,15 @@ public class AppTabViewModel : TabBase
 
     public override bool CloseTab(bool noconfirm = false)
     {
-        if (AppProcess == null || AppProcess.HasExited || !IsInTab || AppProcessID == 0)
+        try
+        {
+            if (AppProcess == null || AppProcess.HasExited || !IsInTab || AppProcessID == 0)
+            {
+                Closed = true;
+                return true;
+            }
+        }
+        catch (Exception) 
         {
             Closed = true;
             return true;
@@ -3006,7 +3045,7 @@ public class AppTabViewModel : TabBase
         }
         if (!noconfirm && (App.Config.GUI.ConfirmClosingTab || IsSSHv2ShareMainTab()))
         {
-            string title = string.Format(System.Windows.Application.Current.Resources["ClosingTab"] as string, base.TabName);
+            string title = string.Format(Application.Current.Resources["ClosingTab"] as string, base.TabName);
             if (IsSSHv2ShareMainTab())
             {
                 int num = 0;
@@ -3028,9 +3067,9 @@ public class AppTabViewModel : TabBase
                     num++;
                     text = text + "\"" + item.TabName + "\"";
                 }
-                title = string.Format(System.Windows.Application.Current.Resources["ClosingTab2"] as string, base.TabName, text);
+                title = string.Format(Application.Current.Resources["ClosingTab2"] as string, base.TabName, text);
             }
-            ConfirmationDialog confirmationDialog = new ConfirmationDialog(base.MainWindow, System.Windows.Application.Current.Resources["CloseTab"] as string, title) { Topmost = true };
+            ConfirmationDialog confirmationDialog = new ConfirmationDialog(base.MainWindow, Application.Current.Resources["CloseTab"] as string, title) { Topmost = true };
             confirmationDialog.Focus();
             confirmationDialog.ShowDialog();
             if (!confirmationDialog.Confirmed)
@@ -3055,41 +3094,134 @@ public class AppTabViewModel : TabBase
         return Closed;
     }
 
-    private void TypePassword()
+    private void AutoInput(string text, bool enter = false)
     {
+        if(CurProgram.AutoInput == ProgramConfig.AUTOINPUT_SENDINPUT)
+        {
+            SendInputHelper.Type(text, enter);
+        }
+        else
+        {
+            SendInputHelper.Type(AppWin, text, enter);
+        }
+    }
+
+    private IntPtr hwndDefaultButton;
+
+    private bool EnumDefaultButtonCallback(IntPtr hWnd, IntPtr lParam)
+    {
+        StringBuilder ClassName = new StringBuilder(256);
+        if (Win32.GetClassName(hWnd, ClassName, ClassName.Capacity) != 0)
+        {
+            string classname = ClassName.ToString();
+
+            if(classname == "TButton")
+            {
+                uint style = Win32.GetWindowLong(hWnd, Win32.GWL_STYLE);
+                if((style & Win32.BS_DEFPUSHBUTTON) == Win32.BS_DEFPUSHBUTTON)
+                {
+                    hwndDefaultButton = hWnd;
+                    return false;
+                }
+
+            }
+        }
+
+        Win32.EnumChildWindows(hWnd, EnumDefaultButtonCallback, lParam);
+
+        return true;
+    }
+
+    private void ClickDefaultButton(IntPtr hWnd)
+    {
+        IntPtr result = Win32.SendMessage(hWnd, Win32.DM_GETDEFID, 0, 0);
+
+        if ((result.ToInt32() >> 16) == Win32.DC_HASDEFID)
+        {
+            int buttonId = result.ToInt32() & 0xFFFF;
+
+            Win32.SendMessage(hWnd, Win32.WM_COMMAND, (uint)buttonId, 0);
+            return;
+        }
+
+        hwndDefaultButton = IntPtr.Zero;
         try
         {
-            while (Win32.GetForegroundWindow() != AppWin)
+            Win32.EnumChildWindows(hWnd, EnumDefaultButtonCallback, IntPtr.Zero);
+        }
+        catch (Exception exception)
+        {
+            log.Error("", exception);
+        }
+
+        if(hwndDefaultButton != IntPtr.Zero)
+        {
+            Win32.SendMessage(hwndDefaultButton, Win32.BM_CLICK, 0, 0);
+        }
+    }
+
+    private void TypePassword()
+    {
+        IntPtr AppWin2 = AppWin;
+        try
+        {
+            if(CurProgram.AutoInput == ProgramConfig.AUTOINPUT_SENDINPUT)
             {
-                AppProcess.Refresh();
+                while (Win32.GetForegroundWindow() != AppWin)
+                {
+                    AppProcess.Refresh();
+                    if (AppProcess.HasExited)
+                    {
+                        break;
+                    }
+                    Thread.Sleep(100);
+                    Win32.SetForegroundWindow(AppWin);
+                }
                 if (AppProcess.HasExited)
                 {
-                    break;
+                    return;
                 }
-                Thread.Sleep(100);
-                Win32.SetForegroundWindow(AppWin);
             }
-            if (AppProcess.HasExited)
+            else
             {
-                return;
+                uint processId;
+                uint threadId = Win32.GetWindowThreadProcessId(AppWin, out processId);
+
+                Win32.GUITHREADINFO gui = new Win32.GUITHREADINFO();
+                gui.cbSize = Marshal.SizeOf(gui);
+        
+                if (Win32.GetGUIThreadInfo(threadId, ref gui))
+                {
+                    if(gui.hwndFocus != IntPtr.Zero)
+                    {
+                        AppWin = gui.hwndFocus;
+                    }
+                }
             }
 
             if(AutoInputUsername && (iFlags & ProgramConfig.FLAG_PASSWORD_ONLY) == 0)
             {
                 Thread.Sleep(TimeSpan.FromSeconds(Session.WaitSeconds));
-                SendInputHelper.Type(Credential.Username, true);
+                AutoInput(Credential.Username, true);
             }
 
             if (PasswordToPump != null)
             {
                 Thread.Sleep(TimeSpan.FromSeconds(Session.WaitSeconds));
-                SendInputHelper.Type(PasswordToPump.ToString(), true);
+                AutoInput(PasswordToPump.ToString(), true);
+            }
+            
+            if(CurProgram.AutoInput != ProgramConfig.AUTOINPUT_SENDINPUT) 
+            { 
+                ClickDefaultButton(AppWin2);
             }
         }
         catch (Exception exception)
         {
             log.Error("Error typing password.", exception);
         }
+
+        AppWin = AppWin2;
     }
 
     private void TypeScript()
@@ -3104,7 +3236,7 @@ public class AppTabViewModel : TabBase
             return;
         }
 
-        if (!string.IsNullOrEmpty(Credential?.PrivateKeyPath))
+        if (!string.IsNullOrWhiteSpace(Credential?.PrivateKeyPath))
         {
             if(SafeString.IsNullOrEmpty(Credential?.Passphrase))
             {
@@ -3116,21 +3248,41 @@ public class AppTabViewModel : TabBase
             return;
         }
 
+        IntPtr AppWin2 = AppWin;
+
         try
         {
-            while (Win32.GetForegroundWindow() != AppWin)
+            if(CurProgram.AutoInput == ProgramConfig.AUTOINPUT_SENDINPUT)
             {
-                AppProcess.Refresh();
+                while (Win32.GetForegroundWindow() != AppWin)
+                {
+                    AppProcess.Refresh();
+                    if (AppProcess.HasExited)
+                    {
+                        break;
+                    }
+                    Thread.Sleep(100);
+                    Win32.SetForegroundWindow(AppWin);
+                }
                 if (AppProcess.HasExited)
                 {
-                    break;
+                    return;
                 }
-                Thread.Sleep(100);
-                Win32.SetForegroundWindow(AppWin);
-            }
-            if (AppProcess.HasExited)
+            } else
             {
-                return;
+                uint processId;
+                uint threadId = Win32.GetWindowThreadProcessId(AppWin, out processId);
+        
+                Win32.GUITHREADINFO gui = new Win32.GUITHREADINFO();
+                gui.cbSize = Marshal.SizeOf(gui);
+        
+                if (Win32.GetGUIThreadInfo(threadId, ref gui))
+                {
+                    if(gui.hwndFocus != IntPtr.Zero)
+                    {
+                        AppWin = gui.hwndFocus;
+                    }
+                }
             }
 
             ConfigFile script = App.Sessions.ConfigFiles.FirstOrDefault(s => s.Id == Session.ScriptId);
@@ -3139,7 +3291,7 @@ public class AppTabViewModel : TabBase
                 foreach(string line in Regex.Split(script.Data, @"(?<=[\n])"))
                 {
                     Thread.Sleep(TimeSpan.FromSeconds(Session.WaitSeconds));
-                    SendInputHelper.Type(line);
+                    AutoInput(line);
                 }
             }
         }
@@ -3147,6 +3299,8 @@ public class AppTabViewModel : TabBase
         {
             log.Error("Error typing password.", exception);
         }
+
+        AppWin = AppWin2;
     }
 
     private double Panel_Width;
@@ -3165,7 +3319,7 @@ public class AppTabViewModel : TabBase
 
         if (hwndPanel == IntPtr.Zero)
         {
-            System.Windows.Application.Current.Dispatcher.Invoke(delegate
+            Application.Current.Dispatcher.Invoke(delegate
             {
                 hwndPanel = Panel.Handle;
             });
@@ -3274,13 +3428,14 @@ public class AppTabViewModel : TabBase
             
             if (string.IsNullOrEmpty(Protocol) && title == "PuTTY (inactive)")
             {
-                base.UnderlineColor = (System.Windows.Application.Current.Resources["g0"] as SolidColorBrush).Color;
+                base.UnderlineColor = (Application.Current.Resources["g0"] as SolidColorBrush).Color;
             }
         }
     }
 
     private CancellationTokenSource MonitorNewAppMainWindowTaskCancel = new CancellationTokenSource();
-
+    private uint locationChangeCount;
+    private int lastTickcount;
     private void WinEventProc(IntPtr hWinEventHook, uint eventType, IntPtr hwnd, int idObject, int idChild, uint dwEventThread, uint dwmsEventTime)
     {
         if (eventType == Win32.EVENT_SYSTEM_CAPTUREEND)
@@ -3366,6 +3521,28 @@ public class AppTabViewModel : TabBase
                 }
 
                 if ((CurProgram.Flags.Contains("mstsc") && (style & Win32.WS_MAXIMIZE) != 0) || !Win32.GetWindowRect(Panel.Handle, out var PanelRect) || !Win32.GetWindowRect(AppWin, out var AppRect))
+                {
+                    break;
+                }
+
+                int tickcount = Environment.TickCount;
+
+                if(lastTickcount == 0)
+                {
+                    lastTickcount = tickcount;
+                }
+
+                if((tickcount - lastTickcount) > 500)
+                {
+                    lastTickcount = tickcount;
+                    locationChangeCount = 0;
+                }
+                else
+                {
+                    locationChangeCount++;
+                }
+
+                if(locationChangeCount > 50)
                 {
                     break;
                 }

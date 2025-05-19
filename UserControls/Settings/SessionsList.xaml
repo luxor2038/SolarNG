@@ -42,7 +42,7 @@
       <StackPanel Orientation="Horizontal" Background="{Binding ButtonPanelBackground}">
         <Button Margin="10,0,10,0" Style="{StaticResource CustomTransparentButtonStyle}" Command="{Binding CreateNewItemCommand}">
           <StackPanel Orientation="Horizontal">
-            <Image Source="../../Images/add.png" Stretch="None" />
+            <Path Width="14" Height="14" Fill="{StaticResource u1}" Stretch="Uniform" Data="{StaticResource AddPath}"/>
             <Label Content="{StaticResource Create}" Foreground="{StaticResource u1}" />
           </StackPanel>
         </Button>
@@ -53,19 +53,19 @@
             </MultiBinding>
           </ButtonBase.CommandParameter>
           <StackPanel Orientation="Horizontal">
-            <Image Source="../../Images/remove.png" Stretch="None" />
+            <Path Width="14" Height="14" Fill="Red" Stretch="Uniform" Data="{StaticResource RemovePath}"/>
             <Label Content="{StaticResource Delete}" Foreground="{StaticResource r0}" />
           </StackPanel>
         </Button>
         <Button Margin="0,0,10,0" Style="{StaticResource CustomTransparentButtonStyle}" Visibility="{Binding SaveButtonVisible}" Command="{Binding SaveItemCommand}">
           <StackPanel Orientation="Horizontal">
-            <Image Source="../../Images/save.png" Stretch="None" />
+            <Path Width="14" Height="14" Fill="{StaticResource u1}" Stretch="Uniform" Data="{StaticResource SavePath}"/>
             <Label Content="{StaticResource Save}" Foreground="{StaticResource u1}" />
           </StackPanel>
         </Button>
         <Button Margin="0,0,10,0" Style="{StaticResource CustomTransparentButtonStyle}" Visibility="{Binding SaveNewButtonVisible}" Command="{Binding SaveNewItemCommand}">
           <StackPanel Orientation="Horizontal">
-            <Image Source="../../Images/savenew.png" Stretch="None" />
+            <Path Width="14" Height="14" Fill="{StaticResource u1}" Stretch="Uniform" Data="{StaticResource SaveNewPath}"/>
             <Label Content="{StaticResource SaveNew}" Foreground="{StaticResource u1}" />
           </StackPanel>
         </Button>
@@ -83,7 +83,7 @@
               <KeyBinding Key="Enter" Command="" CommandParameter="" />
             </UIElement.InputBindings>
           </TextBox>
-          <Image Grid.Column="0" Source="../../Images/search.png" HorizontalAlignment="Right" Margin="0,0,10,0" VerticalAlignment="Center" Height="16" />
+          <Path Grid.Column="0" Width="16" Height="16" HorizontalAlignment="Right" Margin="0,0,10,0" Stretch="Uniform" Data="{StaticResource SearchPath}" Fill="Transparent" Stroke="{StaticResource u1}" StrokeThickness="2" />
         </Grid>
       </DockPanel>
     </Border>

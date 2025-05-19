@@ -16,7 +16,8 @@ namespace SolarNG.ViewModel.Settings;
 public class ProxiesListViewModel : ViewModelBase, INotifyPropertyChanged
 {
     private ObservableCollection<Session> AllSessions => App.Sessions.Sessions;
-    public ObservableCollection<Session> FilteredSessions { get; set; }
+    private ObservableCollection<Session> AllSortedSessions = new ObservableCollection<Session>();
+    public ObservableCollection<Session> FilteredSessions { get; set; } = new ObservableCollection<Session>();
 
     private MainWindow MainWindow => SettingsVM.MainWindow;
 
@@ -30,10 +31,7 @@ public class ProxiesListViewModel : ViewModelBase, INotifyPropertyChanged
         EditProxyVM.ProxiesListVM = this;
         SettingsVM = settingsVM;
 
-        FilteredSessions = new ObservableCollection<Session>(from s in AllSessions
-                                                            orderby s.Name
-                                                            where s.Type == "proxy"
-                                                            select s);
+        UpdateSessions(null, null);
 
         SelectedObject = FilteredSessions.FirstOrDefault();
 
@@ -64,8 +62,15 @@ public class ProxiesListViewModel : ViewModelBase, INotifyPropertyChanged
         base.Cleanup();
     }
 
+    public int GetCount()
+    {
+        return AllSortedSessions.Count;
+    }
+
     private void UpdateSessions(object sender, EventArgs args)
     {
+        AllSortedSessions = new ObservableCollection<Session>(AllSessions.OrderBy((Session s) => s.Name).Where((Session s) => s.Type == "proxy"));
+        SettingsVM.UpdateTitle();
         FilterObjects();
     }
 
@@ -105,21 +110,24 @@ public class ProxiesListViewModel : ViewModelBase, INotifyPropertyChanged
         {
             if ((sender as DeleteConfirmationDialog).Confirmed)
             {
-                List<Guid> list = new List<Guid>();
                 ListView listView = (ListView)((object[])array)[0];
                 if (listView.SelectedItems.Count > 0)
                 {
+                    int nextSelectedIndex = GetNextSelectedIndex(listView);
+
+                    List<Guid> list = new List<Guid>();
                     foreach (object selectedItem in listView.SelectedItems)
                     {
                         list.Add(((Session)selectedItem).Id);
-                     }
+                    }
                     foreach (Guid item in list)
                     {
                         DeleteItem(item);
                     }
+
+                    JumpListManager.SetNewJumpList(AllSessions);
+                    SelectedObject = FilteredSessions.ElementAtOrDefault(nextSelectedIndex); 
                 }
-                JumpListManager.SetNewJumpList(AllSessions);
-                SelectedObject = FilteredSessions.FirstOrDefault(); 
             }
         };
         deleteConfirmationDialog.ShowDialog();
@@ -149,6 +157,27 @@ public class ProxiesListViewModel : ViewModelBase, INotifyPropertyChanged
 
         AllSessions.Remove(session);
     }
+
+    private int GetNextSelectedIndex(ListView listView)
+    {
+        int lastIndex = 0;
+        foreach(Session selectedItem in listView.SelectedItems)
+        {
+            int i = FilteredSessions.IndexOf(selectedItem);
+            if(lastIndex < i)
+            {
+                lastIndex = i;
+            }
+        }
+
+        if(lastIndex < (FilteredSessions.Count - 1))
+        {
+            return (lastIndex - listView.SelectedItems.Count + 1);
+        }
+
+        return (FilteredSessions.Count - listView.SelectedItems.Count - 1);
+    }
+
 
     private bool CreatingNew;
     public Visibility SaveButtonVisible => ((SelectedObjects != null && SelectedObjects.Count > 0) || CreatingNew) ? Visibility.Visible : Visibility.Collapsed;
@@ -184,7 +213,7 @@ public class ProxiesListViewModel : ViewModelBase, INotifyPropertyChanged
     {
         FilteredSessions.Clear();
 
-        foreach (Session session in AllSessions.OrderBy((Session s) => s.Name).Where((Session s) => s.Type == "proxy"))
+        foreach (Session session in AllSortedSessions)
         {
             if (session.Matches(ByUserTypedName))
             {

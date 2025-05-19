@@ -32,17 +32,26 @@ public partial class ProxiesList : UserControl
 
     private void ListItemsView_MouseDoubleClick(object sender, MouseButtonEventArgs e)
     {
-        if(e.OriginalSource is not FrameworkElement)
+        if (e.OriginalSource is FrameworkElement)
         {
+            if (((FrameworkElement) e.OriginalSource).DataContext is not Session)
+            {
+                return;
+            }
+
+            ((ProxiesListViewModel)base.DataContext).OnDoubleClick(((FrameworkElement) e.OriginalSource).DataContext);
             return;
         }
-
-        if(((FrameworkElement) e.OriginalSource).DataContext is not Session)
+        if(e.OriginalSource is FrameworkContentElement)
         {
-            return;
-        }
+            if (((FrameworkContentElement) e.OriginalSource).DataContext is not Session)
+            {
+                return;
+            }
 
-        ((ProxiesListViewModel)base.DataContext).OnDoubleClick(((FrameworkElement) e.OriginalSource).DataContext);
+            ((ProxiesListViewModel)base.DataContext).OnDoubleClick(((FrameworkContentElement) e.OriginalSource).DataContext);
+            return;            
+        }
     }
 
     private void ListItemsView_SelectionChanged(object sender, SelectionChangedEventArgs e)

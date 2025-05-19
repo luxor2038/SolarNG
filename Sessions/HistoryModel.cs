@@ -223,15 +223,18 @@ public class HistoryModel
                 continue;
             }
 
-            Session historySession = new Session("history")
+            if(session.SessionHistory == null)
             {
-                History = history,
-                HistorySession = session
-            };
+                Session historySession = new Session("history")
+                {
+                    History = history,
+                    HistorySession = session
+                };
 
-            session.SessionHistory = historySession;
+                session.SessionHistory = historySession;
 
-            App.HistorySessions.Add(historySession);
+                App.HistorySessions.Add(historySession);
+            }
         }
     }
 

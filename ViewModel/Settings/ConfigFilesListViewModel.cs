@@ -19,7 +19,8 @@ namespace SolarNG.ViewModel.Settings;
 public class ConfigFilesListViewModel : ViewModelBase, INotifyPropertyChanged
 {
     private ObservableCollection<ConfigFile> AllConfigFiles => App.Sessions.ConfigFiles;
-    public ObservableCollection<ConfigFile> FilteredConfigFiles { get; set; }
+    private ObservableCollection<ConfigFile> AllSortedConfigFiles = new ObservableCollection<ConfigFile>();
+    public ObservableCollection<ConfigFile> FilteredConfigFiles { get; set; } = new ObservableCollection<ConfigFile>();
 
     private MainWindow MainWindow => SettingsVM.MainWindow;
 
@@ -33,7 +34,7 @@ public class ConfigFilesListViewModel : ViewModelBase, INotifyPropertyChanged
         EditConfigFileVM.ConfigFilesListVM = this;
         SettingsVM = settingsVM;
 
-        FilteredConfigFiles = new ObservableCollection<ConfigFile>(AllConfigFiles.OrderBy((ConfigFile s) => s.Name));
+        UpdateConfigFiles(null, null);
 
         SelectedObject = FilteredConfigFiles.FirstOrDefault(); 
 
@@ -48,8 +49,15 @@ public class ConfigFilesListViewModel : ViewModelBase, INotifyPropertyChanged
         base.Cleanup();
     }
 
+    public int GetCount()
+    {
+        return AllSortedConfigFiles.Count;
+    }
+
     private void UpdateConfigFiles(object sender, EventArgs args)
     {
+        AllSortedConfigFiles = new ObservableCollection<ConfigFile>(AllConfigFiles.OrderBy((ConfigFile c) => c.Name));
+        SettingsVM.UpdateTitle();
         FilterObjects();
     }
 
@@ -84,20 +92,23 @@ public class ConfigFilesListViewModel : ViewModelBase, INotifyPropertyChanged
         {
             if ((sender as DeleteConfirmationDialog).Confirmed)
             {
-                List<Guid> list = new List<Guid>();
                 ListView listView = (ListView)((object[])array)[0];
                 if (listView.SelectedItems.Count > 0)
                 {
+                    int nextSelectedIndex = GetNextSelectedIndex(listView);
+
+                    List<Guid> list = new List<Guid>();
                     foreach (object selectedItem in listView.SelectedItems)
                     {
                         list.Add(((ConfigFile)selectedItem).Id);
-                     }
+                    }
                     foreach (Guid item in list)
                     {
                         DeleteItem(item);
                     }
+
+                    SelectedObject = FilteredConfigFiles.ElementAtOrDefault(nextSelectedIndex);
                 }
-                SelectedObject = FilteredConfigFiles.FirstOrDefault();
             }
         };
         deleteConfirmationDialog.ShowDialog();
@@ -148,6 +159,26 @@ public class ConfigFilesListViewModel : ViewModelBase, INotifyPropertyChanged
                 session.WinSCPId = Guid.Empty;
             }
         }
+    }
+
+    private int GetNextSelectedIndex(ListView listView)
+    {
+        int lastIndex = 0;
+        foreach(ConfigFile selectedItem in listView.SelectedItems)
+        {
+            int i = FilteredConfigFiles.IndexOf(selectedItem);
+            if(lastIndex < i)
+            {
+                lastIndex = i;
+            }
+        }
+
+        if(lastIndex < (FilteredConfigFiles.Count - 1))
+        {
+            return (lastIndex - listView.SelectedItems.Count + 1);
+        }
+
+        return (FilteredConfigFiles.Count - listView.SelectedItems.Count - 1);
     }
 
     private bool CreatingNew;
@@ -212,7 +243,7 @@ public class ConfigFilesListViewModel : ViewModelBase, INotifyPropertyChanged
     {
         FilteredConfigFiles.Clear();
 
-        foreach (ConfigFile configFile in AllConfigFiles.OrderBy((ConfigFile c) => c.Name))
+        foreach (ConfigFile configFile in AllSortedConfigFiles)
         {
             if (configFile.Matches(ByUserTypedName))
             {

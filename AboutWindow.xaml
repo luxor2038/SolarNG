@@ -9,7 +9,7 @@
             <TreeViewItem Foreground="{StaticResource fg1}" Header="WPF Chrome tabs - MVVM 1.4.0, MIT license type" Margin="-18,2,0,0" />
             <TreeViewItem Foreground="{StaticResource fg1}" Header="MvvmLight 5.4.1, MIT license type" Margin="-18,2,0,0" />
             <TreeViewItem Foreground="{StaticResource fg1}" Header="LitJSON 0.18.0, Unlicense license type" Margin="-18,2,0,0" />
-            <TreeViewItem Foreground="{StaticResource fg1}" Header="log4net 2.0.15, Apache license type" Margin="-18,2,0,0" />
+            <TreeViewItem Foreground="{StaticResource fg1}" Header="log4net 2.0.17, Apache license type" Margin="-18,2,0,0" />
           </TreeViewItem>
         </TreeView>
       </StackPanel>

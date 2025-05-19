@@ -1,6 +1,6 @@
 # SolarNG  2.0 使用手册
 
-SolarNG是一个浏览器界面风格的远程管理客户端，还支持标签页化的本地应用管理以及本地应用启动控制。
+SolarNG是一个浏览器界面风格的远程管理客户端，还支持标签页化的本地应用管理以及本地应用启动和控制。
 
 SolarNG支持以下远程管理协议:
 
@@ -41,8 +41,6 @@ SolarNG支持以下远程管理协议:
 
 ![](SolarNGv2-overview-tag.png)
 
-
-
 ### 搜索框功能
 
 输入搜索内容后，当搜索列表不为空时，直接回车就可以打开第一个会话。
@@ -56,9 +54,32 @@ type类型有ssh/s, telnet/t, sftp/sf, scp/sc, ftp/f, rdp/r, vnc/v, app/a。不�
 例如：
 
 - 192.168.1.5 - 创建SSH会话，并连接"192.168.1.5:22"的SSH服务。
+
 - telnet:192.168.1.5 – 创建Telnet会话，并连接"192.168.1.5:23"的Telnet服务。
+
 - admin&#64;server.com:8888 – 创建SSH会话和用户名为"admin"的凭据配置，并连接"server.com:8888"的SSH服务。
+
 - a:cmd - 创建本地应用会话，并在标签页中打开cmd应用。
+
+### 新建会话
+
+  提供多种新建会话的途径：
+
+  - 通过总览标签页中的搜索框快速新建会话。
+
+  - 点击总览标签页中的“新建会话”按钮，当搜索框有内容时，会直接使用已有的内容填充新会话，规则与快速新建会话一致。
+
+  - 打开设置标签页中的会话设置，点击“新建”按钮。
+
+  - 点击主菜单里的“新建会话”菜单项。
+
+  - 快捷键Ctrl-E进入新建会话界面。
+
+### 应用控制
+
+SolarNG对于嵌入标签页的PuTTY, WinSCP, MSTSC, tvnviewer等等其他应用支持"切换窗口标题栏"，"分离嵌入应用"的功能。在标签页上点击鼠标右键即可使用这些功能。"切换窗口标题栏"可以让嵌入的应用主窗口显示/关闭原始的标题栏信息，这样就能够操作主窗口系统菜单的功能(对于UWP程序无效)。"分离嵌入应用"(Kick)功能可以让嵌入标签页的应用窗口不再嵌入，关闭SolarNG程序也不会自动关闭已经分离的应用。注意"分离嵌入应用"与"分离标签页"不同，"分离标签页"是把指定的标签页移动到SolarNG的新窗口。
+
+![](SolarNGv2-menu.png)
 
 ## 历史(History)标签页
 
@@ -70,29 +91,13 @@ type类型有ssh/s, telnet/t, sftp/sf, scp/sc, ftp/f, rdp/r, vnc/v, app/a。不�
 
 搜索框可以搜索，但不能新建会话。双击已打开的会话，会跳转到对应的标签页。双击历史会话，可以打开新会话。对于使用了标题栏同步功能的标签页名字可能实时变化，点击刷新按钮就能看到最新的标签页名字。会话右上角的菜单目前只有一个编辑功能。
 
-## 新建会话
+## 快捷方式(Shortcut)标签页
 
-提供多种新建会话的途径：
+这个界面默认遍历开始菜单目录(用户/公共)、桌面目录(用户/公共)、快速启动目录(用户)下的所有快捷方式文件(.lnk)。快捷方式列表不会保存，每次打开这个标签页都需要遍历快捷方式文件。双击某个快捷方式就是启动快捷方式(并不会嵌入到标签页中。如果想嵌入标签页启动，需要点"编辑"菜单创建应用会话)。可以通过"刷新"按钮来更新相应目录的快捷方式文件列表。
 
-- 通过总览标签页中的搜索框快速新建会话。
+列表中的每个快捷方式区域显示的内容依次是快捷方式名称、快捷方式文件全路径、命令行。
 
-- 点击总览标签页中的“新建会话”按钮，当搜索框有内容时，会直接使用已有的内容填充新会话，规则与快速新建会话一致。
-
-- 打开设置标签页中的会话设置，点击“新建”按钮。
-
-- 点击主菜单里的“新建会话”菜单项。
-
-- 快捷键Ctrl-E进入新建会话界面。
-
-
-
-## 应用控制
-
-SolarNG对于嵌入标签页的PuTTY, WinSCP, MSTSC, tvnviewer等等其他应用支持"切换窗口标题栏"，"分离嵌入应用"的功能。在标签页上点击鼠标右键即可使用这些功能。"切换窗口标题栏"可以让嵌入的应用主窗口显示/关闭原始的标题栏信息，这样就能够操作主窗口系统菜单的功能。"分离嵌入应用"(Kick)功能可以让嵌入标签页的应用窗口不再嵌入，关闭SolarNG程序也不会自动关闭已经分离的应用。注意"分离嵌入应用"与"分离标签页"不同，"分离标签页"是把指定的标签页移动到SolarNG的新窗口。
-
-![](SolarNGv2-menu.png)
-
-
+![](SolarNGv2-shortcut.png)
 
 ## 进程(Process)标签页
 
@@ -100,7 +105,7 @@ SolarNG对于嵌入标签页的PuTTY, WinSCP, MSTSC, tvnviewer等等其他应用
 
 进程标签页和窗口标签页全局只能有一个。也就是打开了进程标签页，就无法打开窗口标签页。
 
-列表中的每个进程区域显示的内容依次是进程名称(进程ID)、主窗口类名、会话类型、主窗口标题。
+列表中的每个进程区域显示的内容依次是进程名称(进程ID)、主窗口类名、主窗口标题。
 
 ## 窗口(Window)标签页
 
@@ -108,7 +113,7 @@ SolarNG对于嵌入标签页的PuTTY, WinSCP, MSTSC, tvnviewer等等其他应用
 
 窗口标签页和进程标签页全局只能有一个。也就是打开了窗口标签页，就无法打开进程标签页。
 
-列表中的每个窗口区域显示的内容依次是窗口ID(进程名称+进程ID+窗口句柄)、主窗口类名、会话类型、主窗口标题。
+列表中的每个窗口区域显示的内容依次是窗口ID(进程名称+进程ID+窗口句柄)、主窗口类名、主窗口标题。
 
 ## SSH连接复用
 
@@ -206,6 +211,7 @@ SolarNG支持多级SOCK4/SOCK5/HTTP/SSH代理功能(依赖PlinkX.exe程序)。�
 | -------------- | ---------------------- |
 | CTRL+T         | 新建标签页             |
 | CTRL+H         | 打开历史标签页         |
+| CTRL+L         | 打开快捷方式标签页     |
 | CTRL+N         | 新建窗口               |
 | CTRL+E         | 新建会话               |
 | CTRL+S         | 打开设置               |
@@ -272,6 +278,13 @@ appSettings中的配置：
 {
     "Version": 2,
     "MasterPassword": false,
+    "ShortcutsLocations": {
+        "CommonStartMenu": "%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs",
+        "StartMenu": "%APPDATA%\\Microsoft\\Windows\\Start Menu\\Programs",
+        "CommonDesktop": "%PUBLIC%\\Desktop",
+        "Desktop": "%USERPROFILE%\\Desktop",
+        "QuickLaunch": "%APPDATA%\\Microsoft\\Internet Explorer\\Quick Launch"
+    },
     "GUI": {
         "Language": "",
         "Theme": "",      
@@ -297,6 +310,10 @@ appSettings中的配置：
             "NarratorHelperWindow",
             "ThumbnailDeviceHelperWnd",
             "WorkerW"
+        ],
+        "ExcludeShortcuts": [
+            "SolarNG",
+            "unins"
         ]
     },
     "PuTTY": {
@@ -395,6 +412,7 @@ appSettings中的配置：
 | 配置项名称                   | 配置项说明                                                   | 缺省值                                      |
 | ---------------------------- | ------------------------------------------------------------ | ------------------------------------------- |
 | MasterPassword               | 启用主密码功能。"true"是启用，"false"是禁用。                | false                                       |
+| ShortcutsLocations           | 获取快捷方式文件的目录。                                     | "CommonStartMenu": ...                      |
 | GUI.Language                 | 界面语言设置。"zh-cn"是简体中文，""是自动根据系统的缺省语言来设置，其他值是英文。 | ""                                          |
 | GUI.Theme                    | 界面配色设置。"dark"是黑暗配色，""是自动根据系统的配色来设置，其他值是明亮配色。 | ""                                          |
 | GUI.Logo                     | 显示主窗口下面的Logo栏（主要用于调整主窗口大小）。"true"是启用，"false"是禁用。主窗口最大化时始终不显示Logo栏。 | true                                        |
@@ -414,10 +432,11 @@ appSettings中的配置：
 | GUI.WaitTimeout              | 等待窗口同步的超时时间。单位是100ms。                        | 50                                          |
 | GUI.CloseIME                 | 启用主窗口启动后关闭输入法。"true"是启用，"false"是禁用。    | true                                        |
 | GUI.ExcludeClasses           | 进程标签页和窗口标签页枚举时排除的窗口类名称。               | "Shell_TrayWnd", ...                        |
+| GUI.ExcludeShortcuts         | 遍历快捷方式文件时排除的文件名称(包括目标文件路径，采用子串匹配，大小写不敏感)。 | "SolarNG", "unins"                          |
 | GUI.OverviewOrderBy          | 总览标签页中会话列表的排序方法，目前支持"Name"（按会话名排序）、"Counter"（按打开次数排序）和"OpenTime"（按打开会话时间）。 | Name                                        |
 | PuTTY.StrictSSHv2Share       | 启用严格SSH连接复用模式。"true"是启用，"false"是禁用。       | false                                       |
 | PuTTY.SSHPasswordByPipe      | 启用通过命名管道来传递SSH的口令(不包括私钥证书的口令)。"true"是启用(PuTTY.UsePipe必须也是"true")，"false"是禁用。此功能需要PuTTY 0.77以上版本。 | true                                        |
-| PuTTY.SSHPasswordByHook      | 启用通过Hook来传递SSH的口令(包括私钥证书的口令)。"true"是启用(PuTTY.UseHook必须也是"true")，"false"是禁用。此功能属于实验性功能，仅在PuTTY 0.77至0.81版本测试过，不保证支持将来版本。 | false                                       |
+| PuTTY.SSHPasswordByHook      | 启用通过Hook来传递SSH的口令(包括私钥证书的口令)。"true"是启用(PuTTY.UseHook必须也是"true")，"false"是禁用。此功能属于实验性功能，仅在PuTTY 0.77至0.83版本测试过，不保证支持将来版本。 | false                                       |
 | PuTTY.UsePipe                | 启用通过命名管道传递数据(包括口令和私钥文件)。"true"是启用，"false"是禁用。 | true                                        |
 | PuTTY.UseHook                | 启用Hook功能。"true"是启用(ExeLoader和PuTTY.HookDll文件必须存在)，"false"是禁用。 | true                                        |
 | PuTTY.Config                 | 修改PuTTY的缺省配置。必须启用Hook功能，此配置修改才会生效。  | "ScrollBarFullScreen=1", "ProxyLocalhost=1" |
@@ -431,6 +450,18 @@ appSettings中的配置：
 | PlinkX.CreateNoWindow        | 启用自动创建的本地地址转发进程不显示窗口。"true"是启用，"false"是禁用。打开"proxy"类型的会话不受这个配置影响。 | true                                        |
 
 其他配置仅供专业人士修改。
+
+## RemoteApp模式说明
+
+RemoteApp的窗口是mstsc通过DCOM接口让一个类似服务的mstsc进程创建，SolarNG无法自动捕获其窗口。虽然可以使用窗口标签页把RemoteApp的窗口放到标签页中，但是由于RemoteApp的某种特殊机制，鼠标指针的位置会发生位移，无法正常使用鼠标对RemoteApp进行操作。
+
+RemoteApp模式下，不支持使用命名管道传递.rdp文件，不支持远程应用 Windows 组合键。
+
+进入RemoteApp模式后，本地任务栏的系统托盘会出现远程的系统托盘图标，但不是所有的远程系统托盘图标都能出现。
+
+当RemoteApp模式和普通的远程桌面模式交替使用时，由于两者使用的Windows会话不同，因此即便同一个用户的RemoteApp窗口和普通远程桌面中的窗口之间互相隔离，也就是互相看不到。例如Edge默认会启用“启动增强”功能，这个功能是在用户登录后，Edge后台进程会自动运行，用来提升新开Edge窗口的速度。但如果先进入普通的远程桌面模式后不登出用户而是直接关闭，再进入RemoteApp模式，打开Edge，会看不到Edge的主窗口。要想解决这个问题，要么禁用Edge的“启动增强”和关闭后继续运行的功能，要么切换模式的时候先登出用户。
+
+文件资源管理器在RemoteApp模式下，新建、删除、重命名、复制文件或目录时，文件列表可能不会自动刷新，需要手动刷新才能看到变化。
 
 ## SolarNGX.dll模块功能说明
 

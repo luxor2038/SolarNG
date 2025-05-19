@@ -98,7 +98,7 @@ public class EditProxyViewModel : ViewModelBase, INotifyPropertyChanged, INotify
         }
     }
 
-    [Range(-1, 65535, ErrorMessage = "Invalid port")]
+    [Range(-1, 65535, ErrorMessage = "0-65535")]
     public int Port
     {
         get
@@ -151,7 +151,7 @@ public class EditProxyViewModel : ViewModelBase, INotifyPropertyChanged, INotify
     {
         CredentialList = new ObservableCollection<ComboBoxGuid>
         {
-            new ComboBoxGuid(Guid.Empty, System.Windows.Application.Current.Resources["CreateCredential_"] as string)
+            new ComboBoxGuid(Guid.Empty, Application.Current.Resources["CreateCredential_"] as string)
         };
 
         if(EditedProxy.CredentialId == NoChangeId)
@@ -296,7 +296,7 @@ public class EditProxyViewModel : ViewModelBase, INotifyPropertyChanged, INotify
     {
         ProxiesList = new ObservableCollection<ComboBoxGuid>
         {
-            new ComboBoxGuid(Guid.Empty, System.Windows.Application.Current.Resources["ChooseProxy"] as string)
+            new ComboBoxGuid(Guid.Empty, Application.Current.Resources["ChooseProxy"] as string)
         };
 
         if(AddNoChange)
@@ -359,7 +359,7 @@ public class EditProxyViewModel : ViewModelBase, INotifyPropertyChanged, INotify
         }
     }
 
-    [Range(-1, 65535, ErrorMessage = "Invalid port")]
+    [Range(-1, 65535, ErrorMessage = "0-65535")]
     public int ListenPort
     {
         get
@@ -387,7 +387,7 @@ public class EditProxyViewModel : ViewModelBase, INotifyPropertyChanged, INotify
         }
     }
 
-    [Range(-1, 65535, ErrorMessage = "Invalid port")]
+    [Range(-1, 65535, ErrorMessage = "0-65535")]
     public int RemotePort
     {
         get
@@ -434,7 +434,7 @@ public class EditProxyViewModel : ViewModelBase, INotifyPropertyChanged, INotify
         {
             _NotInOverviewCheck = value;
 
-            if (value != null && value.Value)
+            if (value == true)
             {
                 EditedProxy.iFlags |= ProgramConfig.FLAG_NOTINOVERVIEW;
             }
@@ -465,7 +465,7 @@ public class EditProxyViewModel : ViewModelBase, INotifyPropertyChanged, INotify
         {
             _OpenInTabCheck = value;
 
-            if (value != null && value.Value)
+            if (value == true)
             {
                 EditedProxy.iFlags &= ~ProgramConfig.FLAG_NOTINTAB;
             }
@@ -478,7 +478,7 @@ public class EditProxyViewModel : ViewModelBase, INotifyPropertyChanged, INotify
         }
     }
 
-    public bool MonitorValid => (OpenInTabCheck != null && !OpenInTabCheck.Value);
+    public bool MonitorValid => (OpenInTabCheck == false);
     public string Monitor
     {
         get
@@ -502,7 +502,7 @@ public class EditProxyViewModel : ViewModelBase, INotifyPropertyChanged, INotify
         Monitors = new ObservableCollection<ComboBoxTwo>
         {
             new ComboBoxTwo(null, "default"),
-            new ComboBoxTwo("*", System.Windows.Application.Current.Resources["MainMonitor"] as string)
+            new ComboBoxTwo("*", Application.Current.Resources["MainMonitor"] as string)
         };
 
         int monitor = 0;
@@ -917,7 +917,7 @@ public class EditProxyViewModel : ViewModelBase, INotifyPropertyChanged, INotify
             return;
         }
 
-        TitleBackground = System.Windows.Application.Current.Resources["bg8"] as SolidColorBrush;
+        TitleBackground = Application.Current.Resources["bg8"] as SolidColorBrush;
         BatchMode = true;
         NewMode = false;
         SelectedProxy = new Session("proxy");
@@ -1090,7 +1090,7 @@ public class EditProxyViewModel : ViewModelBase, INotifyPropertyChanged, INotify
 
     public void ShowSelectedProxy(Session session)
     {
-        TitleBackground = System.Windows.Application.Current.Resources["bg1"] as SolidColorBrush;
+        TitleBackground = Application.Current.Resources["bg1"] as SolidColorBrush;
         BatchMode = false;
         NewMode = false;
         SSHSessionId = Guid.Empty;
@@ -1098,7 +1098,7 @@ public class EditProxyViewModel : ViewModelBase, INotifyPropertyChanged, INotify
         if(EditedProxy.Color != null)
         {
             SelectedColor = App.SessionColors.FirstOrDefault((Brush x) => x.ToString() == EditedProxy.Color.ToString());
-            _SaveSessionColorCheck = ((SolidColorBrush)EditedProxy.Color).Color != (System.Windows.Application.Current.Resources["t9"] as SolidColorBrush).Color;
+            _SaveSessionColorCheck = ((SolidColorBrush)EditedProxy.Color).Color != (Application.Current.Resources["t9"] as SolidColorBrush).Color;
         }
         else
         {
@@ -1149,13 +1149,12 @@ public class EditProxyViewModel : ViewModelBase, INotifyPropertyChanged, INotify
         EditedProxy = session;
         EditedCredential = credential;
 
-        TitleBackground = System.Windows.Application.Current.Resources["bg8"] as SolidColorBrush;
+        TitleBackground = Application.Current.Resources["bg8"] as SolidColorBrush;
         BatchMode = false;
         NewMode = true;
         SelectedProxy = null;
         SelectedProxies = null;
 		
-        EditedProxy.Color = (SolidColorBrush)new BrushConverter().ConvertFrom(App.GetColor(true));
         OpenInTabCheck = true;
         SelectedColor = null;
         SaveSessionColorCheck = true;
@@ -1305,6 +1304,7 @@ public class EditProxyViewModel : ViewModelBase, INotifyPropertyChanged, INotify
 
             proxy.OnPropertyChanged("DisplayName");
             proxy.OnPropertyChanged("CredentialName");
+            proxy.OnPropertyChanged("NameTooltip");
             proxy.SessionHistory?.OnPropertyChanged("DisplayName");
         }
 
@@ -1332,7 +1332,7 @@ public class EditProxyViewModel : ViewModelBase, INotifyPropertyChanged, INotify
             }
             else
             {
-                EditedProxy.Color = System.Windows.Application.Current.Resources["t9"] as SolidColorBrush;
+                EditedProxy.Color = Application.Current.Resources["t9"] as SolidColorBrush;
             }
         }
         else
@@ -1342,7 +1342,7 @@ public class EditProxyViewModel : ViewModelBase, INotifyPropertyChanged, INotify
 
         proxy.Name = Name;
 
-        if(OpenInTabCheck != null && OpenInTabCheck.Value)
+        if(OpenInTabCheck == true)
         {
             proxy.iFlags &= ~ProgramConfig.FLAG_NOTINTAB;
         }
@@ -1351,7 +1351,7 @@ public class EditProxyViewModel : ViewModelBase, INotifyPropertyChanged, INotify
             proxy.iFlags |= ProgramConfig.FLAG_NOTINTAB;
         }
 
-        if(NotInOverviewCheck != null && NotInOverviewCheck.Value)
+        if(NotInOverviewCheck == true)
         {
             proxy.iFlags |= ProgramConfig.FLAG_NOTINOVERVIEW;
         }
@@ -1421,6 +1421,7 @@ public class EditProxyViewModel : ViewModelBase, INotifyPropertyChanged, INotify
         {
             SelectedProxy.OnPropertyChanged("DisplayName");
             SelectedProxy.OnPropertyChanged("CredentialName");
+            SelectedProxy.OnPropertyChanged("NameTooltip");
             SelectedProxy.SessionHistory?.OnPropertyChanged("DisplayName");
             App.RefreshOverview();
         }
@@ -1453,7 +1454,7 @@ public class EditProxyViewModel : ViewModelBase, INotifyPropertyChanged, INotify
     {
         if (!BatchMode && !SSHValid && string.IsNullOrWhiteSpace(Ip))
         {
-            AddError("Ip", "IP or hostname is required");
+            AddError("Ip", string.Format(Application.Current.Resources["Required"] as string, Application.Current.Resources["Address"]));
             return !HasErrors;
         }
 
@@ -1462,7 +1463,7 @@ public class EditProxyViewModel : ViewModelBase, INotifyPropertyChanged, INotify
 
         if(SSHInvalid && (Port == 0 || (!BatchMode && Port < 0)))
         {
-            AddError("Port", "Port is required");
+            AddError("Port", string.Format(Application.Current.Resources["Required"] as string, Application.Current.Resources["Port"]));
         }
         else
         {
@@ -1494,7 +1495,7 @@ public class EditProxyViewModel : ViewModelBase, INotifyPropertyChanged, INotify
                     }
                     else
                     {
-                        AddError("SSHSessionId", "SSH session has not exist");
+                        AddError("SSHSessionId", string.Format(Application.Current.Resources["NotExist"] as string, "SSH" + Application.Current.Resources["Session2"]));
                         return !HasErrors;
                     }
                 }
@@ -1518,7 +1519,7 @@ public class EditProxyViewModel : ViewModelBase, INotifyPropertyChanged, INotify
             {
                 if (!NewMode)
                 {
-                    AddError("Name", "Proxy name already exists");
+                    AddError("Name", string.Format(Application.Current.Resources["Exist"] as string, Application.Current.Resources["ProxyName"]));
                 }
                 else
                 {
@@ -1544,7 +1545,7 @@ public class EditProxyViewModel : ViewModelBase, INotifyPropertyChanged, INotify
         {
             if (string.IsNullOrWhiteSpace(Username))
             {
-                AddError("Username", "Username is required");
+                AddError("Username", string.Format(Application.Current.Resources["Required"] as string, Application.Current.Resources["Username"]));
             }
             else
             {
@@ -1584,11 +1585,11 @@ public class EditProxyViewModel : ViewModelBase, INotifyPropertyChanged, INotify
             RemoveError("Username");
         }
 
-        if(NotInOverviewCheck != null && !NotInOverviewCheck.Value)
+        if(NotInOverviewCheck == false)
         {
             if(ListenPort == 0 || (!BatchMode && ListenPort < 0))
             {
-                AddError("ListenPort", "Listen port is required");
+                AddError("ListenPort", string.Format(Application.Current.Resources["Required"] as string, Application.Current.Resources["ListenPort"]));
             }
             else
             {
@@ -1604,7 +1605,7 @@ public class EditProxyViewModel : ViewModelBase, INotifyPropertyChanged, INotify
 
             if(string.IsNullOrWhiteSpace(RemoteIp))
             {
-                AddError("RemoteIp", "Remote address is required");
+                AddError("RemoteIp", string.Format(Application.Current.Resources["Required"] as string, Application.Current.Resources["RemoteAddress"]));
             }
             else
             {
@@ -1613,7 +1614,7 @@ public class EditProxyViewModel : ViewModelBase, INotifyPropertyChanged, INotify
 
             if(RemotePort == 0 || (!BatchMode && RemotePort < 0))
             {
-                AddError("RemotePort", "Remote port is required");
+                AddError("RemotePort", string.Format(Application.Current.Resources["Required"] as string, Application.Current.Resources["RemotePort"]));
             }
             else
             {

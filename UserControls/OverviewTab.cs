@@ -40,7 +40,7 @@ public partial class OverviewTab : UserControl, IStyleConnector
                 (contextMenu.Items[1] as MenuItem).Visibility = Visibility.Collapsed;
                 (contextMenu.Items[2] as MenuItem).Visibility = Visibility.Collapsed;
             }
-            else if (overviewTabViewModel.Type == "history")
+            else if (overviewTabViewModel.Type == "history" || overviewTabViewModel.Type == "shortcut")
             {
                 (contextMenu.Items[1] as MenuItem).Visibility = Visibility.Collapsed;
                 (contextMenu.Items[2] as MenuItem).Visibility = Visibility.Collapsed;
@@ -75,16 +75,25 @@ public partial class OverviewTab : UserControl, IStyleConnector
 
     private void FrequentSessions_MouseDoubleClick(object sender, MouseButtonEventArgs e)
     {
-        if(e.OriginalSource is not FrameworkElement)
+        if (e.OriginalSource is FrameworkElement)
         {
+            if (((FrameworkElement) e.OriginalSource).DataContext is not Session)
+            {
+                return;
+            }
+
+            ((OverviewTabViewModel)base.DataContext).OnDoubleClick(((FrameworkElement)e.OriginalSource).DataContext as Session);
             return;
         }
-
-        if(((FrameworkElement) e.OriginalSource).DataContext is not Session)
+        if(e.OriginalSource is FrameworkContentElement)
         {
-            return;
-        }
+            if (((FrameworkContentElement) e.OriginalSource).DataContext is not Session)
+            {
+                return;
+            }
 
-        ((OverviewTabViewModel)base.DataContext).OnDoubleClick(((FrameworkElement)e.OriginalSource).DataContext as Session);
+            ((OverviewTabViewModel)base.DataContext).OnDoubleClick(((FrameworkContentElement)e.OriginalSource).DataContext as Session);
+            return;            
+        }
     }
 }

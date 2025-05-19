@@ -10,6 +10,7 @@ using System.Windows.Media;
 using SolarNG.Configs;
 using System.Collections.ObjectModel;
 using SolarNG.ViewModel;
+using SolarNG.Utilities;
 
 namespace SolarNG.Sessions;
 
@@ -112,7 +113,7 @@ public class Session : INotifyPropertyChanged
                 return Name;
             }
 
-            return Name + "\n" + System.Windows.Application.Current?.Resources["Comment"] + ":\n" + Comment;
+            return Name + "\n" + Application.Current?.Resources["Comment"] + ":\n" + Comment;
         }
     }
 
@@ -123,11 +124,11 @@ public class Session : INotifyPropertyChanged
             if (Type == "tag")
             {
                 if(Name == "..") { 
-                    return System.Windows.Application.Current.Resources["BackUpOneLevel"] as string;
+                    return Application.Current.Resources["BackUpOneLevel"] as string;
                 }
 
                 if(Name == "...") { 
-                    return System.Windows.Application.Current.Resources["BackUpTop"] as string;
+                    return Application.Current.Resources["BackUpTop"] as string;
                 }
 
                 return "tag";
@@ -146,6 +147,11 @@ public class Session : INotifyPropertyChanged
                 }
 
                 return HistorySession.DisplayName;
+            }
+
+            if (Type == "lnk")
+            {
+                return Program.Path;
             }
 
             string str = Type + "://";
@@ -248,7 +254,7 @@ public class Session : INotifyPropertyChanged
         }
     }
 
-    public ObservableCollection<Session> ChildSessions = new ObservableCollection<Session>();
+    public SuspendableObservableCollection<Session> ChildSessions = new SuspendableObservableCollection<Session>();
 
     public int ChildSessionsCount
     {
@@ -322,7 +328,7 @@ public class Session : INotifyPropertyChanged
         {
             if(Type == "tag")
             {
-                return System.Windows.Application.Current.Resources["fg2"] as SolidColorBrush;
+                return Application.Current.Resources["fg2"] as SolidColorBrush;
             }
 
             return Color;
@@ -496,6 +502,15 @@ public class Session : INotifyPropertyChanged
                 return count.ToString();    
             }
 
+            if (Type == "lnk")
+            {
+                if (string.IsNullOrWhiteSpace(Program.CommandLine))
+                {
+                    return Program.DisplayName;
+                }
+                return Program.DisplayName + " " + Program.CommandLine;
+            }
+
             if (Type == "app")
             {
                 if (string.IsNullOrWhiteSpace(Program.CommandLine))
@@ -589,6 +604,18 @@ public class Session : INotifyPropertyChanged
     public int Height;
 
     [DataMember]
+    public string ShellPath;
+
+    [DataMember]
+    public string ShellWorkingDir;
+
+    [DataMember]
+    public string RemoteAppPath;
+
+    [DataMember]
+    public string RemoteAppCmdline;
+
+    [DataMember]
     public Guid MSTSCId = Guid.Empty;
 
     //Application
@@ -677,7 +704,7 @@ public class Session : INotifyPropertyChanged
 
         Port = SessionType.Port;
 
-        if(type == "app")
+        if(type == "app" || type == "lnk")
         {
             Program = new ProgramConfig("");
         }
@@ -733,6 +760,39 @@ public class Session : INotifyPropertyChanged
         }
 
         return false;
+    }
+
+    public string GetRDPFile()
+    {
+        if(SessionType.ProgramName != "MSTSC")
+        {
+            return null;
+        }
+
+        ConfigFile configFile = App.Sessions.ConfigFiles.FirstOrDefault((ConfigFile s) => s.Id == MSTSCId);
+
+        string file_id = Id.ToString();
+        file_id = "_" + file_id.Substring(file_id.Length - 12);
+
+        if(!string.IsNullOrEmpty(Credential?.Username) && !SafeString.IsNullOrEmpty(Credential?.Password))
+        {
+            file_id += "_" + App.UserId.Substring(App.UserId.Length - 12);
+        }
+
+        string rdpFile = configFile?.Path;
+
+        if (string.IsNullOrEmpty(rdpFile))
+        {
+            rdpFile = "SolarNG" + file_id + ".rdp";
+        }
+        else
+        {
+            rdpFile = Path.GetFileNameWithoutExtension(rdpFile) + file_id + Path.GetExtension(rdpFile);
+        }
+
+        rdpFile = Path.Combine(App.DataFilePath, "Temp", rdpFile);
+
+        return rdpFile;
     }
 
     public event PropertyChangedEventHandler PropertyChanged;

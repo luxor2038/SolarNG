@@ -15,7 +15,8 @@ namespace SolarNG.ViewModel.Settings;
 public class TagsListViewModel : ViewModelBase, INotifyPropertyChanged
 {
     private ObservableCollection<Session> AllSessions => App.Sessions.Sessions;
-    public ObservableCollection<Session> FilteredTags { get; set; }
+    private ObservableCollection<Session> AllSortedTags = new ObservableCollection<Session>();
+    public ObservableCollection<Session> FilteredTags { get; set; } = new ObservableCollection<Session>();
 
     private MainWindow MainWindow => SettingsVM.MainWindow;
 
@@ -29,10 +30,7 @@ public class TagsListViewModel : ViewModelBase, INotifyPropertyChanged
         EditTagVM.TagsListVM = this;
         SettingsVM = settingsVM;
 
-        FilteredTags = new ObservableCollection<Session>(from s in AllSessions
-                                                                orderby s.Name
-                                                                where s.Type == "tag"
-                                                                select s);
+        UpdateTags(null, null);
 
         SelectedObject = FilteredTags.FirstOrDefault();
 
@@ -59,8 +57,15 @@ public class TagsListViewModel : ViewModelBase, INotifyPropertyChanged
         base.Cleanup();
     }
 
+    public int GetCount()
+    {
+        return AllSortedTags.Count;
+    }
+
     private void UpdateTags(object sender, EventArgs args)
     {
+        AllSortedTags = new ObservableCollection<Session>(AllSessions.OrderBy((Session s) => s.Name).Where((Session s) => s.Type == "tag"));
+        SettingsVM.UpdateTitle();
         FilterObjects();
     }
 
@@ -98,17 +103,20 @@ public class TagsListViewModel : ViewModelBase, INotifyPropertyChanged
                 ListView listView = (ListView)((object[])array)[0];
                 if (listView.SelectedItems.Count > 0)
                 {
+                    int nextSelectedIndex = GetNextSelectedIndex(listView);
+
                     List<Guid> list = new List<Guid>();
                     foreach (object selectedItem in listView.SelectedItems)
                     {
                         list.Add(((Session)selectedItem).Id);
-                     }
+                    }
                     foreach (Guid item in list)
                     {
                         DeleteItem(item);
                     }
+
+                    SelectedObject = FilteredTags.ElementAtOrDefault(nextSelectedIndex);
                 }
-                SelectedObject = FilteredTags.FirstOrDefault();
             }
         };
         deleteConfirmationDialog.ShowDialog();
@@ -133,6 +141,26 @@ public class TagsListViewModel : ViewModelBase, INotifyPropertyChanged
         }
 
         AllSessions.Remove(tag);
+    }
+
+    private int GetNextSelectedIndex(ListView listView)
+    {
+        int lastIndex = 0;
+        foreach(Session selectedItem in listView.SelectedItems)
+        {
+            int i = FilteredTags.IndexOf(selectedItem);
+            if(lastIndex < i)
+            {
+                lastIndex = i;
+            }
+        }
+
+        if(lastIndex < (FilteredTags.Count - 1))
+        {
+            return (lastIndex - listView.SelectedItems.Count + 1);
+        }
+
+        return (FilteredTags.Count - listView.SelectedItems.Count - 1);
     }
 
     private bool CreatingNew;
@@ -162,7 +190,7 @@ public class TagsListViewModel : ViewModelBase, INotifyPropertyChanged
     {
         FilteredTags.Clear();
 
-        foreach (Session session in AllSessions.OrderBy((Session s) => s.Name).Where((Session s) => s.Type == "tag"))
+        foreach (Session session in AllSortedTags)
         {
             if (session.Matches(ByUserTypedName))
             {

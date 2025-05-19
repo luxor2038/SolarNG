@@ -14,6 +14,7 @@
   <SolidColorBrush x:Key="t7" Color="#FFCDCDCD" />
   <SolidColorBrush x:Key="t8" Color="#FF00C4D2" />
   <SolidColorBrush x:Key="t9" Color="#FF176998" />
+  <SolidColorBrush x:Key="t10" Color="#FFC0C0C0" />
   <SolidColorBrush x:Key="u1" Color="#FF2E5E9E" />
   <SolidColorBrush x:Key="u2" Color="#FF1E4E8E" />
   <SolidColorBrush x:Key="u3" Color="#FFF7F7F7" />
@@ -43,8 +44,4 @@
   <SolidColorBrush x:Key="bb2" Color="#FF6ACCD3" />
   <SolidColorBrush x:Key="bb3" Color="#FFACACAC" />
   <SolidColorBrush x:Key="bb5" Color="#FFFFFFFF" />
-  <BitmapImage x:Key="ImageNormalized" UriSource="pack://application:,,,/images/normalize.png" />
-  <BitmapImage x:Key="ImageMaximized" UriSource="pack://application:,,,/images/maximize.png" />
-  <BitmapImage x:Key="ImageMinimize" UriSource="pack://application:,,,/images/minimize.png" />
-  <BitmapImage x:Key="ImageClose" UriSource="pack://application:,,,/images/close.png" />
 </ResourceDictionary>

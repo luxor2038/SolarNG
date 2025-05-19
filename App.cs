@@ -67,6 +67,7 @@ public partial class App : Application
             MessageBox.Show(ex.Message);
 
             Application.Current.Shutdown();
+            return;
         }
 
         AppDomain.CurrentDomain.UnhandledException += UnhandledExceptionHandler;
@@ -98,7 +99,7 @@ public partial class App : Application
         oSVERSIONINFOEX.OSVersionInfoSize = Marshal.SizeOf(typeof(Win32.OSVERSIONINFOEX));
         Win32.OSVERSIONINFOEX versionInfo = oSVERSIONINFOEX;
         Win32.RtlGetVersion(ref versionInfo);
-        OSVersion = new Version(versionInfo.MajorVersion, versionInfo.MinorVersion);
+        OSVersion = new Version(versionInfo.MajorVersion, versionInfo.MinorVersion, versionInfo.BuildNumber);
 
         DataFilePath = Environment.ExpandEnvironmentVariables(ConfigurationManager.AppSettings["DataFilePath"] ?? "");
         if (!Path.IsPathRooted(DataFilePath))
@@ -116,12 +117,14 @@ public partial class App : Application
         {
             log.Error("Failed to create data file path!", exception);
             Application.Current.Shutdown();
+            return;
         }
 
         Config = SolarNG.Configs.Config.Load(DataFilePath);
         if(Config == null)
         {
             Application.Current.Shutdown();
+            return;
         }
 
         SetLanguageDictionary(App.Config.GUI.Language);
@@ -138,7 +141,7 @@ public partial class App : Application
 
         if (!File.Exists(App.Config.PuTTY.FullPath))
         {
-            ConfirmationDialog confirmationDialog = new ConfirmationDialog(null, "SolarNG", string.Format(System.Windows.Application.Current.Resources["PuttyNotFound"] as string, "\"" + App.Config.PuTTY.FullPath + "\"", "\n"), hideCancelButton: true)
+            ConfirmationDialog confirmationDialog = new ConfirmationDialog(null, "SolarNG", string.Format(Application.Current.Resources["PuttyNotFound"] as string, "\"" + App.Config.PuTTY.FullPath + "\"", "\n"), hideCancelButton: true)
             {
                 Topmost = true,
             };
@@ -151,12 +154,13 @@ public partial class App : Application
             passSalt = Crypto.Argon2dSalt();
 
             PromptDialog promptDialog;
-            promptDialog = new PromptDialog(null, System.Windows.Application.Current.Resources["InputMasterPassword"] as string, System.Windows.Application.Current.Resources["EnterMasterPassword"] as string, "", password: true) { Topmost = true };
+            promptDialog = new PromptDialog(null, Application.Current.Resources["InputMasterPassword"] as string, Application.Current.Resources["EnterMasterPassword"] as string, "", password: true) { Topmost = true };
             promptDialog.Focus();
             bool? flag = promptDialog.ShowDialog();
             if (!flag.HasValue || !flag.Value)
             {
                 Application.Current.Shutdown();
+                return;
             }
 
             passHash = Crypto.Argon2dHash(promptDialog.MyPassword.Password, passSalt);
@@ -165,11 +169,13 @@ public partial class App : Application
             if (Sessions == null)
             {
                 Application.Current.Shutdown();
+                return;
             }
 
             if(!Sessions.Save(DataFilePath, true))
             {
                 Application.Current.Shutdown();
+                return;
             }
         }
         else
@@ -178,6 +184,7 @@ public partial class App : Application
             if (Sessions == null)
             {
                 Application.Current.Shutdown();
+                return;
             }
         }
 
@@ -197,6 +204,7 @@ public partial class App : Application
         {
             log.Error(ex);
             Application.Current.Shutdown();
+            return;
         }
 
         TaskbarList = (Win32.ITaskbarList4) new Win32.CTaskbarList();
@@ -247,7 +255,7 @@ public partial class App : Application
         Application.Current.Resources.MergedDictionaries.Add(resourceDictionary);
     }
 
-    public static byte[] UserHash;
+    public static string UserId;
 
     private static Mutex mutex;
     private static void InitMutex()
@@ -267,10 +275,11 @@ public partial class App : Application
 
         using (SHA256 sha256 = SHA256.Create())
         {
-            UserHash = sha256.ComputeHash(Encoding.ASCII.GetBytes(id)).Take(16).ToArray();
+            byte[] userHash = sha256.ComputeHash(Encoding.ASCII.GetBytes(id)).Take(16).ToArray();
+            UserId = new Guid(userHash).ToString();
         }
 
-        mutex = new Mutex(initiallyOwned: false, "Global\\SolarNG_" + new Guid(UserHash).ToString());
+        mutex = new Mutex(initiallyOwned: false, "Global\\SolarNG_" + UserId);
         MutexAccessRule rule = new MutexAccessRule(new SecurityIdentifier(WellKnownSidType.WorldSid, null), MutexRights.FullControl, AccessControlType.Allow);
         MutexSecurity mutexSecurity = new MutexSecurity();
         mutexSecurity.AddAccessRule(rule);
@@ -443,6 +452,7 @@ public partial class App : Application
         BuiltinSessionTypes.Add(new SessionType("", 0, SessionType.FLAG_BUILTIN) { Program = new Configs.ProgramConfig("") });
         BuiltinSessionTypes.Add(new SessionType("tag", 0, SessionType.FLAG_BUILTIN));
         BuiltinSessionTypes.Add(new SessionType("app", 0, SessionType.FLAG_BUILTIN) { AbbrName="a" });
+        BuiltinSessionTypes.Add(new SessionType("lnk", 0, SessionType.FLAG_BUILTIN) { DisplayName="Shortcut" });
         BuiltinSessionTypes.Add(new SessionType("window", 0, SessionType.FLAG_BUILTIN) { DisplayName="Window", AbbrDisplayName="WIN" });
         BuiltinSessionTypes.Add(new SessionType("process", 0, SessionType.FLAG_BUILTIN) { DisplayName="Process", AbbrDisplayName="PROC" });
         BuiltinSessionTypes.Add(new SessionType("history", 0, SessionType.FLAG_BUILTIN));

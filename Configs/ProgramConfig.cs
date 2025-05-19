@@ -111,7 +111,7 @@ public class ProgramConfig
                 _FullWorkingDir = ExpandEnvironmentVariables(WorkingDir, Arch);
             }
 
-            return string.IsNullOrEmpty(_FullWorkingDir) ? null : _FullWorkingDir;
+            return string.IsNullOrWhiteSpace(_FullWorkingDir) ? null : _FullWorkingDir;
         }
     }
 
@@ -136,6 +136,8 @@ public class ProgramConfig
     internal const uint FLAG_PASSWORD_ONLY = 0x0400u;
     internal const uint FLAG_NOTCLOSEIME = 0x0800u;
 
+    internal const uint FLAG_ENABLEHOTKEY = 0x1000u;
+
     [DataMember]
     public uint iFlags = 0;
 
@@ -144,6 +146,12 @@ public class ProgramConfig
 
     [DataMember]
     public uint WindowStyleMask = 0;
+
+    internal const uint AUTOINPUT_SENDMESSAGE = 0u;
+    internal const uint AUTOINPUT_SENDINPUT = 1u;
+
+    [DataMember]
+    public uint AutoInput = AUTOINPUT_SENDMESSAGE;
 
     [DataMember]
     public bool UsePipe = false;
@@ -170,7 +178,7 @@ public class ProgramConfig
 
     public static string ExpandEnvironmentVariables(string path, string arch=null, bool native=false)
     {
-        if(string.IsNullOrEmpty(path))
+        if(string.IsNullOrWhiteSpace(path))
         {
             return "";
         }

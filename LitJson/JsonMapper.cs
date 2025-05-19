@@ -813,7 +813,7 @@ namespace LitJson
 
             if (obj is IDictionary)
             {
-                if (((IList)obj).Count == 0)
+                if (((IDictionary)obj).Count == 0)
                     return true;
                 return false;
             }

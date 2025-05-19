@@ -130,7 +130,7 @@ public class EditCredentialViewModel : ViewModelBase, INotifyPropertyChanged, IN
     {
         OpenFileDialog openFileDialog = new OpenFileDialog() { Filter = "*.ppk|*.ppk|*.*|*.*" };
         openFileDialog.ShowDialog();
-        if (!string.IsNullOrEmpty(openFileDialog.FileName))
+        if (!string.IsNullOrWhiteSpace(openFileDialog.FileName))
         {
             ConfigFile configFile = new ConfigFile("PrivateKey") { RealPath = openFileDialog.FileName };
 
@@ -235,16 +235,9 @@ public class EditCredentialViewModel : ViewModelBase, INotifyPropertyChanged, IN
 
             if(remove_rdp)
             {
-                try
+                foreach(Session session in App.Sessions.Sessions.Where(s => s.CredentialId == credential.Id))
                 {
-                    string text = credential.Id.ToString();
-                    foreach (string item2 in Directory.EnumerateFiles(searchPattern: "*_" + text.Substring(text.Length - 12) + "_*.rdp", path: Path.Combine(App.DataFilePath, "Temp"), searchOption: SearchOption.TopDirectoryOnly))
-                    {
-                        File.Delete(item2);
-                    }
-                }
-                catch (Exception)
-                {
+                    RemoveRDPFile(session);
                 }
             }
         }
@@ -280,22 +273,30 @@ public class EditCredentialViewModel : ViewModelBase, INotifyPropertyChanged, IN
             foreach(Session session in App.Sessions.Sessions.Where(s => s.CredentialId == credential.Id))
             {
                 session.OnPropertyChanged("CredentialName");
-            }
 
-            try
-            {
-                string text = credential.Id.ToString();
-                foreach (string item2 in Directory.EnumerateFiles(searchPattern: "*_" + text.Substring(text.Length - 12) + "_*.rdp", path: Path.Combine(App.DataFilePath, "Temp"), searchOption: SearchOption.TopDirectoryOnly))
-                {
-                    File.Delete(item2);
-                }
+                RemoveRDPFile(session);
             }
-            catch (Exception)
-            {
-            }
-        }
+         }
 
         return credential;
+    }
+
+    private void RemoveRDPFile(Session session)
+    {
+        string rdpFile = session.GetRDPFile();
+
+        if(string.IsNullOrWhiteSpace(rdpFile))
+        {
+            return;
+        }
+
+        try
+        {
+            File.Delete(rdpFile);
+        }
+        catch (Exception)
+        {
+        }
     }
 
     private Visibility _OkValidationVisibility;
@@ -401,7 +402,7 @@ public class EditCredentialViewModel : ViewModelBase, INotifyPropertyChanged, IN
 
     public void ShowSelectedCredential(Credential credential)
     {
-        TitleBackground = System.Windows.Application.Current.Resources["bg1"] as SolidColorBrush;
+        TitleBackground = Application.Current.Resources["bg1"] as SolidColorBrush;
         BatchMode = false;
         NewMode = false;
 
@@ -454,7 +455,7 @@ public class EditCredentialViewModel : ViewModelBase, INotifyPropertyChanged, IN
     {
         PrivateKeys = new ObservableCollection<ComboBoxGuid>
         {
-            new ComboBoxGuid(Guid.Empty, System.Windows.Application.Current.Resources["ChoosePrivateKey"] as string)
+            new ComboBoxGuid(Guid.Empty, Application.Current.Resources["ChoosePrivateKey"] as string)
         };
 
         if(PrivateKeyHasNoChangeId)
@@ -519,7 +520,7 @@ public class EditCredentialViewModel : ViewModelBase, INotifyPropertyChanged, IN
     {
         if (string.IsNullOrWhiteSpace(Username))
         {
-            AddError("UserName", "UserName is required");
+            AddError("Username", string.Format(Application.Current.Resources["Required"] as string, Application.Current.Resources["Username"]));
             return !HasErrors;
         }
         RemoveError("Username");
@@ -544,7 +545,7 @@ public class EditCredentialViewModel : ViewModelBase, INotifyPropertyChanged, IN
         {
             if (!NewMode)
             {
-                AddError("Name", "Credential name already exists");
+                AddError("Name", string.Format(Application.Current.Resources["Exist"] as string, Application.Current.Resources["CredentialName"]));
             }
             else
             {

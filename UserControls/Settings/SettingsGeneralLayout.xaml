@@ -22,7 +22,7 @@
           </Grid>
         </DockPanel>
       </TabItem>
-      <TabItem Header="{StaticResource CREDENTIALS}" Style="{StaticResource CustomTabItemStyle}">
+      <TabItem Name="TabCredentials"  Header="{StaticResource CREDENTIALS}" Style="{StaticResource CustomTabItemStyle}">
         <DockPanel Background="{StaticResource bg1}">
           <Border DockPanel.Dock="Top">
             <Label Content="{StaticResource Credentials}" Height="40" DockPanel.Dock="Top" VerticalContentAlignment="Center" Margin="12,0,0,0" Foreground="{StaticResource fg1}" FontSize="16" FontWeight="SemiBold" />
@@ -41,7 +41,7 @@
           </Grid>
         </DockPanel>
       </TabItem>
-      <TabItem Header="{StaticResource CONFIGFILES}" Style="{StaticResource CustomTabItemStyle}">
+      <TabItem Name="TabConfigFiles" Header="{StaticResource CONFIGFILES}" Style="{StaticResource CustomTabItemStyle}">
         <DockPanel Background="{StaticResource bg1}">
           <Border DockPanel.Dock="Top">
             <Label Content="{StaticResource ConfigFiles}" Height="40" DockPanel.Dock="Top" VerticalContentAlignment="Center" Margin="12,0,0,0" Foreground="{StaticResource fg1}" FontSize="16" FontWeight="SemiBold" />

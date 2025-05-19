@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Runtime.Serialization;
 using System.Security.Cryptography;
 using System.Text;
+using System.Windows;
 using System.Windows.Media;
 using LitJson;
 using log4net;
@@ -33,7 +34,7 @@ internal class ExportModel
     public ObservableCollection<SessionType> SessionTypes { get; set; }
 
     [DataMember]
-    public ObservableCollection<Session> Sessions { get; set; }
+    public SuspendableObservableCollection<Session> Sessions { get; set; }
 
     [DataMember]
     public ObservableCollection<Credential> Credentials { get; set; }
@@ -45,7 +46,7 @@ internal class ExportModel
     {
         SessionTypes = new ObservableCollection<SessionType>();
         SessionTypesDict = new Dictionary<string, SessionType>();
-        Sessions = new ObservableCollection<Session>();
+        Sessions = new SuspendableObservableCollection<Session>();
         Credentials = new ObservableCollection<Credential>();
         ConfigFiles = new ObservableCollection<ConfigFile>();
     }
@@ -281,7 +282,7 @@ internal class ExportModel
                 string Username = puttySession["UserName"] as string;
                 string PublicKeyFile = puttySession["PublicKeyFile"] as string;
 
-                if(!string.IsNullOrEmpty(Username) || !string.IsNullOrEmpty(PublicKeyFile))
+                if(!string.IsNullOrEmpty(Username) || !string.IsNullOrWhiteSpace(PublicKeyFile))
                 {
                     credential = new Credential()
                     {
@@ -440,6 +441,8 @@ internal class ExportModel
         {
             AddBuiltinTypes();
 
+            Sessions.SuspendNotifications();
+
             List<Session> notFoundedTags = new List<Session>();
 
             Tags = new Dictionary<string, Session>();
@@ -447,6 +450,7 @@ internal class ExportModel
             foreach (Session tag in Sessions.Where((Session s) => s.Type == "tag"))
             {
                 tag.Id = Guid.NewGuid();
+                tag.ChildSessions.SuspendNotifications();
                 tag.ChildSessions.Clear();
                 Tags[tag.Name] = tag;
             }
@@ -506,10 +510,17 @@ internal class ExportModel
                 }
             }
 
+            foreach (Session tag in Sessions.Where((Session s) => s.Type == "tag"))
+            {
+                tag.ChildSessions.ResumeNotifications();
+            }
+
             foreach (Session tag in notFoundedTags)
             {
                 Sessions.Add(tag);
             }
+
+            Sessions.ResumeNotifications();
 
             return;
         }
@@ -576,7 +587,7 @@ internal class ExportModel
                     while (App.passHash == null)
                     {
                         PromptDialog promptDialog;
-                        promptDialog = new PromptDialog(null, System.Windows.Application.Current.Resources["InputMasterPassword"] as string, System.Windows.Application.Current.Resources["EnterMasterPassword"] as string, "", password: true) { Topmost = true };
+                        promptDialog = new PromptDialog(null, Application.Current.Resources["InputMasterPassword"] as string, Application.Current.Resources["EnterMasterPassword"] as string, "", password: true) { Topmost = true };
                         promptDialog.Focus();
                         bool? flag2 = promptDialog.ShowDialog();
                         if (!flag2.HasValue || !flag2.Value)
@@ -865,6 +876,8 @@ internal class ExportModel
             }
 
             FixSessions(true);
+
+            Sessions.TriggerNotifications();
 
             return true;
         }

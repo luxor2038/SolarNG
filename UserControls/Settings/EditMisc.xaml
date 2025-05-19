@@ -3,7 +3,9 @@
     <Label Content="{StaticResource Hotkey}" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource fg1}" Padding="0,0,0,0" Margin="0,0,0,15"/>
     <StackPanel Orientation="Horizontal">
       <CheckBox Style="{StaticResource SimpleCheckBox}" HorizontalAlignment="Left" Content="{StaticResource DisableHotkey}" VerticalContentAlignment="Center" IsChecked="{Binding ShortcutsDisabled}" Checked="OnCheckBoxChecked" Unchecked="OnCheckBoxUnchecked" />
-      <Image Source="../../Images/info.png" Stretch="None" ToolTipService.ShowDuration="60000">
+      <Canvas ToolTipService.ShowDuration="60000">
+        <Path Width="16" Height="16" Fill="{StaticResource u1}" Stretch="Uniform" Data="M1 8a7 7 0 1 0 14 0 7 7 0 1 0-14 0"/>
+        <Path Width="10" Height="10" Margin="3,3,3,3" Fill="White" Stretch="Uniform" Data="M458 458h83V687h-83zM448 344a52 52 0 1 0 104 0 52 52 0 1 0-104 0"/>
         <FrameworkElement.ToolTip>
           <ToolTip Background="{StaticResource bg1}" Margin="10" BorderThickness="0">
             <UIElement.Effect>
@@ -47,35 +49,37 @@
                 <Label Grid.Column="1" Grid.Row="2" Content="{StaticResource OpenSettings}" Style="{StaticResource HintLabel}" />
                 <Label Grid.Column="0" Grid.Row="3" Content="Ctrl+H" Style="{StaticResource HintLabel}" />
                 <Label Grid.Column="1" Grid.Row="3" Content="{StaticResource OpenHistory}" Style="{StaticResource HintLabel}" />
-                <Label Grid.Column="0" Grid.Row="4" Content="Ctrl+F5" Style="{StaticResource HintLabel}" />
-                <Label Grid.Column="1" Grid.Row="4" Content="{StaticResource Reconnects}" Style="{StaticResource HintLabel}" />
-                <Label Grid.Column="0" Grid.Row="5" Foreground="{StaticResource fg1}" Content="{StaticResource Tab}" FontWeight="SemiBold" Padding="5,10,0,5" FontSize="11" />
-                <Label Grid.Column="0" Grid.Row="6" Content="Ctrl+T" Style="{StaticResource HintLabel}" />
-                <Label Grid.Column="1" Grid.Row="6" Content="{StaticResource OpenTab}" Style="{StaticResource HintLabel}" />
-                <Label Grid.Column="0" Grid.Row="7" Content="Ctrl+W" Style="{StaticResource HintLabel}" />
-                <Label Grid.Column="1" Grid.Row="7" Content="{StaticResource Closes}" Style="{StaticResource HintLabel}" />
-                <Label Grid.Column="0" Grid.Row="8" Content="Ctrl+Shift+T" Style="{StaticResource HintLabel}" />
-                <Label Grid.Column="1" Grid.Row="8" Content="{StaticResource OpenPrevious}" Style="{StaticResource HintLabel}" />
-                <Label Grid.Column="0" Grid.Row="9" Content="Ctrl+Tab" Style="{StaticResource HintLabel}" />
-                <Label Grid.Column="1" Grid.Row="9" Content="{StaticResource SwitchesLeft}" Style="{StaticResource HintLabel}" />
-                <Label Grid.Column="0" Grid.Row="10" Content="Ctrl+Shift+Tab" Style="{StaticResource HintLabel}" />
-                <Label Grid.Column="1" Grid.Row="10" Content="{StaticResource SwitchesRight}" Style="{StaticResource HintLabel}" />
-                <Label Grid.Column="0" Grid.Row="11" Content="Ctrl+1-8" Style="{StaticResource HintLabel}" />
-                <Label Grid.Column="1" Grid.Row="11" Content="{StaticResource Switches}" Style="{StaticResource HintLabel}" />
-                <Label Grid.Column="0" Grid.Row="12" Content="Ctrl+9" Style="{StaticResource HintLabel}" />
-                <Label Grid.Column="1" Grid.Row="12" Content="{StaticResource SwitchesLast}" Style="{StaticResource HintLabel}" />
-                <Label Grid.Column="0" Grid.Row="13" Style="{StaticResource HintLabel}">Ctrl+←</Label>
-                <Label Grid.Column="1" Grid.Row="13" Content="{StaticResource MoveLeft}" Style="{StaticResource HintLabel}" />
-                <Label Grid.Column="0" Grid.Row="14" Style="{StaticResource HintLabel}">Ctrl+→</Label>
-                <Label Grid.Column="1" Grid.Row="14" Content="{StaticResource MoveRight}" Style="{StaticResource HintLabel}" />
-                <Label Grid.Column="0" Grid.Row="15" Foreground="{StaticResource fg1}" Content="{StaticResource Window}" FontWeight="SemiBold" Padding="5,10,0,5" FontSize="11" />
-                <Label Grid.Column="0" Grid.Row="16" Content="Ctrl+N" Style="{StaticResource HintLabel}" />
-                <Label Grid.Column="1" Grid.Row="16" Content="{StaticResource OpenWindow}" Style="{StaticResource HintLabel}" />
+                <Label Grid.Column="0" Grid.Row="4" Content="Ctrl+L" Style="{StaticResource HintLabel}" />
+                <Label Grid.Column="1" Grid.Row="4" Content="{StaticResource OpenShortcut}" Style="{StaticResource HintLabel}" />
+                <Label Grid.Column="0" Grid.Row="5" Content="Ctrl+F5" Style="{StaticResource HintLabel}" />
+                <Label Grid.Column="1" Grid.Row="5" Content="{StaticResource Reconnects}" Style="{StaticResource HintLabel}" />
+                <Label Grid.Column="0" Grid.Row="6" Foreground="{StaticResource fg1}" Content="{StaticResource Tab}" FontWeight="SemiBold" Padding="5,10,0,5" FontSize="11" />
+                <Label Grid.Column="0" Grid.Row="7" Content="Ctrl+T" Style="{StaticResource HintLabel}" />
+                <Label Grid.Column="1" Grid.Row="7" Content="{StaticResource OpenTab}" Style="{StaticResource HintLabel}" />
+                <Label Grid.Column="0" Grid.Row="8" Content="Ctrl+W" Style="{StaticResource HintLabel}" />
+                <Label Grid.Column="1" Grid.Row="8" Content="{StaticResource Closes}" Style="{StaticResource HintLabel}" />
+                <Label Grid.Column="0" Grid.Row="9" Content="Ctrl+Shift+T" Style="{StaticResource HintLabel}" />
+                <Label Grid.Column="1" Grid.Row="9" Content="{StaticResource OpenPrevious}" Style="{StaticResource HintLabel}" />
+                <Label Grid.Column="0" Grid.Row="10" Content="Ctrl+Tab" Style="{StaticResource HintLabel}" />
+                <Label Grid.Column="1" Grid.Row="10" Content="{StaticResource SwitchesLeft}" Style="{StaticResource HintLabel}" />
+                <Label Grid.Column="0" Grid.Row="11" Content="Ctrl+Shift+Tab" Style="{StaticResource HintLabel}" />
+                <Label Grid.Column="1" Grid.Row="11" Content="{StaticResource SwitchesRight}" Style="{StaticResource HintLabel}" />
+                <Label Grid.Column="0" Grid.Row="12" Content="Ctrl+1-8" Style="{StaticResource HintLabel}" />
+                <Label Grid.Column="1" Grid.Row="12" Content="{StaticResource Switches}" Style="{StaticResource HintLabel}" />
+                <Label Grid.Column="0" Grid.Row="13" Content="Ctrl+9" Style="{StaticResource HintLabel}" />
+                <Label Grid.Column="1" Grid.Row="13" Content="{StaticResource SwitchesLast}" Style="{StaticResource HintLabel}" />
+                <Label Grid.Column="0" Grid.Row="14" Style="{StaticResource HintLabel}">Ctrl+←</Label>
+                <Label Grid.Column="1" Grid.Row="14" Content="{StaticResource MoveLeft}" Style="{StaticResource HintLabel}" />
+                <Label Grid.Column="0" Grid.Row="15" Style="{StaticResource HintLabel}">Ctrl+→</Label>
+                <Label Grid.Column="1" Grid.Row="15" Content="{StaticResource MoveRight}" Style="{StaticResource HintLabel}" />
+                <Label Grid.Column="0" Grid.Row="16" Foreground="{StaticResource fg1}" Content="{StaticResource Window}" FontWeight="SemiBold" Padding="5,10,0,5" FontSize="11" />
+                <Label Grid.Column="0" Grid.Row="17" Content="Ctrl+N" Style="{StaticResource HintLabel}" />
+                <Label Grid.Column="1" Grid.Row="17" Content="{StaticResource OpenWindow}" Style="{StaticResource HintLabel}" />
               </Grid>
             </StackPanel>
           </ToolTip>
         </FrameworkElement.ToolTip>
-      </Image>
+      </Canvas>
     </StackPanel>
     <Border BorderThickness="0,1,0,0" BorderBrush="{StaticResource bb1}" Margin="0,15,0,0" Background="{StaticResource bg1}">
       <StackPanel>

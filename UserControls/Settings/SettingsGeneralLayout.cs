@@ -79,6 +79,36 @@ public partial class SettingsGeneralLayout : UserControl
         ((AppsListViewModel)AppsList.DataContext).Cleanup();
     }
 
+    public int GetCount()
+    {
+        int count = -1;
+        if(MainTabControl.SelectedItem == TabSessions)
+        {
+            count = ((SessionsListViewModel)SessionsList.DataContext).GetCount();
+        } 
+        else if(MainTabControl.SelectedItem == TabCredentials)
+        {
+            count = ((CredentialsListViewModel)CredentialsList.DataContext).GetCount();
+        }
+        else if(MainTabControl.SelectedItem == TabConfigFiles)
+        {
+            count = ((ConfigFilesListViewModel)ConfigFilesList.DataContext).GetCount();
+        }
+        else if(MainTabControl.SelectedItem == TabProxies)
+        {
+            count = ((ProxiesListViewModel)ProxiesList.DataContext).GetCount();
+        }
+        else if(MainTabControl.SelectedItem == TabTags)
+        {
+            count = ((TagsListViewModel)TagsList.DataContext).GetCount();
+        }
+        else if(MainTabControl.SelectedItem == TabApps)
+        {
+            count = ((AppsListViewModel)AppsList.DataContext).GetCount();
+        }
+        return count;
+    }
+
     private void MainTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (e.OriginalSource is not TabControl tabControl)
@@ -89,6 +119,11 @@ public partial class SettingsGeneralLayout : UserControl
         if (tabBase != null)
         {
             tabBase.CanActivate = true;
+
+            if(base.IsLoaded)
+            {
+                ((SettingsViewModel)DataContext).UpdateTitle();
+            }
         }
         else if (tabControl.SelectedItem == TabMisc)
         {

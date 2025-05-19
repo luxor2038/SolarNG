@@ -158,6 +158,15 @@ namespace ChromeTabs
             //this.Unloaded += ChromeTabPanel_Unloaded;
         }
 
+        internal void SetAddButtonTooltip(bool isFull)
+        {
+            ((ToolTip)(((Button)_addButton.Children[0]).ToolTip)).IsOpen = false;
+            ((Button)_addButton.Children[0]).ToolTip = new ToolTip
+            {
+                Content = Application.Current.Resources[isFull?"TabsFull":"AddTab"] as string
+            };
+        }
+
         private void ChromeTabPanel_Unloaded(object sender, RoutedEventArgs e)
         {
             if (Window.GetWindow(this) != null)
@@ -213,7 +222,6 @@ namespace ChromeTabs
             //_rightMargin = ParentTabControl.IsAddButtonVisible ? 25 : 0;
             _rightMargin = (ParentTabControl.IsAddButtonVisible ? (separatorSize.Width + addButtonSize.Width + 25) : 25.0);
             _currentTabWidth = CalculateTabWidth(finalSize);
-            ParentTabControl.CanAddTabInternal=_currentTabWidth > MinTabWidth;
             ParentTabControl.IsTabsFull = !ParentTabControl.CanAddTabInternal;
 
             if (_hideAddButton)
@@ -263,7 +271,6 @@ namespace ChromeTabs
         protected override Size MeasureOverride(Size availableSize)
         {
             _currentTabWidth = CalculateTabWidth(availableSize);
-            ParentTabControl.CanAddTabInternal = _currentTabWidth > MinTabWidth;
             ParentTabControl.IsTabsFull = !ParentTabControl.CanAddTabInternal;
 
             if (_hideAddButton)
@@ -323,6 +330,8 @@ namespace ChromeTabs
 
             double totalPinnedTabsWidth = numberOfPinnedTabs > 0 ? ((numberOfPinnedTabs * PinnedTabWidth)) : 0;
             double totalNonPinnedTabsWidth = ((activeWidth) + (Children.Count - 1) * Overlap) - totalPinnedTabsWidth;
+            ParentTabControl.CanAddTabInternal = ((totalNonPinnedTabsWidth / (Children.Count  - numberOfPinnedTabs + 1)) >= MinTabWidth);
+
             return Math.Min(Math.Max(totalNonPinnedTabsWidth / (Children.Count - numberOfPinnedTabs), MinTabWidth), MaxTabWidth);
         }
 

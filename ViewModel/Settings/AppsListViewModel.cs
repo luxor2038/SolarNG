@@ -16,7 +16,8 @@ namespace SolarNG.ViewModel.Settings;
 public class AppsListViewModel : ViewModelBase, INotifyPropertyChanged
 {
     private ObservableCollection<Session> AllSessions => App.Sessions.Sessions;
-    public ObservableCollection<Session> FilteredApplications { get; set; }
+    private ObservableCollection<Session> AllSortedApplications = new ObservableCollection<Session>();
+    public ObservableCollection<Session> FilteredApplications { get; set; } = new ObservableCollection<Session>();
 
     private MainWindow MainWindow => SettingsVM.MainWindow;
 
@@ -30,10 +31,7 @@ public class AppsListViewModel : ViewModelBase, INotifyPropertyChanged
         EditAppVM.AppsListVM = this;
         SettingsVM = settingsVM;
 
-        FilteredApplications = new ObservableCollection<Session>(from s in AllSessions
-                                                                orderby s.Name
-                                                                where s.Type == "app"
-                                                                select s);
+        UpdateApplications(null, null);
 
         SelectedObject = FilteredApplications.FirstOrDefault();
 
@@ -64,8 +62,15 @@ public class AppsListViewModel : ViewModelBase, INotifyPropertyChanged
         base.Cleanup();
     }
 
+    public int GetCount()
+    {
+        return AllSortedApplications.Count;
+    }
+
     private void UpdateApplications(object sender, EventArgs args)
     {
+        AllSortedApplications = new ObservableCollection<Session>(AllSessions.OrderBy((Session s) => s.Name).Where((Session s) => s.Type == "app"));
+        SettingsVM.UpdateTitle();
         FilterObjects();
     }
 
@@ -105,21 +110,24 @@ public class AppsListViewModel : ViewModelBase, INotifyPropertyChanged
         {
             if ((sender as DeleteConfirmationDialog).Confirmed)
             {
-                List<Guid> list = new List<Guid>();
                 ListView listView = (ListView)((object[])array)[0];
                 if (listView.SelectedItems.Count > 0)
                 {
+                    int nextSelectedIndex = GetNextSelectedIndex(listView);
+
+                    List<Guid> list = new List<Guid>();
                     foreach (object selectedItem in listView.SelectedItems)
                     {
                         list.Add(((Session)selectedItem).Id);
-                     }
+                    }
                     foreach (Guid item in list)
                     {
                         DeleteItem(item);
                     }
+
+                    JumpListManager.SetNewJumpList(AllSessions);
+                    SelectedObject = FilteredApplications.ElementAtOrDefault(nextSelectedIndex);
                 }
-                JumpListManager.SetNewJumpList(AllSessions);
-                SelectedObject = FilteredApplications.FirstOrDefault(); 
             }
         };
         deleteConfirmationDialog.ShowDialog();
@@ -139,6 +147,26 @@ public class AppsListViewModel : ViewModelBase, INotifyPropertyChanged
             App.HistorySessions.Remove(session.SessionHistory);
         }
         AllSessions.Remove(session);
+    }
+
+    private int GetNextSelectedIndex(ListView listView)
+    {
+        int lastIndex = 0;
+        foreach(Session selectedItem in listView.SelectedItems)
+        {
+            int i = FilteredApplications.IndexOf(selectedItem);
+            if(lastIndex < i)
+            {
+                lastIndex = i;
+            }
+        }
+
+        if(lastIndex < (FilteredApplications.Count - 1))
+        {
+            return (lastIndex - listView.SelectedItems.Count + 1);
+        }
+
+        return (FilteredApplications.Count - listView.SelectedItems.Count - 1);
     }
 
     private bool CreatingNew;
@@ -177,11 +205,11 @@ public class AppsListViewModel : ViewModelBase, INotifyPropertyChanged
     {
         FilteredApplications.Clear();
 
-        foreach (Session session in AllSessions.OrderBy((Session s) => s.Name).Where((Session s) => s.Type == "app"))
+        foreach (Session app in AllSortedApplications)
         {
-            if (session.Matches(ByUserTypedName))
+            if (app.Matches(ByUserTypedName))
             {
-                FilteredApplications.Add(session);
+                FilteredApplications.Add(app);
             }
         }
         ListUpdate();

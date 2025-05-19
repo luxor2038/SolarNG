@@ -37,6 +37,7 @@
   <system:String x:Key="Refresh">刷新</system:String>
   <system:String x:Key="Save">保存</system:String>
   <system:String x:Key="Session">会话</system:String>
+  <system:String x:Key="Shortcut">快捷方式</system:String>
   <system:String x:Key="Tab">标签页</system:String>
   <system:String x:Key="Tag">标签</system:String>
   <system:String x:Key="Unpin">取消固定</system:String>
@@ -45,10 +46,12 @@
   <system:String x:Key="Window">窗口</system:String>
   <system:String x:Key="Yes">是</system:String>
   <system:String x:Key="Menu">主菜单</system:String>
+  <system:String x:Key="Script">脚本</system:String>
   <system:String x:Key="NewSession">新建会话</system:String>
   <system:String x:Key="NewTab">新建标签页</system:String>
   <system:String x:Key="NewWindow">新建窗口</system:String>
   <system:String x:Key="NewHistory">打开历史标签页</system:String>
+  <system:String x:Key="NewShortcut">打开快捷方式标签页</system:String>
   <system:String x:Key="NewProcessTab">打开进程标签页</system:String>
   <system:String x:Key="NewWindowTab">打开窗口标签页</system:String>
   <system:String x:Key="ImportSessions">导入会话数据</system:String>
@@ -114,7 +117,13 @@
   <system:String x:Key="CUSTOMIZATION">自定义</system:String>
   <system:String x:Key="SetColor">设置自定义颜色</system:String>
   <system:String x:Key="UseScript">使用认证后脚本</system:String>
+  <system:String x:Key="StartRemoteApp">启动RemoteApp</system:String>
+  <system:String x:Key="ProgramPath">程序路径</system:String>
+  <system:String x:Key="StartShell">连接时启动程序</system:String>
   <system:String x:Key="WindowsKeyCombinations">远程应用Windows组合键</system:String>
+  <system:String x:Key="RDSizeMode">远程桌面大小模式</system:String>
+  <system:String x:Key="AutoFit">自动设置</system:String>
+  <system:String x:Key="Custom">自定义</system:String>  
   <system:String x:Key="FullScreen">全屏显示</system:String>
   <system:String x:Key="MultiMonitors">多个显示器全屏显示</system:String>
   <system:String x:Key="SelectMonitors">选择显示器</system:String>
@@ -127,6 +136,7 @@
   <system:String x:Key="ClassName">主窗口类名</system:String>
   <system:String x:Key="DisplayName">显示名</system:String>
   <system:String x:Key="SyncTitle">同步窗口标题</system:String>
+  <system:String x:Key="EnableHotkey">启用快捷键</system:String>
   <system:String x:Key="OpenInTab">在标签页中打开</system:String>
   <system:String x:Key="CloseIME">关闭输入法</system:String>
   <system:String x:Key="ProcessName">进程名</system:String>
@@ -190,7 +200,8 @@
   <system:String x:Key="SaveSessions">立即保存所有会话</system:String>
   <system:String x:Key="CreateSession2">新建会话</system:String>
   <system:String x:Key="OpenSettings">打开设置</system:String>
-  <system:String x:Key="OpenHistory">打开历史</system:String>
+  <system:String x:Key="OpenHistory">打开历史标签页</system:String>
+  <system:String x:Key="OpenShortcut">打开快捷方式标签页</system:String>
   <system:String x:Key="Reconnects">重新连接目标地址</system:String>
   <system:String x:Key="OpenTab">新建一个标签页</system:String>
   <system:String x:Key="Closes">关闭当前标签页</system:String>
@@ -214,6 +225,7 @@
   <system:String x:Key="Error9">其他错误({0})！</system:String>
   <system:String x:Key="DeleteConfirmation">删除确认</system:String>
   <system:String x:Key="AddTab">添加标签页</system:String>
+  <system:String x:Key="TabsFull">标签页已满</system:String>
   <system:String x:Key="Thirdparty">第三方组件</system:String>
   <system:String x:Key="PuttyNotFound">{0}文件不存在！{1}SSH/Telnet将不能使用！</system:String>
   <system:String x:Key="InputMasterPassword">输入主密码</system:String>
@@ -236,4 +248,8 @@
   <system:String x:Key="Password2">密码({0}):</system:String>
   <system:String x:Key="Frequent">经常使用</system:String>
   <system:String x:Key="InputAddress">输入地址</system:String>
+  <system:String x:Key="Session2">会话</system:String>
+  <system:String x:Key="Required">需要{0}</system:String>
+  <system:String x:Key="Exist">{0}已经存在</system:String>
+  <system:String x:Key="NotExist">{0}不存在</system:String>
 </ResourceDictionary>

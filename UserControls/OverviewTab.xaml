@@ -31,7 +31,7 @@
           <KeyBinding Key="Enter" Command="{Binding TypedSessionOpenCommand, ValidatesOnNotifyDataErrors=True}" />
         </UIElement.InputBindings>
       </TextBox>
-      <Image Grid.Row="0" Grid.Column="0" Source="../Images/search.png" HorizontalAlignment="Right" Margin="0,10,10,0" VerticalAlignment="Center" Height="16" />
+      <Path Grid.Row="0" Grid.Column="0" Width="16" Height="16" HorizontalAlignment="Right" Margin="0,10,10,0" Stretch="Uniform" Data="{StaticResource SearchPath}" Fill="Transparent" Stroke="{StaticResource u1}" StrokeThickness="2" />
       <Separator Grid.Column="1" Grid.Row="0" Background="{StaticResource g0}" Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Margin="15,10,15,0" />
       <Button Name="btnCreateNewSession" Grid.Row="0" Grid.Column="2" Content="{StaticResource NewSession}" Margin="0,10,10,0" Style="{StaticResource CustomWhiteButtonStyle}" Command="{Binding SessionAddCommand}" />
       <ListView Name="FrequentSessions" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" FontFamily="{StaticResource Font1}" Background="{StaticResource bg1}" Margin="5,20,0,0" ScrollViewer.CanContentScroll="True" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Auto" KeyboardNavigation.DirectionalNavigation="Cycle" KeyboardNavigation.TabNavigation="Once" SelectionMode="Single" IsSynchronizedWithCurrentItem="True" BorderThickness="0,0,0,0" Focusable="False" FocusManager.IsFocusScope="True" ItemsSource="{Binding FilteredSessions}" SelectedValue="{Binding SelectedSession}" KeyUp="FrequentSessions_KeyUp" MouseDoubleClick="FrequentSessions_MouseDoubleClick">
@@ -97,9 +97,9 @@
               <DockPanel>
                 <Ellipse Width="10" Height="10" Margin="0,0,0,2" Fill="{Binding Color2}" />
                 <DockPanel Width="180" Margin="5,0,0,2">
-                  <Image Source="../Images/pin.png" HorizontalAlignment="Left" Width="14" Height="14" Visibility="{Binding PinVisibility}" />
-                  <Image Source="../Images/tab.png" HorizontalAlignment="Left" Width="16" Height="16" Visibility="{Binding TabVisibility}" />
-                  <Image Source="../Images/tag.png" HorizontalAlignment="Left" Width="16" Height="16" Visibility="{Binding TagVisibility}" />
+                  <Path Width="14" Height="14" Margin="0,0,2,0" Visibility="{Binding PinVisibility}" Stroke="{StaticResource u1}" StrokeThickness="2" Stretch="Uniform" Data="{StaticResource PinPath}"/>
+                  <Path Width="14" Height="14" Margin="0,0,2,0" Visibility="{Binding TabVisibility}" Stroke="{StaticResource u1}" Stretch="Uniform" Data="M7 3v-1h-7v14h17v-13h-10zM11 4v1h-4v-1h4zM16 15h-15v-12h5v3h10v9zM12 5v-1h4v1h-4z"/>
+                  <Path Width="14" Height="14" Margin="0,0,2,0" Visibility="{Binding TagVisibility}" Stroke="{StaticResource u1}" Stretch="Uniform" Data="M8 1H1V8l8 8 7-7ZM2.4 7.42v-5h5L14 9 9 14ZM5 4A1.11 1.11 0 1 0 6.14 5.06 1.11 1.11 0 0 0 5 4Z"/>
                   <uc:HightlightTextBlock FontWeight="Bold" FontSize="12" MaxWidth="180" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Text="{Binding Name}" SearchText="{Binding ElementName=TxBoxSearch}" ToolTip="{Binding NameTooltip}" />
                 </DockPanel>
                 <Border Width="25" Height="25" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,0,5" Visibility="{Binding MenuVisibility}" MouseUp="TextBlockTriple_MouseUp">
@@ -126,11 +126,13 @@
                       <MenuItem Header="{StaticResource KeepParentNoResize}" Foreground="{StaticResource u1}" Command="{Binding KeepParentNoResizeCommand}" />
                     </ContextMenu>
                   </FrameworkElement.ContextMenu>
-                  <Image Source="../Images/menu.png" Width="16" Height="16" HorizontalAlignment="Center" ToolTip="{StaticResource EditMenu}"/>
+                  <Border Width="25" Height="25" Background="Transparent" ToolTip="{StaticResource EditMenu}">
+                    <Path Width="4" Height="16" Fill="{StaticResource u1}" Stretch="Uniform" Data="{StaticResource MenuPath}"/>
+                  </Border>
                 </Border>
               </DockPanel>
-              <uc:HightlightTextBlock Margin="15,0,0,0" Foreground="{StaticResource g0}" FontSize="11" Text="{Binding DisplayName}" SearchText="{Binding ElementName=TxBoxSearch}" ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}" />
-              <uc:HightlightTextBlock Margin="15,0,15,0" FontSize="11" Foreground="{StaticResource g0}" TextTrimming="CharacterEllipsis" Text="{Binding CredentialName}" ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}" SearchText="{Binding ElementName=TxBoxSearch}" Visibility="{Binding CredentialName, Converter={StaticResource stringContentToVisibilityConv}}" />
+              <uc:HightlightTextBlock Margin="15,0,15,0" Foreground="{StaticResource g0}" FontSize="11" TextTrimming="CharacterEllipsis" Text="{Binding DisplayName}" SearchText="{Binding ElementName=TxBoxSearch}" ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}" />
+              <uc:HightlightTextBlock Margin="15,0,15,0" Foreground="{StaticResource g0}" FontSize="11" TextTrimming="CharacterEllipsis" Text="{Binding CredentialName}" SearchText="{Binding ElementName=TxBoxSearch}" ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}" Visibility="{Binding CredentialName, Converter={StaticResource stringContentToVisibilityConv}}" />
               <TextBlock Margin="15,5,0,0" Foreground="{StaticResource u1}" FontSize="11" Visibility="{Binding CredentialId2, Converter={StaticResource guidToVisibilityConv}}">
                 <FrameworkElement.Style>
                   <Style TargetType="{x:Type TextBlock}">

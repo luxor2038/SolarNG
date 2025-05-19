@@ -63,7 +63,7 @@ public class EditTagViewModel : ViewModelBase, INotifyPropertyChanged, INotifyDa
         {
             _NotInOverviewCheck = value;
 
-            if (value != null && value.Value)
+            if (value == true)
             {
                 EditedTag.iFlags |= ProgramConfig.FLAG_NOTINOVERVIEW;
             }
@@ -301,7 +301,7 @@ public class EditTagViewModel : ViewModelBase, INotifyPropertyChanged, INotifyDa
         tag.Name = Name;
         tag.Comment = string.IsNullOrWhiteSpace(Comment) ? null : Comment.Trim();
 
-        if(NotInOverviewCheck != null && NotInOverviewCheck.Value)
+        if(NotInOverviewCheck == true)
         {
             tag.iFlags |= ProgramConfig.FLAG_NOTINOVERVIEW;
         }
@@ -678,7 +678,7 @@ public class EditTagViewModel : ViewModelBase, INotifyPropertyChanged, INotifyDa
 
     public void ShowSelectedTag(Session tag)
     {
-        TitleBackground = System.Windows.Application.Current.Resources["bg1"] as SolidColorBrush;
+        TitleBackground = Application.Current.Resources["bg1"] as SolidColorBrush;
         BatchMode = false;
         NewMode = false;
 
@@ -767,7 +767,7 @@ public class EditTagViewModel : ViewModelBase, INotifyPropertyChanged, INotifyDa
 
         if (string.IsNullOrWhiteSpace(Name))
         {
-            AddError("Name", "Tag name is requred!");
+            AddError("Name", string.Format(Application.Current.Resources["Required"] as string, Application.Current.Resources["TagName"]));
             return !HasErrors;
         }
 
@@ -777,7 +777,7 @@ public class EditTagViewModel : ViewModelBase, INotifyPropertyChanged, INotifyDa
         {
             if (!NewMode)
             {
-                AddError("Name", "Tag name already exists!");
+                AddError("Name", string.Format(Application.Current.Resources["Exist"] as string, Application.Current.Resources["TagName"]));
             }
             else
             {
@@ -794,7 +794,7 @@ public class EditTagViewModel : ViewModelBase, INotifyPropertyChanged, INotifyDa
         }
         else if (Name == ".." || Name == "...")
         {
-            AddError("Name", "Tag name already exists!");
+            AddError("Name", string.Format(Application.Current.Resources["Exist"] as string, Application.Current.Resources["TagName"]));
         }
         else
         {

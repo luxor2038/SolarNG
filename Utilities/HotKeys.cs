@@ -53,9 +53,9 @@ public class HotKeys : IDisposable
 
     private HotKey hotKeyCtrlH;
 
-    private HotKey hotKeyCtrlS;
+    private HotKey hotKeyCtrlL;
 
-    private HotKey hotKeyAltF4;
+    private HotKey hotKeyCtrlS;
 
     private HotKey hotKeyCtrlLeft;
 
@@ -183,8 +183,8 @@ public class HotKeys : IDisposable
                 hotKeyCtrl9 = new HotKey(Key.D9, KeyModifier.Ctrl, OnCtrl1_9Handler);
                 hotKeyCtrlN = new HotKey(Key.N, KeyModifier.Ctrl, OnCtrlNHandler);
                 hotKeyCtrlH = new HotKey(Key.H, KeyModifier.Ctrl, OnCtrlHHandler);
+                hotKeyCtrlL = new HotKey(Key.L, KeyModifier.Ctrl, OnCtrlLHandler);
                 hotKeyCtrlS = new HotKey(Key.S, KeyModifier.Ctrl, OnCtrlSHandler);
-                hotKeyAltF4 = new HotKey(Key.F4, KeyModifier.Alt, OnAltF4Handler);
                 hotKeyCtrlLeft = new HotKey(Key.Left, KeyModifier.Ctrl, OnCtrl_LeftHandler);
                 hotKeyCtrlRight = new HotKey(Key.Right, KeyModifier.Ctrl, OnCtrl_RightHandler);
             }
@@ -216,9 +216,9 @@ public class HotKeys : IDisposable
                 hotKeyCtrl9.Unregister();
                 hotKeyCtrlN.Unregister();
                 hotKeyCtrlH.Unregister();
+                hotKeyCtrlL.Unregister();
                 hotKeyCtrlS.Unregister();
                 hotKeyCtrlE.Unregister();
-                hotKeyAltF4.Unregister();
                 hotKeyCtrlLeft.Unregister();
                 hotKeyCtrlRight.Unregister();
                 registeredHotkeys = false;
@@ -320,19 +320,16 @@ public class HotKeys : IDisposable
         MainWindow?.MainWindowVM.OpenHistoryTab();
     }
 
+    private void OnCtrlLHandler(HotKey hotKey)
+    {
+        MainWindow?.MainWindowVM.OpenShortcutTab();
+    }
+
     private void OnCtrlSHandler(HotKey hotKey)
     {
         if (MainWindow != null)
         {
             DoAction(MainWindow.MainWindowVM.OnOpenSettings, hotKey);
-        }
-    }
-
-    private void OnAltF4Handler(HotKey hotKey)
-    {
-        if (MainWindow != null)
-        {
-            DoAction(MainWindow.CloseCurrentWindow, hotKey);
         }
     }
 

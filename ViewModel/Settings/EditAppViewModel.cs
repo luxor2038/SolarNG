@@ -8,7 +8,6 @@ using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using System.Windows;
-using System.Windows.Forms;
 using System.Windows.Media;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
@@ -63,9 +62,9 @@ public class EditAppViewModel : ViewModelBase, INotifyPropertyChanged, INotifyDa
     public RelayCommand OpenExeFileCommand { get; set; }
     private void OnOpenExeFile()
     {
-        OpenFileDialog openFileDialog = new OpenFileDialog();
+        System.Windows.Forms.OpenFileDialog openFileDialog = new System.Windows.Forms.OpenFileDialog();
         openFileDialog.ShowDialog();
-        if (!string.IsNullOrEmpty(openFileDialog.FileName))
+        if (!string.IsNullOrWhiteSpace(openFileDialog.FileName))
         {
             ExePath = openFileDialog.FileName;
         }
@@ -262,7 +261,7 @@ public class EditAppViewModel : ViewModelBase, INotifyPropertyChanged, INotifyDa
         {
             _NotInOverviewCheck = value;
 
-            if (value != null && value.Value)
+            if (value == true)
             {
                 EditedApp.iFlags |= ProgramConfig.FLAG_NOTINOVERVIEW;
             }
@@ -293,7 +292,7 @@ public class EditAppViewModel : ViewModelBase, INotifyPropertyChanged, INotifyDa
         {
             _UsedForSessionCheck = value;
 
-            if (value != null && value.Value)
+            if (value == true)
             {
                 EditedApp.Program.iFlags |= ProgramConfig.FLAG_USED_FOR_SESSION;
             }
@@ -352,7 +351,7 @@ public class EditAppViewModel : ViewModelBase, INotifyPropertyChanged, INotifyDa
         {
             _OpenInTabCheck = value;
 
-            if (value != null && value.Value)
+            if (value == true)
             {
                 EditedApp.Program.iFlags &= ~ProgramConfig.FLAG_NOTINTAB;
             }
@@ -383,7 +382,7 @@ public class EditAppViewModel : ViewModelBase, INotifyPropertyChanged, INotifyDa
         {
             _SyncTitleCheck = value;
 
-            if (value != null && value.Value)
+            if (value == true)
             {
                 EditedApp.Program.iFlags |= ProgramConfig.FLAG_SYNCTITLE;
             }
@@ -392,6 +391,36 @@ public class EditAppViewModel : ViewModelBase, INotifyPropertyChanged, INotifyDa
                 EditedApp.Program.iFlags &= ~ProgramConfig.FLAG_SYNCTITLE;
             }
             NotifyPropertyChanged("SyncTitleCheck");
+        }
+    }
+
+    private bool _EnableHotkeyCheckThree;
+    public bool EnableHotkeyCheckThree => BatchMode && _EnableHotkeyCheckThree;  
+
+    private Nullable<bool> _EnableHotkeyCheck;
+    public Nullable<bool> EnableHotkeyCheck
+    {
+        get
+        {
+            if (BatchMode)
+            {
+                return _EnableHotkeyCheck;
+            }
+
+            return (EditedApp.Program.iFlags & ProgramConfig.FLAG_ENABLEHOTKEY) != 0;
+        }
+        set
+        {
+            _EnableHotkeyCheck = value;
+            if (value == true)
+            {
+                EditedApp.Program.iFlags |= ProgramConfig.FLAG_ENABLEHOTKEY;
+            }
+            else
+            {
+                EditedApp.Program.iFlags &= ~ProgramConfig.FLAG_ENABLEHOTKEY;
+            }
+            NotifyPropertyChanged("EnableHotkeyCheck");
         }
     }
 
@@ -449,7 +478,7 @@ public class EditAppViewModel : ViewModelBase, INotifyPropertyChanged, INotifyDa
     {
         get
         {
-            if(string.IsNullOrEmpty(_Flags) || (OpenInTabCheck != null && !OpenInTabCheck.Value))
+            if(string.IsNullOrEmpty(_Flags) || (OpenInTabCheck == false))
             {
                 return "default";
             }
@@ -494,7 +523,7 @@ public class EditAppViewModel : ViewModelBase, INotifyPropertyChanged, INotifyDa
         set
         {
             _CloseIMECheck = value;
-            if (value != null && value.Value)
+            if (value == true)
             {
                 EditedApp.Program.iFlags &= ~ProgramConfig.FLAG_NOTCLOSEIME;
             }
@@ -510,7 +539,7 @@ public class EditAppViewModel : ViewModelBase, INotifyPropertyChanged, INotifyDa
     {
         get
         {
-            if(OpenInTabCheck != null && !OpenInTabCheck.Value) { 
+            if(OpenInTabCheck == false) { 
                 return EditedApp.Monitor;
             }
 
@@ -529,7 +558,7 @@ public class EditAppViewModel : ViewModelBase, INotifyPropertyChanged, INotifyDa
         Monitors = new ObservableCollection<ComboBoxTwo>
         {
             new ComboBoxTwo(null, "default"),
-            new ComboBoxTwo("*", System.Windows.Application.Current.Resources["MainMonitor"] as string)
+            new ComboBoxTwo("*", Application.Current.Resources["MainMonitor"] as string)
         };
 
         int monitor = 0;
@@ -705,6 +734,10 @@ public class EditAppViewModel : ViewModelBase, INotifyPropertyChanged, INotifyDa
             {
                 SelectedColor = null;
             }
+            else
+            {
+                EditedApp.Color = (SolidColorBrush)new BrushConverter().ConvertFrom(App.GetColor(true));
+            }
             NotifyPropertyChanged("SaveSessionColorCheck");
         }
     }
@@ -736,7 +769,7 @@ public class EditAppViewModel : ViewModelBase, INotifyPropertyChanged, INotifyDa
         }
         else
         {
-            SaveSessionColorCheck = solidColorBrush.Color != (System.Windows.Application.Current.Resources["t9"] as SolidColorBrush).Color;
+            SaveSessionColorCheck = solidColorBrush.Color != (Application.Current.Resources["t9"] as SolidColorBrush).Color;
         }
     }
 
@@ -965,7 +998,7 @@ public class EditAppViewModel : ViewModelBase, INotifyPropertyChanged, INotifyDa
             ShowSelectedApp(sessions[0]);
             return;
         }
-        TitleBackground = System.Windows.Application.Current.Resources["bg8"] as SolidColorBrush;
+        TitleBackground = Application.Current.Resources["bg8"] as SolidColorBrush;
         BatchMode = true;
         NewMode = false;
 
@@ -1013,8 +1046,10 @@ public class EditAppViewModel : ViewModelBase, INotifyPropertyChanged, INotifyDa
                 _UsedForSessionCheckThree = false;
                 _OpenInTabCheck = (EditedApp.Program.iFlags & ProgramConfig.FLAG_NOTINTAB) == 0;
                 _OpenInTabCheckThree = false;
-                _SyncTitleCheck = OpenInTabCheck.Value && (EditedApp.Program.iFlags & ProgramConfig.FLAG_SYNCTITLE) != 0;
+                _SyncTitleCheck = (OpenInTabCheck == true) && (EditedApp.Program.iFlags & ProgramConfig.FLAG_SYNCTITLE) != 0;
                 _SyncTitleCheckThree = false;
+                _EnableHotkeyCheck = (OpenInTabCheck == true) && (EditedApp.Program.iFlags & ProgramConfig.FLAG_ENABLEHOTKEY) != 0;
+                _EnableHotkeyCheckThree = false;
                 _CloseIMECheck = (EditedApp.Program.iFlags & ProgramConfig.FLAG_NOTCLOSEIME) == 0;
                 _CloseIMECheckThree = false;
                 continue;
@@ -1038,13 +1073,19 @@ public class EditAppViewModel : ViewModelBase, INotifyPropertyChanged, INotifyDa
                 _OpenInTabCheckThree = true;
             }
 
-            if(OpenInTabCheck != null && OpenInTabCheck.Value && SyncTitleCheck != null && (EditedApp.Program.iFlags & ProgramConfig.FLAG_SYNCTITLE) != (app.Program.iFlags & ProgramConfig.FLAG_SYNCTITLE))
+            if(OpenInTabCheck == true && SyncTitleCheck != null && (EditedApp.Program.iFlags & ProgramConfig.FLAG_SYNCTITLE) != (app.Program.iFlags & ProgramConfig.FLAG_SYNCTITLE))
             {
                 _SyncTitleCheck = null;
                 _SyncTitleCheckThree = true;
             }
 
-            if(OpenInTabCheck != null && OpenInTabCheck.Value && Method != "!NoChange!" && (EditedApp.Program.iFlags & ProgramConfig.FLAG_CLOSE_MASK) != (app.Program.iFlags & ProgramConfig.FLAG_CLOSE_MASK))
+            if(OpenInTabCheck == true && EnableHotkeyCheck != null && (EditedApp.Program.iFlags & ProgramConfig.FLAG_ENABLEHOTKEY) != (app.Program.iFlags & ProgramConfig.FLAG_ENABLEHOTKEY))
+            {
+                _EnableHotkeyCheck = null;
+                _EnableHotkeyCheckThree = true;
+            }
+
+            if(OpenInTabCheck == true && Method != "!NoChange!" && (EditedApp.Program.iFlags & ProgramConfig.FLAG_CLOSE_MASK) != (app.Program.iFlags & ProgramConfig.FLAG_CLOSE_MASK))
             {
                 if(MethodsList.ElementAt(0).Key != "!NoChange!")
                 {
@@ -1142,7 +1183,7 @@ public class EditAppViewModel : ViewModelBase, INotifyPropertyChanged, INotifyDa
                 Flags = "!NoChange!";
             }
 
-            if(OpenInTabCheck != null && !OpenInTabCheck.Value && Monitor != "!NoChange!" && Monitor != app.Monitor)
+            if(OpenInTabCheck == false && Monitor != "!NoChange!" && Monitor != app.Monitor)
             {
                 if(Monitors.ElementAt(0).Key != "!NoChange!")
                 {
@@ -1180,7 +1221,7 @@ public class EditAppViewModel : ViewModelBase, INotifyPropertyChanged, INotifyDa
 
     public void ShowSelectedApp(Session session)
     {
-        TitleBackground = System.Windows.Application.Current.Resources["bg1"] as SolidColorBrush;
+        TitleBackground = Application.Current.Resources["bg1"] as SolidColorBrush;
         BatchMode = false;
         NewMode = false;
 
@@ -1238,7 +1279,7 @@ public class EditAppViewModel : ViewModelBase, INotifyPropertyChanged, INotifyDa
     {
         EditedApp = session;
 
-        TitleBackground = System.Windows.Application.Current.Resources["bg8"] as SolidColorBrush;
+        TitleBackground = Application.Current.Resources["bg8"] as SolidColorBrush;
         BatchMode = false;
         NewMode = true;
         SelectedApp = null;
@@ -1251,6 +1292,7 @@ public class EditAppViewModel : ViewModelBase, INotifyPropertyChanged, INotifyDa
         ProcessName = null;
         Flags = "default";
         SelectedColor = null;
+        SaveSessionColorCheck = true;
         RemoveNoChangeFromLists();
         CreateTags();
         UpdateGUI();
@@ -1301,6 +1343,18 @@ public class EditAppViewModel : ViewModelBase, INotifyPropertyChanged, INotifyDa
                         }
                     }
 
+                    if(EnableHotkeyCheck != null)
+                    {
+                        if(EnableHotkeyCheck.Value)
+                        {
+                            app.Program.iFlags |= ProgramConfig.FLAG_ENABLEHOTKEY;
+                        }
+                        else
+                        {
+                            app.Program.iFlags &= ~ProgramConfig.FLAG_ENABLEHOTKEY;
+                        }
+                    }
+
                     if(Method != "!NoChange!")
                     {
                         app.Program.iFlags &= ~ProgramConfig.FLAG_CLOSE_MASK;
@@ -1322,7 +1376,7 @@ public class EditAppViewModel : ViewModelBase, INotifyPropertyChanged, INotifyDa
                 else
                 {
                     app.Program.iFlags |= ProgramConfig.FLAG_NOTINTAB;
-                    app.Program.iFlags &= ~(ProgramConfig.FLAG_SYNCTITLE | ProgramConfig.FLAG_CLOSE_MASK);
+                    app.Program.iFlags &= ~(ProgramConfig.FLAG_SYNCTITLE | ProgramConfig.FLAG_ENABLEHOTKEY | ProgramConfig.FLAG_CLOSE_MASK);
 
                     if(Monitor != "!NoChange!")
                     {
@@ -1343,7 +1397,7 @@ public class EditAppViewModel : ViewModelBase, INotifyPropertyChanged, INotifyDa
                 }
             }
 
-            if(!string.IsNullOrEmpty(EditedApp.Program.Path))
+            if(!string.IsNullOrWhiteSpace(EditedApp.Program.Path))
             {
                 app.Program.Path = EditedApp.Program.Path;
             }
@@ -1495,6 +1549,7 @@ public class EditAppViewModel : ViewModelBase, INotifyPropertyChanged, INotifyDa
 
             app.OnPropertyChanged("DisplayName");
             app.OnPropertyChanged("CredentialName");
+            app.OnPropertyChanged("NameTooltip");
             app.SessionHistory?.OnPropertyChanged("DisplayName");
         }
 
@@ -1516,14 +1571,14 @@ public class EditAppViewModel : ViewModelBase, INotifyPropertyChanged, INotifyDa
         {
             if (SaveSessionColorCheck)
             {
-                if (EditedApp.Color.ToString() == System.Windows.Application.Current.Resources["t9"].ToString() && App.SessionColors.FirstOrDefault((Brush x) => x.ToString() == EditedApp.Color.ToString()) == null)
+                if (NewMode)
                 {
                     EditedApp.Color = (SolidColorBrush)new BrushConverter().ConvertFrom(App.GetColor(true));
                 }
             }
             else
             {
-                EditedApp.Color = System.Windows.Application.Current.Resources["t9"] as SolidColorBrush;
+                EditedApp.Color = Application.Current.Resources["t9"] as SolidColorBrush;
             }
         }
         else
@@ -1551,7 +1606,7 @@ public class EditAppViewModel : ViewModelBase, INotifyPropertyChanged, INotifyDa
             app.Program.ClassName = new List<string>(ClassName.Split('|'));
         }
 
-        if(NotInOverviewCheck != null && NotInOverviewCheck.Value)
+        if(NotInOverviewCheck == true)
         {
             app.Program.iFlags |= ProgramConfig.FLAG_NOTINOVERVIEW;
         }
@@ -1560,7 +1615,7 @@ public class EditAppViewModel : ViewModelBase, INotifyPropertyChanged, INotifyDa
             app.Program.iFlags &= ~ProgramConfig.FLAG_NOTINOVERVIEW;
         }
 
-        if(UsedForSessionCheck != null && UsedForSessionCheck.Value)
+        if(UsedForSessionCheck == true)
         {
             if(string.IsNullOrEmpty(AuthClassName))
             {
@@ -1582,9 +1637,9 @@ public class EditAppViewModel : ViewModelBase, INotifyPropertyChanged, INotifyDa
             app.Program.AuthClassName = null;
         }
 
-        if (OpenInTabCheck != null && !OpenInTabCheck.Value)
+        if (OpenInTabCheck == false)
         {
-            app.Program.iFlags &= ~(ProgramConfig.FLAG_SYNCTITLE | ProgramConfig.FLAG_CLOSE_MASK);
+            app.Program.iFlags &= ~(ProgramConfig.FLAG_SYNCTITLE | ProgramConfig.FLAG_ENABLEHOTKEY | ProgramConfig.FLAG_CLOSE_MASK);
         }
 
         if(string.IsNullOrWhiteSpace(app.Program.DisplayName))
@@ -1602,7 +1657,7 @@ public class EditAppViewModel : ViewModelBase, INotifyPropertyChanged, INotifyDa
             app.Program.CommandLine = null;
         }
 
-        if(string.IsNullOrEmpty(app.Program.WorkingDir))
+        if(string.IsNullOrWhiteSpace(app.Program.WorkingDir))
         {
             app.Program.WorkingDir = null;
         }
@@ -1641,6 +1696,7 @@ public class EditAppViewModel : ViewModelBase, INotifyPropertyChanged, INotifyDa
         {
             SelectedApp.OnPropertyChanged("DisplayName");
             SelectedApp.OnPropertyChanged("CredentialName");
+            SelectedApp.OnPropertyChanged("NameTooltip");
             SelectedApp.SessionHistory?.OnPropertyChanged("DisplayName");
             App.RefreshOverview();			
         }
@@ -1659,7 +1715,7 @@ public class EditAppViewModel : ViewModelBase, INotifyPropertyChanged, INotifyDa
     {
         if (!BatchMode && string.IsNullOrWhiteSpace(ExePath))
         {
-            AddError("ExePath", "ExePath is required");
+            AddError("ExePath", string.Format(Application.Current.Resources["Required"] as string, Application.Current.Resources["Path"]));
             return !HasErrors;
         }
         RemoveError("ExePath");
@@ -1685,6 +1741,10 @@ public class EditAppViewModel : ViewModelBase, INotifyPropertyChanged, INotifyDa
         {
             int num = 2;
             string applicationName = Path.GetFileNameWithoutExtension(ExePath).ToLower();
+            if(string.IsNullOrWhiteSpace(applicationName))
+            {
+                applicationName = ExePath.ToLower();
+            }
             string name = applicationName;
 
             while (NameHasExisted(name))
@@ -1704,7 +1764,7 @@ public class EditAppViewModel : ViewModelBase, INotifyPropertyChanged, INotifyDa
         {
             if (!NewMode)
             {
-                AddError("Name", "Application name already exists");
+                AddError("Name", string.Format(Application.Current.Resources["Exist"] as string, Application.Current.Resources["AppName"]));
                 return !HasErrors;
             }
             else
@@ -1728,6 +1788,7 @@ public class EditAppViewModel : ViewModelBase, INotifyPropertyChanged, INotifyDa
     {
         RemoveError("Name");
         RemoveError("ExePath");
+        RemoveError("ApplicationName");
     }
 
     public void UpdateGUI(Visibility controlVisibility = Visibility.Visible)
@@ -1759,6 +1820,8 @@ public class EditAppViewModel : ViewModelBase, INotifyPropertyChanged, INotifyDa
         NotifyPropertyChanged("OpenInTabCheck");
         NotifyPropertyChanged("SyncTitleCheckThree");
         NotifyPropertyChanged("SyncTitleCheck");
+        NotifyPropertyChanged("EnableHotkeyCheckThree");
+        NotifyPropertyChanged("EnableHotkeyCheck");
         NotifyPropertyChanged("MethodList");
         NotifyPropertyChanged("Method");
         NotifyPropertyChanged("FlagsList");

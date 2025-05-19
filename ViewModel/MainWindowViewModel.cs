@@ -8,7 +8,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows.Data;
-using System.Windows.Forms;
+using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
 using ChromeTabs;
@@ -146,7 +146,7 @@ public class MainWindowViewModel : ViewModelBase
             CanActivate = true;
             Task.Run(delegate
             {
-                System.Windows.Application.Current.Dispatcher.Invoke(delegate
+                Application.Current.Dispatcher.Invoke(delegate
                 {
                     TabBase selectedTab = SelectedTab;
                     SelectedTab = null;
@@ -232,14 +232,14 @@ public class MainWindowViewModel : ViewModelBase
     public RelayCommand OpenHistoryTabCommand { get; set; }
     public void OpenHistoryTab()
     {
-        TabBase historyTab = GetSpecialTab("history");
-        if (historyTab == null)
+        TabBase tab = GetSpecialTab("history");
+        if (tab == null)
         {
             AddNewTab(CreateOverviewTab("history"));
             return;
         }
 
-        SelectTab(historyTab);
+        SelectTab(tab);
     }
 
     public OverviewTabViewModel GetSpecialTab(string type)
@@ -259,30 +259,45 @@ public class MainWindowViewModel : ViewModelBase
 
     public string CtrlH => ((!App.hotKeys.HotKeysDisabled) ? "Ctrl+H" : "");
 
+    public RelayCommand OpenShortcutTabCommand { get; set; }
+    public void OpenShortcutTab()
+    {
+        TabBase tab = GetSpecialTab("shortcut");
+        if (tab == null)
+        {
+            AddNewTab(CreateOverviewTab("shortcut"));
+            return;
+        }
+
+        SelectTab(tab);
+    }
+
+    public string CtrlL => ((!App.hotKeys.HotKeysDisabled) ? "Ctrl+L" : "");
+
     public RelayCommand OpenProcessTabCommand { get; set; }
     public void OpenProcessTab()
     {
-        TabBase processTab = GetSpecialTab("process");
-        if (processTab == null)
+        TabBase tab = GetSpecialTab("process");
+        if (tab == null)
         {
             AddNewTab(CreateOverviewTab("process"));
             return;
         }
 
-        SelectTab(processTab);
+        SelectTab(tab);
     }
 
     public bool NewProcessTabVisible
     {
         get
         {
-            OverviewTabViewModel processTab = GetSpecialTab("process");
-            if(processTab != null)
+            OverviewTabViewModel tab = GetSpecialTab("process");
+            if(tab != null)
             {
                 return true;
             }
-            processTab = GetSpecialTab("window");
-            if(processTab == null)
+            tab = GetSpecialTab("window");
+            if(tab == null)
             {
                 return true;
             }
@@ -294,28 +309,28 @@ public class MainWindowViewModel : ViewModelBase
     public RelayCommand OpenWindowTabCommand { get; set; }
     public void OpenWindowTab()
     {
-        TabBase processTab = GetSpecialTab("window");
-        if (processTab == null)
+        TabBase tab = GetSpecialTab("window");
+        if (tab == null)
         {
             AddNewTab(CreateOverviewTab("window"));
             return;
         }
 
-        SelectTab(processTab);
+        SelectTab(tab);
     }
 
     public bool NewWindowTabVisible
     {
         get
         {
-            OverviewTabViewModel processTab = GetSpecialTab("window");
-            if(processTab != null)
+            OverviewTabViewModel tab = GetSpecialTab("window");
+            if(tab != null)
             {
                 return true;
             }
 
-            processTab = GetSpecialTab("process");
-            if(processTab == null)
+            tab = GetSpecialTab("process");
+            if(tab == null)
             {
                 return true;
             }
@@ -327,8 +342,8 @@ public class MainWindowViewModel : ViewModelBase
     public RelayCommand ImportModelCommand { get; set; }
     private void OnImportModel()
     {
-        OpenFileDialog openFileDialog = new OpenFileDialog() { Filter = "*.json|*.json|*.*|*.*" };
-        if (openFileDialog.ShowDialog() != DialogResult.OK)
+        System.Windows.Forms.OpenFileDialog openFileDialog = new System.Windows.Forms.OpenFileDialog() { Filter = "*.json|*.json|*.*|*.*" };
+        if (openFileDialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
         {
             return;
         }
@@ -345,7 +360,7 @@ public class MainWindowViewModel : ViewModelBase
             byte[] hash;
             do
             {
-                promptDialog = new PromptDialog(null, System.Windows.Application.Current.Resources["InputMasterPassword"] as string, System.Windows.Application.Current.Resources["EnterMasterPassword"] as string, "", password: true) { Topmost = true };
+                promptDialog = new PromptDialog(null, Application.Current.Resources["InputMasterPassword"] as string, Application.Current.Resources["EnterMasterPassword"] as string, "", password: true) { Topmost = true };
                 promptDialog.Focus();
                 bool? flag = promptDialog.ShowDialog();
                 if (!flag.HasValue || !flag.Value)
@@ -357,7 +372,7 @@ public class MainWindowViewModel : ViewModelBase
             }
             while (!App.passHash.SequenceEqual(hash));
         }
-        SaveFileDialog saveFileDialog = new SaveFileDialog
+        System.Windows.Forms.SaveFileDialog saveFileDialog = new System.Windows.Forms.SaveFileDialog
         {
             Filter = "*.json|*.json",
             FileName = "SolarNG.json",
@@ -365,7 +380,7 @@ public class MainWindowViewModel : ViewModelBase
             AddExtension = true,
             OverwritePrompt = true
         };
-        if (DialogResult.OK == saveFileDialog.ShowDialog())
+        if (System.Windows.Forms.DialogResult.OK == saveFileDialog.ShowDialog())
         {
             App.Sessions.Export(saveFileDialog.FileName);
         }
@@ -406,6 +421,7 @@ public class MainWindowViewModel : ViewModelBase
         AddOverviewTabCommand = new RelayCommand(AddOverviewTab);
         AddWindowCommand = new RelayCommand(AddNewWindow);
         OpenHistoryTabCommand = new RelayCommand(OpenHistoryTab);
+        OpenShortcutTabCommand = new RelayCommand(OpenShortcutTab);
         OpenProcessTabCommand = new RelayCommand(OpenProcessTab);
         OpenWindowTabCommand = new RelayCommand(OpenWindowTab);
         ImportModelCommand = new RelayCommand(OnImportModel);
@@ -479,7 +495,7 @@ public class MainWindowViewModel : ViewModelBase
             {
                 return;
             }
-            System.Windows.Application.Current?.Dispatcher.Invoke(delegate
+            Application.Current?.Dispatcher.Invoke(delegate
             {
                 RemoveTab(tabBase);
             });
